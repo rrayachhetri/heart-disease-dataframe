@@ -58,10 +58,59 @@ Notes & next steps
 - MLflow tracks training runs in `mlruns/` by default. Open `http://127.0.0.1:5000` after running `mlflow ui --backend-store-uri ./mlruns`.
 - To containerize: build the image with `docker build -t heart-model:dev .` and run it with `docker run -p 8080:8080 heart-model:dev` (ensure the model artifact `models/rf_model.joblib` exists before starting the container).
 
-If you want, I can now:
-- add an sklearn Pipeline + imputation and update the API to use the pipeline (recommended next step), or
-- add CI (GitHub Actions) to run tests and build the Docker image, or
-- add a basic monitoring/metrics setup (Prometheus / Evidently) and example notebooks.
+---
+
+## Mobile UI (React Native / Expo)
+
+A cross-platform mobile frontend has been added under `ui/`. It is built with **Expo** (React Native), so it runs on Android, iOS, and in the browser — no Mac required for development.
+
+### What was added
+
+```
+ui/
+├── App.js                     # Navigation root (React Navigation stack)
+├── app.json                   # Expo project config
+├── package.json               # Node dependencies
+└── src/
+    ├── api/
+    │   ├── config.js          # API base URL (edit when testing on a device)
+    │   └── predict.js         # POST /predict wrapper using fetch()
+    ├── components/
+    │   ├── FormField.js       # Reusable numeric text input
+    │   └── PickerField.js     # Reusable dropdown selector
+    └── screens/
+        ├── HomeScreen.js      # Patient input form (all 13 model features)
+        └── ResultScreen.js    # Prediction result card with probability bar
+```
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later recommended)
+- Expo CLI (installed automatically via `npx`)
+
+### Quick start
+
+```powershell
+cd ui
+npm install
+npx expo start --web      # open in browser (fastest, no device needed)
+# or
+npx expo start --android  # requires Android emulator / connected device
+```
+
+> **Testing on a physical device:** install [Expo Go](https://expo.dev/client) on your phone, then run `npx expo start` and scan the QR code.  
+> Edit `ui/src/api/config.js` and replace `localhost` with your machine's local IP address (run `ipconfig` in PowerShell to find it, e.g. `192.168.1.100`).
+
+### Screens
+
+| Screen | Description |
+|--------|-------------|
+| **Home** | Patient data form grouped into sections: *Personal Info*, *Symptoms*, *Vitals & Test Results*. Categorical fields use dropdowns; continuous fields use numeric inputs. |
+| **Result** | Displays the model's verdict (✅ Lower Risk / ⚠️ Higher Risk), the raw probability as a percentage, and a visual progress bar. Includes a medical disclaimer. |
+
+### How it connects to the API
+
+The app sends a `POST` request to `/predict` on the FastAPI server. Make sure the server is running (step 4 of the Quick start above) before using the app.
 
 # activate venv first if not active
 .\.venv\Scripts\Activate.ps1

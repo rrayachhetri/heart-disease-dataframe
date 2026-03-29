@@ -1,7 +1,7 @@
 # Byte-compiled / cached
 __pycache__/
 *.py[cod]
-
+node_modules/
 # Virtual environments
 .venv/
 venv/
