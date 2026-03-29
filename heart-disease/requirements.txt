@@ -5,3 +5,8 @@ joblib>=1.2
 fastapi>=0.85
 uvicorn>=0.18
 python-dotenv>=0.21
+
+# ── Test / CI dependencies (used by Jenkins pipeline) ──────────
+pytest>=7.4
+pytest-cov>=4.1        # coverage.xml consumed by SonarQube
+httpx>=0.24            # async test client for FastAPI endpoints
