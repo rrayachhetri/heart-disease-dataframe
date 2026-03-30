@@ -1,0 +1,74 @@
+@import '../../styles/variables.less';
+
+.card {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+  transition: box-shadow @transition-base, transform @transition-base;
+
+  &:hover {
+    box-shadow: @shadow-lg;
+    transform: translateY(-2px);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title {
+  font-size: @font-size-sm;
+  font-weight: 500;
+  color: @text-secondary;
+  margin-bottom: @space-1;
+}
+
+.value {
+  font-size: @font-size-3xl;
+  font-weight: 700;
+  color: @text-primary;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-top: @space-1;
+}
+
+.iconBox {
+  width: 48px;
+  height: 48px;
+  border-radius: @radius-lg;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trend {
+  margin-top: @space-4;
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-sm;
+}
+
+.trendUp {
+  color: @success;
+  font-weight: 600;
+}
+
+.trendDown {
+  color: @danger;
+  font-weight: 600;
+}
+
+.trendLabel {
+  color: @text-tertiary;
+}

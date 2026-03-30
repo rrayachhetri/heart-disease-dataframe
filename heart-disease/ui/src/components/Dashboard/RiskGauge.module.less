@@ -1,0 +1,28 @@
+@import '../../styles/variables.less';
+
+.gauge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.label {
+  text-align: center;
+  margin-top: -@space-6;
+}
+
+.percentage {
+  font-size: @font-size-3xl;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.subtext {
+  display: block;
+  font-size: @font-size-sm;
+  color: @text-tertiary;
+  margin-top: @space-1;
+}

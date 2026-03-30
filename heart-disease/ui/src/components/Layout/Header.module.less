@@ -1,0 +1,88 @@
+@import '../../styles/variables.less';
+
+.header {
+  height: @header-height;
+  background: @bg-card;
+  border-bottom: 1px solid @border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 @space-8;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: @space-4;
+}
+
+.title {
+  font-size: @font-size-xl;
+  font-weight: 600;
+  color: @text-primary;
+  letter-spacing: -0.025em;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: @space-4;
+}
+
+.notifWrapper {
+  position: relative;
+}
+
+.iconBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: @radius-lg;
+  background: transparent;
+  color: @text-secondary;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: @bg-secondary;
+    color: @text-primary;
+  }
+}
+
+.badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: @radius-full;
+  background: @danger;
+  color: @text-inverse;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: @radius-full;
+  background: linear-gradient(135deg, @primary, @secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @text-inverse;
+  font-size: @font-size-xs;
+  font-weight: 600;
+}

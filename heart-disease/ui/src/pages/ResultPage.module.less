@@ -1,0 +1,227 @@
+@import '../styles/variables.less';
+
+.page {
+  max-width: 900px;
+}
+
+.resultCard {
+  border-radius: @radius-xl;
+  padding: @space-8;
+  text-align: center;
+  margin-bottom: @space-6;
+  border: 2px solid;
+
+  h2 {
+    font-size: @font-size-2xl;
+    font-weight: 700;
+    margin-top: @space-4;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    margin-top: @space-2;
+    font-size: @font-size-base;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+}
+
+.high {
+  background: @danger-50;
+  border-color: fadeout(@danger, 70%);
+  color: @danger;
+
+  .resultIcon {
+    background: fadeout(@danger, 85%);
+    color: @danger;
+  }
+}
+
+.low {
+  background: @success-50;
+  border-color: fadeout(@success, 70%);
+  color: @success;
+
+  .resultIcon {
+    background: fadeout(@success, 85%);
+    color: @success;
+  }
+}
+
+.resultIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: @radius-full;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-6;
+  margin-bottom: @space-6;
+
+  @media (max-width: @breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gaugeCard,
+.detailsCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+
+  h3 {
+    font-size: @font-size-base;
+    font-weight: 600;
+    color: @text-primary;
+    margin-bottom: @space-4;
+  }
+}
+
+.scoreBar {
+  margin-top: @space-6;
+}
+
+.scoreLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-bottom: @space-2;
+}
+
+.scoreBg {
+  height: 8px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.scoreFill {
+  height: 100%;
+  border-radius: @radius-full;
+  transition: width 1s ease;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-3;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  padding: @space-2 @space-3;
+  border-radius: @radius-md;
+  background: @bg-primary;
+
+  &:hover {
+    background: @bg-secondary;
+  }
+}
+
+.detailLabel {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+}
+
+.detailValue {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+}
+
+.disclaimer {
+  background: @warning-50;
+  border: 1px solid fadeout(@warning, 70%);
+  border-radius: @radius-lg;
+  padding: @space-4 @space-5;
+  margin-bottom: @space-6;
+
+  p {
+    font-size: @font-size-sm;
+    color: @warning;
+    line-height: 1.5;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: @space-4;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-3 @space-6;
+  background: @primary;
+  color: @text-inverse;
+  border: none;
+  border-radius: @radius-lg;
+  font-size: @font-size-sm;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background @transition-fast;
+
+  &:hover {
+    background: @primary-dark;
+  }
+}
+
+.historyBtn {
+  padding: @space-3 @space-6;
+  background: transparent;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  color: @text-secondary;
+  font-size: @font-size-sm;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: @bg-secondary;
+    color: @text-primary;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: @space-12;
+  color: @text-tertiary;
+
+  h3 {
+    font-size: @font-size-lg;
+    color: @text-primary;
+    margin-top: @space-4;
+  }
+
+  p {
+    color: @text-secondary;
+    margin-top: @space-2;
+  }
+
+  button {
+    margin-top: @space-6;
+    padding: @space-3 @space-6;
+    background: @primary;
+    color: @text-inverse;
+    border: none;
+    border-radius: @radius-lg;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: @primary-dark;
+    }
+  }
+}

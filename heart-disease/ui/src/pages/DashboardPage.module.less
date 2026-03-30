@@ -1,0 +1,138 @@
+@import '../styles/variables.less';
+
+.page {
+  max-width: 1200px;
+}
+
+.welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: @space-8;
+  flex-wrap: wrap;
+  gap: @space-4;
+
+  h2 {
+    font-size: @font-size-2xl;
+    font-weight: 700;
+    color: @text-primary;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    font-size: @font-size-base;
+    color: @text-secondary;
+    margin-top: @space-1;
+  }
+}
+
+.ctaBtn {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-3 @space-6;
+  background: linear-gradient(135deg, @primary, @primary-dark);
+  color: @text-inverse;
+  border: none;
+  border-radius: @radius-lg;
+  font-size: @font-size-sm;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transition: box-shadow @transition-fast;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  }
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: @space-6;
+  margin-bottom: @space-8;
+}
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: @space-6;
+
+  @media (max-width: @breakpoint-lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chartCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+
+  h3 {
+    font-size: @font-size-base;
+    font-weight: 600;
+    color: @text-primary;
+    margin-bottom: @space-4;
+  }
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: @space-6;
+  margin-top: @space-2;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-sm;
+  color: @text-secondary;
+
+  i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: @radius-full;
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: @space-12 @space-6;
+  background: @bg-card;
+  border: 2px dashed @border-color;
+  border-radius: @radius-xl;
+  color: @text-tertiary;
+
+  h3 {
+    font-size: @font-size-lg;
+    font-weight: 600;
+    color: @text-primary;
+    margin-top: @space-4;
+  }
+
+  p {
+    color: @text-secondary;
+    margin-top: @space-2;
+  }
+}
+
+.emptyBtn {
+  margin-top: @space-6;
+  padding: @space-3 @space-8;
+  background: @primary;
+  color: @text-inverse;
+  border: none;
+  border-radius: @radius-lg;
+  font-size: @font-size-sm;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background @transition-fast;
+
+  &:hover {
+    background: @primary-dark;
+  }
+}

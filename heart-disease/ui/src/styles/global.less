@@ -1,0 +1,55 @@
+@import './variables.less';
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: @font-family;
+  background-color: @bg-primary;
+  color: @text-primary;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: @text-tertiary;
+  border-radius: @radius-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: @text-secondary;
+}
+
+a {
+  color: @primary;
+  text-decoration: none;
+}
+
+input,
+select,
+button {
+  font-family: inherit;
+}

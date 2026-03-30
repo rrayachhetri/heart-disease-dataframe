@@ -1,0 +1,36 @@
+@import '../../styles/variables.less';
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  margin-left: @sidebar-width;
+  transition: margin-left @transition-base;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.collapsed {
+  margin-left: @sidebar-collapsed-width;
+}
+
+.content {
+  flex: 1;
+  padding: @space-8;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

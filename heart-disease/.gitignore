@@ -37,6 +37,10 @@ Thumbs.db
 # Misc
 *.sqlite3
 
+# Vite cache
+.vite/
+ui/dist/
+
 # If the repo contains an embedded repository that you don't want to commit
 # (e.g. a vendor or third-party checkout), ignore it here. Remove or
 # uncomment the next line if you prefer to keep it as a submodule instead.
