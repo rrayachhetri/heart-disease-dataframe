@@ -1,18 +1,20 @@
-<!-- README updated by assistant: added MVP instructions -->
 
-# Heart disease datasets — MVP project
+        │   ├── Layout/         # Sidebar, Header, Layout
+        │   ├── Dashboard/      # KPICard, RiskGauge
+        │   ├── Form/           # FormField, SelectField
+        │   └── Notification/   # NotificationCenter
+        └── pages/
+            ├── DashboardPage   # KPIs, pie chart, trend chart
+            ├── PredictPage     # Sectioned patient data form
+            ├── ResultPage      # Animated risk gauge + summary
+            └── HistoryPage     # All past predictions with risk bars
+```
 
-This repository contains several variants of the classic UCI Heart Disease datasets and a small MVP pipeline for a predictive model (data prep → train → serve).
+---
 
-What I added (MVP)
-- `requirements.txt` — Python dependencies
-- `src/data/prepare.py` — reads `processed.cleveland.data`, normalizes the target, writes `data/processed.parquet`
-- `src/models/train.py` — trains a RandomForest, logs metrics to MLflow, saves `models/rf_model.joblib`
-- `src/api/app.py` — FastAPI app exposing `/health` and `/predict`
-- `Dockerfile` — container image for the API
+## Quick Start
 
-Quick start (PowerShell)
-1) Create and activate a virtual environment, install deps
+### 1. Python environment
 
 ```powershell
 python -m venv .venv
@@ -20,109 +22,84 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-2) Prepare data
+### 2. Prepare data and train model
 
 ```powershell
-python .\src\data\prepare.py
-# writes data/processed.parquet
+python .\src\data\prepare.py    # writes data/processed.parquet
+python .\src\models\train.py    # saves models/rf_model.joblib, logs to mlruns/
 ```
 
-3) Train model
+### 3. Start the API
 
 ```powershell
-python .\src\models\train.py
-# saves models/rf_model.joblib and logs to ./mlruns
+python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --log-level info
 ```
 
-4) Run the API server (in same activated venv)
+API endpoints:
+- `GET  http://127.0.0.1:8080/health`  — model health check
+- `POST http://127.0.0.1:8080/predict` — predict heart disease risk
+- `GET  http://127.0.0.1:8080/docs`    — Swagger UI
 
-```powershell
-# start server
-python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8080 --log-level info
-```
-
-5) Test the API
-
-```powershell
-$body = @{
-  age = 63.0; sex = 1.0; cp = 1.0; trestbps = 145.0; chol = 233.0;
-  fbs = 1.0; restecg = 2.0; thalach = 150.0; exang = 0.0; oldpeak = 2.3;
-  slope = 3.0; ca = 0.0; thal = 6.0
-} | ConvertTo-Jso
-
-```
-
-```
-Invoke-RestMethod -Uri http://127.0.0.1:8080/predict -Method Post -ContentType "application/json" -Body '{"age":63,"sex":1,"cp":3,"trestbps":145,"chol":233,"fbs":1,"restecg":0,"thalach":150,"exang":0,"oldpeak":2.3,"slope":0,"ca":0,"thal":1Invoke-RestMethod -Uri http://127.0.0.1:8080/predict -Method Post -ContentType "application/json" -Body '{"age":63,"sex":1,"cp":3,"trestbps":145,"chol":233,"fbs":1,"restecg":0,"thalach":150,"exang":0,"oldpeak":2.3,"slope":0,"ca":0,"thal":1
-```
-
-Notes & next steps
-- The current preprocessing is minimal (rows with missing features are dropped). In a next iteration we can add an sklearn Pipeline with imputation and feature transforms.
-- MLflow tracks training runs in `mlruns/` by default. Open `http://127.0.0.1:5000` after running `mlflow ui --backend-store-uri ./mlruns`.
-- To containerize: build the image with `docker build -t heart-model:dev .` and run it with `docker run -p 8080:8080 heart-model:dev` (ensure the model artifact `models/rf_model.joblib` exists before starting the container).
-
----
-
-## Mobile UI (React Native / Expo)
-
-A cross-platform mobile frontend has been added under `ui/`. It is built with **Expo** (React Native), so it runs on Android, iOS, and in the browser — no Mac required for development.
-
-### What was added
-
-```
-ui/
-├── App.js                     # Navigation root (React Navigation stack)
-├── app.json                   # Expo project config
-├── package.json               # Node dependencies
-└── src/
-    ├── api/
-    │   ├── config.js          # API base URL (edit when testing on a device)
-    │   └── predict.js         # POST /predict wrapper using fetch()
-    ├── components/
-    │   ├── FormField.js       # Reusable numeric text input
-    │   └── PickerField.js     # Reusable dropdown selector
-    └── screens/
-        ├── HomeScreen.js      # Patient input form (all 13 model features)
-        └── ResultScreen.js    # Prediction result card with probability bar
-```
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18 or later recommended)
-- Expo CLI (installed automatically via `npx`)
-
-### Quick start
+### 4. Start the Web UI
 
 ```powershell
 cd ui
 npm install
-npx expo start --web      # open in browser (fastest, no device needed)
-# or
-npx expo start --android  # requires Android emulator / connected device
+npm run dev        # http://localhost:3000
 ```
 
-> **Testing on a physical device:** install [Expo Go](https://expo.dev/client) on your phone, then run `npx expo start` and scan the QR code.  
-> Edit `ui/src/api/config.js` and replace `localhost` with your machine's local IP address (run `ipconfig` in PowerShell to find it, e.g. `192.168.1.100`).
+The Vite dev server proxies all `/api/*` requests to `localhost:8080` automatically — no CORS configuration needed.
 
-### Screens
+### 5. Test the API directly
 
-| Screen | Description |
-|--------|-------------|
-| **Home** | Patient data form grouped into sections: *Personal Info*, *Symptoms*, *Vitals & Test Results*. Categorical fields use dropdowns; continuous fields use numeric inputs. |
-| **Result** | Displays the model's verdict (✅ Lower Risk / ⚠️ Higher Risk), the raw probability as a percentage, and a visual progress bar. Includes a medical disclaimer. |
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8080/predict" -Method POST `
+  -ContentType "application/json" `
+  -Body '{"age":63,"sex":1,"cp":3,"trestbps":145,"chol":233,"fbs":1,"restecg":0,"thalach":150,"exang":0,"oldpeak":2.3,"slope":0,"ca":0,"thal":1}'
+```
 
-### How it connects to the API
+---
 
-The app sends a `POST` request to `/predict` on the FastAPI server. Make sure the server is running (step 4 of the Quick start above) before using the app.
+## Web UI Features
 
-# activate venv first if not active
-.\.venv\Scripts\Activate.ps1
+| Page | Features |
+|---|---|
+| **Dashboard** | KPI cards (total, avg risk, high/low counts), risk distribution pie chart, risk trend area chart |
+| **Predict** | Sectioned form (Personal / Symptoms / Vitals), field validation, animated loading state |
+| **Result** | Animated SVG risk gauge, color-coded verdict card, patient data summary, risk progress bar |
+| **History** | Full prediction history, inline risk bars, high/low badges, delete per record or clear all |
 
-# show schema, missing counts, head (default 10 rows)
-python .\src\data\preview_parquet.py
+**Notifications:**
+- Bell icon with unread count badge in the header
+- In-app notification center (dropdown) with read/unread state and timestamps
+- Browser push notifications triggered automatically on prediction completion
 
-# show only 5 rows
-python .\src\data\preview_parquet.py --rows 5
+---
 
-# (optional) export to CSV for opening in the editor (careful if file is large)
-python .\src\data\preview_parquet.py --to-csv data/processed.csv
+## Docker
+
+```powershell
+docker build -t cardiosense:dev .
+docker run -p 8080:8080 cardiosense:dev
+```
+
+> Ensure `models/rf_model.joblib` exists before building the container.
+
+---
+
+## MLflow
+
+```powershell
+mlflow ui --backend-store-uri ./mlruns
+# open http://127.0.0.1:5000
+```
+
+---
+
+## Notes
+
+- Preprocessing drops rows with missing values. An sklearn Pipeline with imputation can be added as a next step.
+- Prediction history is persisted in `localStorage` (up to 50 records).
+- The model is for educational/research purposes only and is not a medical diagnostic tool.
+'@
+Set-Content -Path README.md -Value $content -Encoding UTF8
