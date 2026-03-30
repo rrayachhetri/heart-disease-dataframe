@@ -48,9 +48,12 @@ $body = @{
   age = 63.0; sex = 1.0; cp = 1.0; trestbps = 145.0; chol = 233.0;
   fbs = 1.0; restecg = 2.0; thalach = 150.0; exang = 0.0; oldpeak = 2.3;
   slope = 3.0; ca = 0.0; thal = 6.0
-} | ConvertTo-Json
+} | ConvertTo-Jso
 
-Invoke-RestMethod -Uri 'http://127.0.0.1:8080/predict' -Method Post -ContentType 'application/json' -Body $body
+```
+
+```
+Invoke-RestMethod -Uri http://127.0.0.1:8080/predict -Method Post -ContentType "application/json" -Body '{"age":63,"sex":1,"cp":3,"trestbps":145,"chol":233,"fbs":1,"restecg":0,"thalach":150,"exang":0,"oldpeak":2.3,"slope":0,"ca":0,"thal":1Invoke-RestMethod -Uri http://127.0.0.1:8080/predict -Method Post -ContentType "application/json" -Body '{"age":63,"sex":1,"cp":3,"trestbps":145,"chol":233,"fbs":1,"restecg":0,"thalach":150,"exang":0,"oldpeak":2.3,"slope":0,"ca":0,"thal":1
 ```
 
 Notes & next steps

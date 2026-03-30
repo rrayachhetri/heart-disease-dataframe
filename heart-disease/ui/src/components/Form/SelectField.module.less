@@ -1,0 +1,57 @@
+@import '../../styles/variables.less';
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+}
+
+.label {
+  font-size: @font-size-sm;
+  font-weight: 500;
+  color: @text-primary;
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+}
+
+.hint {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  font-weight: 400;
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  background: @bg-card;
+  transition: all @transition-fast;
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: @primary;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  padding-left: @space-3;
+  color: @text-tertiary;
+}
+
+.select {
+  flex: 1;
+  padding: @space-3 @space-4;
+  border: none;
+  outline: none;
+  font-size: @font-size-base;
+  color: @text-primary;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  appearance: auto;
+}

@@ -1,0 +1,178 @@
+@import '../styles/variables.less';
+
+.page {
+  max-width: 1000px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: @space-6;
+  flex-wrap: wrap;
+  gap: @space-4;
+
+  h2 {
+    font-size: @font-size-2xl;
+    font-weight: 700;
+    color: @text-primary;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    color: @text-secondary;
+    margin-top: @space-1;
+    font-size: @font-size-sm;
+  }
+}
+
+.clearBtn {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-2 @space-4;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  background: @bg-card;
+  color: @text-secondary;
+  font-size: @font-size-sm;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    border-color: @danger;
+    color: @danger;
+    background: @danger-50;
+  }
+}
+
+.table {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  overflow: hidden;
+}
+
+.thead {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 0.8fr 1.5fr 1fr 0.8fr;
+  padding: @space-4 @space-5;
+  background: @bg-secondary;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 0.8fr 1.5fr 1fr 0.8fr;
+  padding: @space-4 @space-5;
+  border-bottom: 1px solid @border-light;
+  font-size: @font-size-sm;
+  color: @text-primary;
+  align-items: center;
+  transition: background @transition-fast;
+
+  &:hover {
+    background: @bg-primary;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.date {
+  color: @text-secondary;
+}
+
+.scoreMini {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-xs;
+  font-weight: 600;
+}
+
+.scoreMiniBar {
+  height: 6px;
+  border-radius: @radius-full;
+  min-width: 40px;
+  max-width: 80px;
+}
+
+.badge {
+  display: inline-flex;
+  padding: @space-1 @space-3;
+  border-radius: @radius-full;
+  font-size: @font-size-xs;
+  font-weight: 600;
+}
+
+.badgeHigh {
+  background: @danger-50;
+  color: @danger;
+}
+
+.badgeLow {
+  background: @success-50;
+  color: @success;
+}
+
+.rowActions {
+  display: flex;
+  gap: @space-2;
+}
+
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: @radius-md;
+  background: transparent;
+  color: @text-tertiary;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: @danger-50;
+    color: @danger;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: @space-12;
+  color: @text-tertiary;
+
+  h3 {
+    font-size: @font-size-lg;
+    color: @text-primary;
+    margin-top: @space-4;
+  }
+
+  p {
+    color: @text-secondary;
+    margin-top: @space-2;
+  }
+
+  button {
+    margin-top: @space-6;
+    padding: @space-3 @space-6;
+    background: @primary;
+    color: @text-inverse;
+    border: none;
+    border-radius: @radius-lg;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: @primary-dark;
+    }
+  }
+}
