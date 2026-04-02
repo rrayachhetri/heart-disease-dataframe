@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from src.db.database import get_db
 from src.db.models import Prediction
-from src.auth.routes import get_optional_user
+from src.auth.routes import get_optional_user, get_current_user
 
 router = APIRouter(prefix="/predictions", tags=["predictions"])
 
@@ -94,12 +94,9 @@ def get_predictions(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    current_user=Depends(get_optional_user),
+    current_user=Depends(get_current_user),
 ):
-    """Return the authenticated user's prediction history."""
-    if not current_user:
-        return {"predictions": [], "total": 0}
-
+    """Return the authenticated user's prediction history. Requires authentication."""
     total = db.query(Prediction).filter(Prediction.user_id == current_user.id).count()
     records = (
         db.query(Prediction)

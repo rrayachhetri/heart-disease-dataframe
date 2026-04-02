@@ -28,6 +28,16 @@ export interface PredictionRecord {
   result: PredictionResult;
 }
 
+/** Shape of a prediction record returned by the server (GET /api/predictions). */
+export interface ServerPredictionRecord {
+  id: string;
+  risk_score: number;
+  risk_level: string;
+  prediction: number;
+  features: PatientData;
+  created_at: string;
+}
+
 export interface AppNotification {
   id: string;
   type: 'success' | 'warning' | 'info' | 'error';

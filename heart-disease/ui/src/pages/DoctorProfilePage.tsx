@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Stethoscope, Save, CheckCircle } from 'lucide-react';
-import type { RootState, AppDispatch } from '../store';
+import type { RootState } from '../store';
 import { authHeaders, API_BASE_URL } from '../api/config';
 import type { DoctorProfile } from '../types';
 import styles from './DoctorProfilePage.module.less';
@@ -23,7 +23,10 @@ export default function DoctorProfilePage() {
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/doctors/me`, { headers: authHeaders() })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to load profile: ${r.status}`);
+        return r.json();
+      })
       .then((data: DoctorProfile) => {
         setProfile(data);
         setForm({
@@ -39,10 +42,13 @@ export default function DoctorProfilePage() {
       .catch(console.error);
   }, []);
 
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    await fetch(`${API_BASE_URL}/doctors/me`, {
+    setSaveError(null);
+    const response = await fetch(`${API_BASE_URL}/doctors/me`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({
@@ -51,8 +57,12 @@ export default function DoctorProfilePage() {
       }),
     });
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    if (response.ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } else {
+      setSaveError(`Save failed (${response.status}). Please try again.`);
+    }
   };
 
   if (!user || user.role !== 'doctor') {
@@ -110,6 +120,7 @@ export default function DoctorProfilePage() {
             <input type="checkbox" checked={form.is_accepting_patients} onChange={(e) => setForm((f) => ({ ...f, is_accepting_patients: e.target.checked }))} />
             Accepting new patients
           </label>
+          {saveError && <span className={styles.saveError}>{saveError}</span>}
           <button type="submit" className={styles.saveBtn} disabled={saving}>
             <Save size={16} />
             {saving ? 'Saving…' : saved ? '✓ Saved!' : 'Save profile'}

@@ -168,7 +168,7 @@ Phase 1 introduces full JWT-based authentication.
 ```
 Register (/register)  →  Auto-login  →  Dashboard
 Login    (/login)     →  JWT stored in localStorage  →  Dashboard
-Token expiry (30 min) →  Auto-refresh via refresh token (7 days)
+Token expiry (30 min) →  Re-login required (refresh endpoint available for Phase 2 auto-refresh)
 Logout                →  Tokens cleared, redirect to /login
 ```
 

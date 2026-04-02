@@ -1,5 +1,5 @@
 import { API_BASE_URL, authHeaders } from './config';
-import type { PatientData, PredictionResult } from '../types';
+import type { PatientData, PredictionResult, ServerPredictionRecord } from '../types';
 
 export async function predictHeartDisease(data: PatientData): Promise<PredictionResult> {
   const response = await fetch(`${API_BASE_URL}/predictions`, {
@@ -18,7 +18,7 @@ export async function predictHeartDisease(data: PatientData): Promise<Prediction
 export async function fetchPredictionHistory(
   skip = 0,
   limit = 50
-): Promise<{ predictions: unknown[]; total: number }> {
+): Promise<{ predictions: ServerPredictionRecord[]; total: number }> {
   const response = await fetch(
     `${API_BASE_URL}/predictions?skip=${skip}&limit=${limit}`,
     { headers: authHeaders() }

@@ -119,7 +119,7 @@ def list_doctors(
     """
     query = db.query(Doctor)
     if accepting_only:
-        query = query.filter(Doctor.is_accepting_patients == True)
+        query = query.filter(Doctor.is_accepting_patients.is_(True))
     if specialty:
         query = query.filter(Doctor.specialty.ilike(f"%{specialty}%"))
     if insurance:

@@ -4,8 +4,7 @@ DATABASE_URL defaults to SQLite for local dev; set to PostgreSQL in production.
 """
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
 
 load_dotenv()

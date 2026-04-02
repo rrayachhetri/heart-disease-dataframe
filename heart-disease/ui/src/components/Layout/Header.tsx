@@ -66,7 +66,7 @@ export default function Header() {
         {user && (
           <div className={styles.userInfo}>
             <span className={styles.userName}>
-              {user.first_name ? `${user.first_name} ${user.last_name}` : user.email}
+              {[user.first_name, user.last_name].filter(Boolean).join(' ') || user.email}
             </span>
             <span className={styles.userRole}>{user.role}</span>
           </div>

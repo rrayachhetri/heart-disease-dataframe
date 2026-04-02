@@ -1,3 +1,6 @@
+# Environment variables (never commit secrets)
+.env
+
 # Byte-compiled / cached
 __pycache__/
 *.py[cod]

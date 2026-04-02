@@ -44,7 +44,10 @@ def get_optional_user(
     payload = decode_token(credentials.credentials)
     if not payload or payload.get("type") != "access":
         return None
-    return db.query(User).filter(User.id == payload["sub"]).first()
+    user = db.query(User).filter(User.id == payload["sub"]).first()
+    if not user or not user.is_active:
+        return None
+    return user
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────

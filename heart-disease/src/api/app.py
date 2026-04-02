@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
+import os
 import joblib
 
 from src.db.database import init_db
@@ -39,7 +40,10 @@ def load_model():
 def startup_event():
     global _model
     _model = load_model()
-    init_db()  # create tables if they don't exist yet
+    # Only auto-create tables when explicitly enabled (local dev / SQLite).
+    # In production, use `alembic upgrade head` instead.
+    if os.getenv("AUTO_CREATE_TABLES", "false").lower() in ("1", "true", "yes"):
+        init_db()
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
