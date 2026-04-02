@@ -5,3 +5,11 @@ joblib>=1.2
 fastapi>=0.85
 uvicorn>=0.18
 python-dotenv>=0.21
+# Phase 1 — Auth & Database
+sqlalchemy>=2.0
+alembic>=1.13
+passlib[bcrypt]>=1.7
+python-jose[cryptography]>=3.3
+python-multipart>=0.0.6
+# Optional: uncomment for PostgreSQL
+# psycopg2-binary>=2.9

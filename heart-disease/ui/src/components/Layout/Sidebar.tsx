@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   LayoutDashboard,
   HeartPulse,
@@ -6,13 +7,22 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  Stethoscope,
 } from 'lucide-react';
+import type { RootState } from '../../store';
 import styles from './Sidebar.module.less';
 
-const navItems = [
+const patientNavItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/predict', label: 'New Prediction', icon: HeartPulse },
   { path: '/history', label: 'History', icon: ClipboardList },
+];
+
+const doctorNavItems = [
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/predict', label: 'New Prediction', icon: HeartPulse },
+  { path: '/history', label: 'History', icon: ClipboardList },
+  { path: '/doctor/profile', label: 'My Profile', icon: Stethoscope },
 ];
 
 interface Props {
@@ -22,6 +32,8 @@ interface Props {
 
 export default function Sidebar({ collapsed, onToggle }: Props) {
   const location = useLocation();
+  const user = useSelector((s: RootState) => s.auth.user);
+  const navItems = user?.role === 'doctor' ? doctorNavItems : patientNavItems;
 
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
