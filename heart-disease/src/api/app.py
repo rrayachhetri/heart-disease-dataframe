@@ -1,54 +1,59 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import joblib
-import pandas as pd
+
+from src.db.database import init_db
+from src.auth.routes import router as auth_router
+from src.routers.predictions import router as predictions_router
+from src.routers.doctors import router as doctors_router
 
 MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "rf_model.joblib"
 
-app = FastAPI(title="Heart Disease Risk API")
+app = FastAPI(
+    title="CardioSense API",
+    description="Heart disease risk prediction with doctor connect, chat, and payments.",
+    version="2.0.0",
+)
 
+# Allow the React dev server (port 3000) and any production origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class Patient(BaseModel):
-    age: float
-    sex: float
-    cp: float
-    trestbps: float
-    chol: float
-    fbs: float
-    restecg: float
-    thalach: float
-    exang: float
-    oldpeak: float
-    slope: float
-    ca: float
-    thal: float
+# ── Global model reference (accessed by predictions router) ───────────────────
+_model = None
 
 
 def load_model():
     if not MODEL_PATH.exists():
-        raise RuntimeError(f"Model file not found at {MODEL_PATH}. Run training first.")
+        raise RuntimeError(f"Model not found at {MODEL_PATH}. Run training first.")
     return joblib.load(MODEL_PATH)
-
-
-MODEL = None
 
 
 @app.on_event("startup")
 def startup_event():
-    global MODEL
-    MODEL = load_model()
+    global _model
+    _model = load_model()
+    init_db()  # create tables if they don't exist yet
 
 
+# ── Routers ───────────────────────────────────────────────────────────────────
+app.include_router(auth_router, prefix="/api")
+app.include_router(predictions_router, prefix="/api")
+app.include_router(doctors_router, prefix="/api")
+
+
+# ── Legacy / utility endpoints ────────────────────────────────────────────────
 @app.get("/health")
 def health():
-    return {"status": "ok", "model_loaded": MODEL is not None}
+    return {"status": "ok", "model_loaded": _model is not None}
 
 
-@app.post("/predict")
-def predict(p: Patient):
-    global MODEL
-    data = pd.DataFrame([p.dict()])
-    proba = MODEL.predict_proba(data)[:, 1][0]
-    pred = int(proba >= 0.5)
-    return {"probability": float(proba), "prediction": pred}
+@app.get("/api/health")
+def api_health():
+    return {"status": "ok", "model_loaded": _model is not None}

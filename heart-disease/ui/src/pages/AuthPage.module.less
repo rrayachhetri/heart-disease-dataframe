@@ -1,0 +1,198 @@
+@import '../styles/variables.less';
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, @primary-dark 0%, @secondary 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: @space-6;
+}
+
+.card {
+  background: @bg-card;
+  border-radius: @radius-2xl;
+  padding: @space-10 @space-8;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: @shadow-xl;
+}
+
+.logo {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, @primary, @secondary);
+  border-radius: @radius-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @text-inverse;
+  margin: 0 auto @space-6;
+}
+
+.heading {
+  font-size: @font-size-2xl;
+  font-weight: 700;
+  color: @text-primary;
+  text-align: center;
+  margin-bottom: @space-2;
+}
+
+.subheading {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  text-align: center;
+  margin-bottom: @space-8;
+}
+
+.errorBanner {
+  background: @danger-50;
+  border: 1px solid @danger-light;
+  color: @danger;
+  border-radius: @radius-md;
+  padding: @space-3 @space-4;
+  font-size: @font-size-sm;
+  margin-bottom: @space-6;
+  text-align: center;
+}
+
+// Role toggle
+.roleToggle {
+  display: flex;
+  gap: @space-2;
+  background: @bg-secondary;
+  border-radius: @radius-lg;
+  padding: 4px;
+  margin-bottom: @space-6;
+}
+
+.roleBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: @space-2;
+  padding: @space-2 @space-4;
+  border: none;
+  border-radius: @radius-md;
+  background: transparent;
+  color: @text-secondary;
+  font-size: @font-size-sm;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    color: @text-primary;
+  }
+}
+
+.roleActive {
+  background: @bg-card;
+  color: @primary;
+  box-shadow: @shadow-sm;
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: @space-5;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-4;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+}
+
+.label {
+  font-size: @font-size-sm;
+  font-weight: 500;
+  color: @text-primary;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: @space-3;
+  color: @text-tertiary;
+  pointer-events: none;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: @space-3;
+  background: none;
+  border: none;
+  color: @text-tertiary;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+
+  &:hover { color: @text-secondary; }
+}
+
+.input {
+  width: 100%;
+  padding: @space-3 @space-4;
+  border: 1.5px solid @border-color;
+  border-radius: @radius-md;
+  font-size: @font-size-sm;
+  color: @text-primary;
+  background: @bg-card;
+  transition: border-color @transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: @primary;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  // When preceded by icon
+  .inputWrapper & {
+    padding-left: calc(@space-4 + 24px);
+  }
+}
+
+.submitBtn {
+  width: 100%;
+  padding: @space-3 @space-4;
+  background: linear-gradient(135deg, @primary, @primary-dark);
+  color: @text-inverse;
+  border: none;
+  border-radius: @radius-md;
+  font-size: @font-size-base;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity @transition-fast;
+  margin-top: @space-2;
+
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.footer {
+  text-align: center;
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin-top: @space-6;
+}
+
+.link {
+  color: @primary;
+  font-weight: 500;
+  &:hover { color: @primary-dark; }
+}

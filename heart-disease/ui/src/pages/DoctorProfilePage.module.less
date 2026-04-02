@@ -1,0 +1,132 @@
+@import '../styles/variables.less';
+
+.page {
+  max-width: 760px;
+  padding: @space-8;
+}
+
+.notice {
+  padding: @space-8;
+  color: @text-secondary;
+  font-size: @font-size-base;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-4;
+  margin-bottom: @space-8;
+  color: @primary;
+}
+
+.title {
+  font-size: @font-size-xl;
+  font-weight: 700;
+  color: @text-primary;
+  margin-bottom: @space-1;
+}
+
+.subtitle {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+}
+
+.verifiedBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  background: @success-50;
+  color: @success;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  padding: @space-1 @space-3;
+  border-radius: @radius-full;
+}
+
+.form {
+  background: @bg-card;
+  border-radius: @radius-xl;
+  padding: @space-8;
+  box-shadow: @shadow-md;
+  border: 1px solid @border-color;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-5;
+  margin-bottom: @space-6;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+
+  label {
+    font-size: @font-size-sm;
+    font-weight: 500;
+    color: @text-primary;
+  }
+
+  input, textarea {
+    padding: @space-3 @space-4;
+    border: 1.5px solid @border-color;
+    border-radius: @radius-md;
+    font-size: @font-size-sm;
+    color: @text-primary;
+    font-family: inherit;
+    resize: vertical;
+
+    &:focus {
+      outline: none;
+      border-color: @primary;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  }
+}
+
+.hint {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: @space-4;
+  border-top: 1px solid @border-light;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-sm;
+  color: @text-primary;
+  cursor: pointer;
+}
+
+.saveBtn {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-3 @space-6;
+  background: linear-gradient(135deg, @primary, @primary-dark);
+  color: @text-inverse;
+  border: none;
+  border-radius: @radius-md;
+  font-size: @font-size-sm;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity @transition-fast;
+
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
