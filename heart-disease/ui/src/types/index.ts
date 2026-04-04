@@ -14,11 +14,25 @@ export interface PatientData {
   thal: number;
 }
 
+/** A single feature's contribution to the predicted risk score. */
+export interface TopFactor {
+  feature: string;
+  label: string;
+  value: number;
+  population_mean: number;
+  unit: string;
+  /** Probability delta (−1 to +1). Positive = increases risk. */
+  contribution: number;
+  direction: 'increases_risk' | 'decreases_risk';
+}
+
 export interface PredictionResult {
   id?: string;       // server-assigned ID (present when authenticated)
   probability: number;
   prediction: number;
   risk_level: string;
+  /** Top contributing features (returned by ensemble model). */
+  top_factors?: TopFactor[];
 }
 
 export interface PredictionRecord {
@@ -45,6 +59,31 @@ export interface AppNotification {
   message: string;
   timestamp: number;
   read: boolean;
+}
+
+// ── Model info ────────────────────────────────────────────────────────────────
+
+export interface ModelMetrics {
+  val_auc: number;
+  val_accuracy: number;
+  val_sensitivity: number;
+  val_specificity: number;
+  val_precision: number;
+  val_f1: number;
+  cv_auc_mean: number;
+  cv_auc_std: number;
+}
+
+export interface FeatureImportanceItem {
+  feature: string;
+  label: string;
+  importance: number;
+}
+
+export interface ModelInfo {
+  model_type: string;
+  metrics: ModelMetrics;
+  feature_importances: FeatureImportanceItem[];
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

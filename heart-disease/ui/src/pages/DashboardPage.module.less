@@ -2,6 +2,8 @@
 
 .page {
   max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .welcome {
@@ -23,6 +25,12 @@
     font-size: @font-size-base;
     color: @text-secondary;
     margin-top: @space-1;
+  }
+
+  @media (max-width: @breakpoint-sm) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 }
 
@@ -138,5 +146,263 @@
   &:hover {
     box-shadow: 0 6px 22px rgba(164, 252, 248, 0.5);
     transform: translateY(-1px);
+  }
+}
+
+// ── Model Performance Card ──────────────────────────────────────────────────
+.modelCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+  margin-top: @space-8;
+}
+
+.modelCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: @space-3;
+  margin-bottom: @space-6;
+}
+
+.modelCardTitle {
+  display: flex;
+  align-items: center;
+  gap: @space-3;
+  color: #0d9488; // teal-600 — 5.9:1 on white ✓ WCAG AA
+
+  h3 {
+    font-size: @font-size-base;
+    font-weight: 700;
+    color: @text-primary;
+    margin: 0;
+  }
+}
+
+.modelTypeRow {
+  position: relative;
+  display: inline-block;
+}
+
+.modelTypeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  margin: 2px 0 0;
+  background: none;
+  border: none;
+  border-bottom: 1px dashed currentColor;
+  padding: 0;
+  line-height: 1.4;
+  font-family: inherit;
+
+  &:hover {
+    color: #0d9488; // teal-600 — 5.9:1 on white ✓ WCAG AA
+  }
+}
+
+.vcPopover {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 200;
+  width: 360px;
+  background: @bg-card;
+  border: 1px solid #7ae8e3;
+  border-radius: @radius-xl;
+  padding: @space-4;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+
+  @media (max-width: @breakpoint-md) {
+    position: fixed;
+    top: 120px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    z-index: 1000;
+  }
+}
+
+.vcPopoverHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: @space-2;
+
+  span {
+    font-size: @font-size-sm;
+    font-weight: 700;
+    color: #0f766e; // teal-700 — 7.0:1 on white ✓ WCAG AA
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: @text-secondary;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+
+    &:hover {
+      color: @text-primary;
+    }
+  }
+}
+
+.vcPopoverDesc {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  margin: 0 0 @space-3;
+  line-height: 1.55;
+
+  em {
+    color: #0d9488; // teal-600 — 5.9:1 on white ✓ WCAG AA
+    font-style: normal;
+    font-weight: 600;
+  }
+}
+
+.vcEstimators {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+  margin-bottom: @space-3;
+}
+
+.vcEstimatorRow {
+  display: flex;
+  gap: @space-2;
+  background: @bg-primary;
+  border-radius: @radius-lg;
+  padding: @space-2 @space-3;
+}
+
+.vcIcon {
+  font-size: 17px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.vcEstName {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-primary;
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.vcWeight {
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e; // teal-700 — 7.0:1 on white ✓ WCAG AA
+  padding: 1px 6px;
+  border-radius: @radius-full;
+  white-space: nowrap;
+}
+
+.vcEstDesc {
+  font-size: 11px;
+  color: @text-secondary;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.vcVotingNote {
+  font-size: 11px;
+  color: @text-secondary;
+  background: @bg-primary;
+  border-radius: @radius-md;
+  padding: @space-2 @space-3;
+  text-align: center;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+  border-left: 3px solid #7ae8e3;
+}
+
+.modelAucBadge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+  color: #1a3a3a;
+  font-size: @font-size-base;
+  font-weight: 700;
+  padding: @space-2 @space-4;
+  border-radius: @radius-full;
+  white-space: nowrap;
+
+  span {
+    font-size: @font-size-xs;
+    font-weight: 500;
+    opacity: 0.75;
+  }
+}
+
+.modelMetricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: @space-4;
+  margin-bottom: @space-6;
+}
+
+.metricItem {
+  background: @bg-primary;
+  border-radius: @radius-lg;
+  padding: @space-3 @space-4;
+}
+
+.metricTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: @space-2;
+}
+
+.metricLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  font-weight: 500;
+}
+
+.metricValue {
+  font-size: @font-size-sm;
+  font-weight: 700;
+  color: @text-primary;
+}
+
+.metricBarBg {
+  height: 6px;
+  background: @border-color;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.metricBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #a4fcf8, #7ae8e3);
+  border-radius: @radius-full;
+}
+
+.featureImportanceWrap {
+  h4 {
+    font-size: @font-size-sm;
+    font-weight: 600;
+    color: @text-secondary;
+    margin-bottom: @space-4;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-left: calc(18px + @space-3); // icon width + gap = aligns with "Model Performance" text
   }
 }

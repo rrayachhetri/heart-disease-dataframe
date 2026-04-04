@@ -10,7 +10,7 @@
   padding: 0 @space-6;
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 102;
   gap: @space-4;
 
   @media (max-width: @breakpoint-sm) {
@@ -354,8 +354,8 @@
   animation: popIn 0.15s ease;
 
   @media (max-width: @breakpoint-sm) {
-    width: calc(100vw - @space-8);
-    right: -@space-4;
+    width: min(320px, calc(100vw - 72px - @space-4));
+    right: 0;
   }
 }
 
@@ -497,10 +497,12 @@
   flex-direction: column;
   gap: @space-3;
   animation: popIn 0.15s ease;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
 
   @media (max-width: @breakpoint-sm) {
-    width: calc(100vw - @space-6);
-    right: -@space-2;
+    width: min(300px, calc(100vw - 72px - @space-4));
+    right: 0;
   }
 }
 

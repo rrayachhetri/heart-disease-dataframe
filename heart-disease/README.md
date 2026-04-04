@@ -6,13 +6,15 @@
 
 ## Overview
 
-CardioSense is a full-stack heart disease risk prediction platform built on a Random Forest ML model trained on the Cleveland Heart Disease Dataset. It predicts cardiovascular risk from 13 clinical features and (Phase 1+) connects patients with relevant, in-network doctors for consultations.
+CardioSense is a full-stack heart disease risk prediction platform built on an ensemble ML model trained on the Cleveland Heart Disease Dataset. It predicts cardiovascular risk from 13 clinical features, explains which factors drove each score, and (Phase 1+) connects patients with relevant, in-network doctors for consultations.
 
 ### Current Capabilities (Phase 1)
 
 | Capability | Status |
 |---|---|
-| ML Risk Prediction (RandomForest, 200 estimators) | ✅ |
+| ML Risk Prediction (VotingClassifier — RF-300 + GBM-200 + LR, CV AUC 0.894) | ✅ |
+| Per-prediction explainability (baseline-perturbation, top 6 factors) | ✅ |
+| Model performance endpoint (`GET /api/predictions/model-info`) | ✅ |
 | REST API (FastAPI) | ✅ |
 | React + TypeScript Web UI | ✅ |
 | **User Authentication (JWT — login / register)** | ✅ Phase 1 |
@@ -43,12 +45,13 @@ heart-disease/
 │   │   ├── database.py             # SQLAlchemy engine, SessionLocal, init_db()
 │   │   └── models.py               # User, Patient, Doctor, Prediction ORM models
 │   ├── routers/
-│   │   ├── predictions.py          # POST/GET/DELETE /api/predictions
+│   │   ├── predictions.py          # POST/GET/DELETE /api/predictions + /model-info
 │   │   └── doctors.py              # GET/PUT /api/doctors/me, GET /api/doctors
 │   ├── data/
 │   │   └── prepare.py              # Cleveland data → processed.parquet
 │   └── models/
-│       └── train.py                # RandomForest training + MLflow logging
+│       ├── train.py                # Ensemble training (RF-300 + GBM-200 + LR) + MLflow
+│       └── explain.py              # Baseline-perturbation explainability (top_factors)
 ├── alembic/
 │   ├── env.py                      # Alembic migration environment
 │   ├── script.py.mako              # Migration template
@@ -79,7 +82,8 @@ heart-disease/
 │           ├── Form/               # FormField, SelectField
 │           └── Notification/       # NotificationCenter
 ├── models/
-│   └── rf_model.joblib             # Pre-trained RandomForest
+│   ├── ensemble_model.joblib       # Trained VotingClassifier (RF + GBM + LR) with metadata
+│   └── rf_model.joblib             # Legacy RandomForest (fallback if ensemble not present)
 ├── .env.example                    # Environment variable template
 ├── alembic.ini                     # Alembic configuration
 ├── requirements.txt                # Python dependencies
@@ -122,8 +126,10 @@ DATABASE_URL=postgresql://user:password@localhost:5432/cardiosense
 
 ```powershell
 python .\src\data\prepare.py    # writes data/processed.parquet
-python .\src\models\train.py    # saves models/rf_model.joblib, logs to mlruns/
+python .\src\models\train.py    # saves models/ensemble_model.joblib, logs to mlruns/
 ```
+
+The training script prints a full report including CV AUC ± std and per-feature importance bars.
 
 ### 4. Start the API
 
@@ -206,9 +212,10 @@ Predictions are saved to the database when authenticated, and available via `loc
 
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
-| `POST` | `/api/predictions` | Run prediction (saves to DB if authed) | Optional 🔓 |
+| `POST` | `/api/predictions` | Run prediction + per-feature explanations | Optional 🔓 |
 | `GET` | `/api/predictions` | Get own prediction history | 🔒 Bearer |
 | `DELETE` | `/api/predictions/{id}` | Delete a prediction record | 🔒 Bearer |
+| `GET` | `/api/predictions/model-info` | Model metrics + feature importances | Public |
 
 **Example — Predict (authenticated):**
 
@@ -226,7 +233,37 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/predictions" -Method POST `
   "id": "uuid-of-saved-record",
   "probability": 0.87,
   "prediction": 1,
-  "risk_level": "high"
+  "risk_level": "high",
+  "top_factors": [
+    {
+      "feature": "thal",
+      "label": "Thalassemia",
+      "value": 7,
+      "population_mean": 4.73,
+      "unit": "",
+      "contribution": 0.147,
+      "direction": "increases_risk"
+    }
+  ]
+}
+```
+
+`contribution` is the probability delta (−1 to +1) when this feature is swapped from the population mean to the patient's actual value. Positive = increases risk.
+
+**`GET /api/predictions/model-info` Response:**
+
+```json
+{
+  "model_type": "VotingClassifier (RF-300 + GBM-200 + LR)",
+  "metrics": {
+    "val_auc": 0.9420, "val_accuracy": 0.8333,
+    "val_sensitivity": 0.7857, "val_specificity": 0.875,
+    "val_precision": 0.8462, "val_f1": 0.8148,
+    "cv_auc_mean": 0.8941, "cv_auc_std": 0.042
+  },
+  "feature_importances": [
+    { "feature": "cp", "label": "Chest Pain Type", "importance": 0.1565 }
+  ]
 }
 ```
 
@@ -276,9 +313,9 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
 |---|---|---|
 | **Login** | `/login` | JWT login, link to register |
 | **Register** | `/register` | Patient or Doctor account creation |
-| **Dashboard** | `/` | KPI cards, risk distribution pie chart, risk trend area chart |
+| **Dashboard** | `/` | KPI cards, risk distribution pie chart, risk trend area chart, model performance card with AUC badge + feature importance bar chart |
 | **Predict** | `/predict` | Sectioned form (Personal / Symptoms / Vitals), validation |
-| **Result** | `/result` | Animated SVG risk gauge, color-coded verdict, patient summary |
+| **Result** | `/result` | Animated SVG risk gauge, color-coded verdict, patient summary, **"Why This Score?"** animated contribution bars per feature |
 | **History** | `/history` | Server-side history when logged in, localStorage fallback for anonymous |
 | **Doctor Profile** | `/doctor/profile` | Doctor-only: NPI, specialty, fee, insurance, accepting patients toggle |
 
@@ -343,6 +380,8 @@ mlflow ui --backend-store-uri ./mlruns
 ## Notes
 
 - Preprocessing drops rows with missing values. An sklearn Pipeline with imputation can be added as a next step.
+- The ensemble model (`ensemble_model.joblib`) stores the trained model, feature importances, population statistics, and CV metrics as a single dict — enabling explainability without a separate feature store.
+- Per-prediction explanations use baseline perturbation: each feature's contribution = P(risk | feature=patient_value, rest=mean) − P(risk | all=mean). This is model-agnostic and requires no additional libraries.
 - The ML model is for **educational/research purposes only** and is not a medical diagnostic device.
 - JWT access tokens expire in 30 minutes; refresh tokens in 7 days (configurable via `.env`).
 - All predictions are linked to the authenticated user. Anonymous predictions (no token) are processed but not persisted.
@@ -377,9 +416,9 @@ mlflow ui --backend-store-uri ./mlruns
 │            │                                                    │
 │     ┌──────┴──────┐                                             │
 │     ▼             ▼                                             │
-│  SQLite DB    rf_model.joblib                                   │
-│  (cardio-     (Random Forest                                    │
-│  sense.db)     ML model)                                        │
+│  SQLite DB    ensemble_model.joblib                             │
+│  (cardio-     (VotingClassifier:                                │
+│  sense.db)     RF-300 + GBM-200 + LR)                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -400,7 +439,7 @@ python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload
 **What happens on startup:**
 1. Python imports `src/api/app.py`
 2. All routers are registered (auth, predictions, doctors)
-3. `startup_event()` fires — loads `models/rf_model.joblib` into memory
+  3. `startup_event()` fires — loads `models/ensemble_model.joblib` into memory (falls back to `rf_model.joblib` if ensemble not present)
 4. `init_db()` creates the SQLite tables (`users`, `patients`, `doctors`, `predictions`) if they don't exist yet
 5. Uvicorn begins accepting connections on `127.0.0.1:8080`
 
@@ -531,13 +570,14 @@ Browser PredictPage.tsx (form submit)
     → predictApi.ts → fetch POST /api/predictions
       (includes Authorization: Bearer <token> if logged in)
         → FastAPI predictions.py predict()
-          1. Imports _model from app global state (loaded at startup)
-          2. Builds numpy array [[age, sex, cp, trestbps, ...]] shape (1, 13)
-          3. _model.predict_proba(X)[0][1] → float probability (0.0–1.0)
-          4. _model.predict(X)[0]          → binary prediction (0 or 1)
+          1. Imports _model_data from app global state (loaded at startup)
+          2. Builds pandas DataFrame with named feature columns
+          3. model.predict_proba(X)[0][1] → float probability (0.0–1.0)
+          4. model.predict(X)[0]          → binary prediction (0 or 1)
           5. _risk_level() → "low" / "moderate" / "high"
-          6. If user authenticated → saves Prediction row to DB
-          7. Returns {id, probability, prediction, risk_level}
+          6. compute_top_factors() → per-feature probability deltas (explain.py)
+          7. If user authenticated → saves Prediction row to DB
+          8. Returns {id, probability, prediction, risk_level, top_factors}
   ← JSON result
 → predictionSlice stores result + patient data in Redux + localStorage
 → navigate('/result') → shows animated ResultPage
@@ -662,7 +702,7 @@ The backend ships with an interactive API explorer. With the backend running:
 | `500` on register/login | FastAPI backend not running | Start uvicorn on port 8080 (Step 1 above) |
 | `Failed to fetch` / network error | Vite can't reach the backend proxy target | Confirm uvicorn is running on `127.0.0.1:8080` |
 | Redirected to `/login` after page refresh | Token expired or missing from localStorage | Log in again |
-| `503 Model not loaded` on predict | `rf_model.joblib` missing at startup | Verify `models/rf_model.joblib` exists; re-train if needed |
+| `503 Model not loaded` on predict | Model file missing at startup | Run `python -m src.models.train`; ensure `models/ensemble_model.joblib` exists |
 | CORS error in browser console | Frontend running on a port not in CORS allow-list | Add your port to `allow_origins` in `src/api/app.py` |
 | `Email already registered` | Duplicate email on register | Use a different email address |
 | `422 Unprocessable Entity` | Request body missing required fields | Check the request body matches the schema above |

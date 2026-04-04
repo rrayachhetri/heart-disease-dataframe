@@ -4,7 +4,7 @@ Saves predictions to the DB when user is authenticated.
 Anonymous predictions are still accepted (user_id=None).
 """
 import json
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
@@ -16,6 +16,8 @@ from src.auth.routes import get_optional_user, get_current_user
 
 router = APIRouter(prefix="/predictions", tags=["predictions"])
 
+
+# ── Schemas ───────────────────────────────────────────────────────────────────
 
 class PatientFeatures(BaseModel):
     age: float
@@ -33,12 +35,37 @@ class PatientFeatures(BaseModel):
     thal: float
 
 
+class TopFactor(BaseModel):
+    feature: str
+    label: str
+    value: float
+    population_mean: float
+    unit: str
+    contribution: float      # probability delta; positive = increases risk
+    direction: str           # "increases_risk" | "decreases_risk"
+
+
 class PredictionResult(BaseModel):
     id: Optional[str] = None
     probability: float
     prediction: int
     risk_level: str
+    top_factors: List[TopFactor] = []
 
+
+class FeatureImportanceItem(BaseModel):
+    feature: str
+    label: str
+    importance: float
+
+
+class ModelInfoResponse(BaseModel):
+    model_type: str
+    metrics: Dict[str, float]
+    feature_importances: List[FeatureImportanceItem]
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _risk_level(prob: float) -> str:
     if prob >= 0.70:
@@ -48,28 +75,45 @@ def _risk_level(prob: float) -> str:
     return "low"
 
 
+def _get_model_data() -> Dict[str, Any]:
+    from src.api.app import _model_data
+    if _model_data is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    return _model_data
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
 @router.post("", response_model=PredictionResult)
 def predict(
     features: PatientFeatures,
     db: Session = Depends(get_db),
     current_user=Depends(get_optional_user),
-    request=None,  # kept for compatibility
 ):
-    # Import the loaded model via the app state (injected at startup)
-    from src.api.app import _model
-    if _model is None:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail="Model not loaded")
+    import pandas as pd
+    from src.models.explain import compute_top_factors
 
-    import numpy as np
-    X = np.array([[
-        features.age, features.sex, features.cp, features.trestbps,
-        features.chol, features.fbs, features.restecg, features.thalach,
-        features.exang, features.oldpeak, features.slope, features.ca, features.thal,
-    ]])
-    prob = float(_model.predict_proba(X)[0][1])
-    pred = int(_model.predict(X)[0])
+    md = _get_model_data()
+    model = md["model"]
+    feature_cols = md["feature_cols"]
+
+    row = {f: getattr(features, f) for f in feature_cols}
+    X = pd.DataFrame([row], columns=feature_cols)
+    prob = float(model.predict_proba(X)[0][1])
+    pred = int(model.predict(X)[0])
     level = _risk_level(prob)
+
+    # Per-prediction explainability (only when population stats are available)
+    top_factors: List[Dict] = []
+    if md.get("feature_stats") and md.get("feature_cols"):
+        top_factors = compute_top_factors(
+            features=features.model_dump(),
+            model=model,
+            feature_cols=feature_cols,
+            feature_stats=md["feature_stats"],
+            top_n=6,
+        )
 
     # Persist when authenticated
     record_id = None
@@ -86,7 +130,38 @@ def predict(
         db.refresh(record)
         record_id = record.id
 
-    return PredictionResult(id=record_id, probability=prob, prediction=pred, risk_level=level)
+    return PredictionResult(
+        id=record_id,
+        probability=prob,
+        prediction=pred,
+        risk_level=level,
+        top_factors=top_factors,
+    )
+
+
+@router.get("/model-info", response_model=ModelInfoResponse)
+def model_info():
+    """Return model performance metrics and global feature importances.
+    This endpoint is public — no authentication required."""
+    from src.models.explain import FEATURE_LABELS
+
+    md = _get_model_data()
+    raw_importances = md.get("feature_importances", {})
+
+    importance_list = [
+        FeatureImportanceItem(
+            feature=feat,
+            label=FEATURE_LABELS.get(feat, feat),
+            importance=round(imp, 4),
+        )
+        for feat, imp in sorted(raw_importances.items(), key=lambda x: -x[1])
+    ]
+
+    return ModelInfoResponse(
+        model_type=md.get("model_type", "Unknown"),
+        metrics={k: round(v, 4) for k, v in md.get("metrics", {}).items()},
+        feature_importances=importance_list,
+    )
 
 
 @router.get("")

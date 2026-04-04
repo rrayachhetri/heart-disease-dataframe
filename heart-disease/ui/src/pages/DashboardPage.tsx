@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   HeartPulse,
@@ -5,9 +6,11 @@ import {
   ShieldCheck,
   AlertTriangle,
   TrendingUp,
+  Cpu,
+  Info,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   PieChart,
   Pie,
@@ -18,8 +21,12 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  BarChart,
+  Bar,
 } from 'recharts';
 import type { RootState } from '../store';
+import type { ModelInfo } from '../types';
+import { fetchModelInfo } from '../api/predictApi';
 import KPICard from '../components/Dashboard/KPICard';
 import styles from './DashboardPage.module.less';
 
@@ -28,11 +35,20 @@ export default function DashboardPage() {
   const history = useSelector((s: RootState) => s.prediction.history);
   const user = useSelector((s: RootState) => s.auth.user);
 
+  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
+  const [showVcInfo, setShowVcInfo] = useState(false);
+
+  useEffect(() => {
+    fetchModelInfo()
+      .then(setModelInfo)
+      .catch(() => { /* API may not be running — fail silently */ });
+  }, []);
+
   const displayName = user
     ? [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email
     : '';
-  const roleLabel =
-    user?.role === 'doctor' ? 'Doctor' : user?.role === 'admin' ? 'Admin' : 'Patient';
+  const ROLE_LABEL_MAP: Record<string, string> = { doctor: 'Doctor', admin: 'Admin', patient: 'Patient' };
+  const roleLabel = ROLE_LABEL_MAP[user?.role ?? ''] ?? 'Patient';
 
   const totalPredictions = history.length;
   const highRiskCount = history.filter((r) => r.result.prediction === 1).length;
@@ -141,8 +157,8 @@ export default function DashboardPage() {
                   dataKey="value"
                   stroke="none"
                 >
-                  {pieData.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i]} />
+                  {pieData.map((entry) => (
+                    <Cell key={entry.name} fill={PIE_COLORS[pieData.indexOf(entry)]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -205,6 +221,148 @@ export default function DashboardPage() {
           >
             Get Started
           </button>
+        </motion.div>
+      )}
+
+      {/* ── Model Performance Card ──────────────────────────────────────── */}
+      {modelInfo && (
+        <motion.div
+          className={styles.modelCard}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className={styles.modelCardHeader}>
+            <div className={styles.modelCardTitle}>
+              <Cpu size={18} />
+              <div>
+                <h3>Model Performance</h3>
+                <div className={styles.modelTypeRow}>
+                  <button
+                    className={styles.modelTypeBtn}
+                    onClick={() => setShowVcInfo((v) => !v)}
+                    type="button"
+                  >
+                    {modelInfo.model_type}
+                    <Info size={12} />
+                  </button>
+                  <AnimatePresence>
+                    {showVcInfo && (
+                      <motion.div
+                        className={styles.vcPopover}
+                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <div className={styles.vcPopoverHeader}>
+                          <span>VotingClassifier — How it works</span>
+                          <button onClick={() => setShowVcInfo(false)}>×</button>
+                        </div>
+                        <p className={styles.vcPopoverDesc}>
+                          An ensemble meta-learner that trains three independent classifiers and
+                          averages their predicted probabilities (<em>soft voting</em>) using
+                          learned weights, producing a final score that is more robust than any
+                          single model alone.
+                        </p>
+                        <div className={styles.vcEstimators}>
+                          {[
+                            {
+                              icon: '🌲',
+                              name: 'Random Forest  (RF-300)',
+                              weight: 2,
+                              desc: '300 decision trees, balanced class weights (min_samples_leaf=2). Handles non-linear boundaries and is robust to noise.',
+                            },
+                            {
+                              icon: '📈',
+                              name: 'Gradient Boosting  (GBM-200)',
+                              weight: 2,
+                              desc: '200 boosted trees (lr=0.05, subsample=0.8, max_depth=4). Each tree corrects errors of the previous — excellent on tabular clinical data.',
+                            },
+                            {
+                              icon: '⚖️',
+                              name: 'Logistic Regression  (LR)',
+                              weight: 1,
+                              desc: 'L2-regularised linear model on StandardScaler-normalised features. Adds stability and probabilistic calibration.',
+                            },
+                          ].map((e) => (
+                            <div key={e.name} className={styles.vcEstimatorRow}>
+                              <span className={styles.vcIcon}>{e.icon}</span>
+                              <div>
+                                <div className={styles.vcEstName}>
+                                  {e.name}
+                                  <span className={styles.vcWeight}>weight&nbsp;{e.weight}</span>
+                                </div>
+                                <p className={styles.vcEstDesc}>{e.desc}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className={styles.vcVotingNote}>
+                          final&nbsp;P&nbsp;=&nbsp;(2×RF&nbsp;+&nbsp;2×GBM&nbsp;+&nbsp;1×LR)&nbsp;/&nbsp;5
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+            <div className={styles.modelAucBadge}>
+              AUC&nbsp;{(modelInfo.metrics.cv_auc_mean * 100).toFixed(1)}%
+              <span>&nbsp;±&nbsp;{(modelInfo.metrics.cv_auc_std * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+
+          <div className={styles.modelMetricsGrid}>
+            {[
+              { label: 'Accuracy',    key: 'val_accuracy' },
+              { label: 'Sensitivity', key: 'val_sensitivity' },
+              { label: 'Specificity', key: 'val_specificity' },
+              { label: 'Precision',   key: 'val_precision' },
+              { label: 'F1 Score',    key: 'val_f1' },
+              { label: 'Val AUC',     key: 'val_auc' },
+            ].map(({ label, key }) => {
+              const val = modelInfo.metrics[key as keyof typeof modelInfo.metrics] ?? 0;
+              const pct = Math.round(val * 100);
+              return (
+                <div key={key} className={styles.metricItem}>
+                  <div className={styles.metricTop}>
+                    <span className={styles.metricLabel}>{label}</span>
+                    <span className={styles.metricValue}>{pct}%</span>
+                  </div>
+                  <div className={styles.metricBarBg}>
+                    <motion.div
+                      className={styles.metricBarFill}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.8, delay: 0.5 }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {modelInfo.feature_importances.length > 0 && (
+            <div className={styles.featureImportanceWrap}>
+              <h4>Feature Importances (RF component)</h4>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart
+                  data={modelInfo.feature_importances.map((f) => ({
+                    name: f.label.replace('Blood Pressure', 'BP').replace('Thalassemia', 'Thal').replace('Exercise', 'Ex.').replace('Fasting Blood Sugar', 'Fasting BS').replace('Resting ECG', 'Rst ECG').replace('Max Heart Rate', 'Max HR').replace('ST Depression', 'ST Dep.').replace('ST Slope', 'ST Slope').replace('Major Vessels', 'Vessels'),
+                    importance: +(f.importance * 100).toFixed(2),
+                  }))}
+                  layout="vertical"
+                  margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+                >
+                  <XAxis type="number" tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
+                  <Tooltip formatter={(v) => [`${v}%`, 'Importance']} />
+                  <Bar dataKey="importance" fill="#7ae8e3" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </motion.div>
       )}
     </div>

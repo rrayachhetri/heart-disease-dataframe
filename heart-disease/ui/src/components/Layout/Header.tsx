@@ -1,4 +1,4 @@
-import { Bell, LogOut, User, ChevronDown, Shield, Menu, CheckCheck, Trash2, Camera, X as XIcon, Search } from 'lucide-react';
+import { Bell, LogOut, User, ChevronDown, Shield, CheckCheck, Trash2, Camera, X as XIcon, Search } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
@@ -16,11 +16,7 @@ const pageTitles: Record<string, string> = {
   '/doctor/profile': 'Doctor Profile',
 };
 
-interface Props {
-  onMobileMenuToggle?: () => void;
-}
-
-export default function Header({ onMobileMenuToggle }: Props) {
+export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -114,9 +110,6 @@ export default function Header({ onMobileMenuToggle }: Props) {
     <header className={styles.header}>
       {/* Left */}
       <div className={styles.left}>
-        <button className={styles.menuBtn} onClick={onMobileMenuToggle} aria-label="Toggle menu">
-          <Menu size={20} />
-        </button>
         <h1 className={styles.title}>{pageTitles[location.pathname] || 'CardioSense'}</h1>
       </div>
 

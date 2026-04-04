@@ -9,7 +9,15 @@ from src.auth.routes import router as auth_router
 from src.routers.predictions import router as predictions_router
 from src.routers.doctors import router as doctors_router
 
-MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "rf_model.joblib"
+MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
+ENSEMBLE_PATH = MODELS_DIR / "ensemble_model.joblib"
+LEGACY_RF_PATH = MODELS_DIR / "rf_model.joblib"
+
+# Legacy feature list (used when falling back to the old RF pickle)
+_LEGACY_FEATURE_COLS = [
+    "age", "sex", "cp", "trestbps", "chol", "fbs",
+    "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal",
+]
 
 app = FastAPI(
     title="CardioSense API",
@@ -32,19 +40,38 @@ app.add_middleware(
 )
 
 # ── Global model reference (accessed by predictions router) ───────────────────
-_model = None
+# _model_data is a dict: {model, feature_cols, feature_importances,
+#                          feature_stats, metrics, model_type}
+_model_data: dict | None = None
 
 
-def load_model():
-    if not MODEL_PATH.exists():
-        raise RuntimeError(f"Model not found at {MODEL_PATH}. Run training first.")
-    return joblib.load(MODEL_PATH)
+def load_model() -> dict:
+    """Load ensemble model (preferred) or legacy RF model (fallback)."""
+    if ENSEMBLE_PATH.exists():
+        data = joblib.load(ENSEMBLE_PATH)
+        if isinstance(data, dict) and "model" in data:
+            return data
+
+    if LEGACY_RF_PATH.exists():
+        raw_model = joblib.load(LEGACY_RF_PATH)
+        return {
+            "model": raw_model,
+            "feature_cols": _LEGACY_FEATURE_COLS,
+            "feature_importances": {},
+            "feature_stats": {},
+            "metrics": {},
+            "model_type": "RandomForestClassifier (legacy)",
+        }
+
+    raise RuntimeError(
+        "No model found. Run `python -m src.models.train` first."
+    )
 
 
 @app.on_event("startup")
 def startup_event():
-    global _model
-    _model = load_model()
+    global _model_data
+    _model_data = load_model()
     # Only auto-create tables when explicitly enabled (local dev / SQLite).
     # In production, use `alembic upgrade head` instead.
     if os.getenv("AUTO_CREATE_TABLES", "false").lower() in ("1", "true", "yes"):
@@ -60,9 +87,9 @@ app.include_router(doctors_router, prefix="/api")
 # ── Legacy / utility endpoints ────────────────────────────────────────────────
 @app.get("/health")
 def health():
-    return {"status": "ok", "model_loaded": _model is not None}
+    return {"status": "ok", "model_loaded": _model_data is not None}
 
 
 @app.get("/api/health")
 def api_health():
-    return {"status": "ok", "model_loaded": _model is not None}
+    return {"status": "ok", "model_loaded": _model_data is not None}
