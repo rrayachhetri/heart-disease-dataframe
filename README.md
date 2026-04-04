@@ -1,0 +1,1 @@
+full-stack heart disease risk prediction platform built on a Random Forest ML model trained on the Cleveland Heart Disease Dataset. It predicts cardiovascular risk from 13 clinical features and (Phase 1+) connects patients with relevant, in-network doctors for consultations.
