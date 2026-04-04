@@ -1,102 +1,161 @@
-@import '../../styles/variables.less';
+// ── Sidebar color tokens ───────────────────────────────────────────────────────
+// bg: #a4fcf8 (light aqua)  text: #1a3a3a (dark slate)
 
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  width: @sidebar-width;
-  background: @sidebar-bg;
+  width: 215px;
+  background: linear-gradient(180deg, #a4fcf8 0%, #7ae8e3 100%);
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width @transition-base;
+  transition: width 250ms ease, transform 250ms ease;
   overflow: hidden;
+  box-shadow: 2px 0 16px rgba(122, 232, 227, 0.35);
 }
+
+// ── Collapsed state ────────────────────────────────────────────────────────────
 
 .collapsed {
-  width: @sidebar-collapsed-width;
-
-  .navItem {
-    justify-content: center;
-    padding: @space-3;
-  }
+  width: 72px;
 }
+
+.collapsed .navItem {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+// ── Logo area ──────────────────────────────────────────────────────────────────
 
 .logo {
   display: flex;
   align-items: center;
-  gap: @space-3;
-  padding: @space-6;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  min-height: @header-height;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(26, 58, 58, 0.12);
+  min-height: 64px;
 }
 
 .logoIcon {
-  color: @danger-light;
+  color: #1a3a3a;
   flex-shrink: 0;
 }
 
 .logoText {
-  font-size: @font-size-xl;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: @text-inverse;
+  color: #1a3a3a;
   white-space: nowrap;
   letter-spacing: -0.025em;
+  flex: 1;
 }
+
+// ── Nav ────────────────────────────────────────────────────────────────────────
 
 .nav {
   flex: 1;
-  padding: @space-4 @space-3;
+  padding: 1rem 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: @space-1;
+  gap: 0.25rem;
+  overflow-y: auto;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  gap: @space-3;
-  padding: @space-3 @space-4;
-  border-radius: @radius-lg;
-  color: @text-tertiary;
-  font-size: @font-size-sm;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  color: rgba(26, 58, 58, 0.7);
+  font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
-  transition: all @transition-fast;
+  transition: all 150ms ease;
   white-space: nowrap;
   cursor: pointer;
 
   &:hover {
-    background: @sidebar-hover;
-    color: @text-inverse;
+    background: rgba(26, 58, 58, 0.1);
+    color: #1a3a3a;
   }
 }
 
 .active {
-  background: @sidebar-active;
-  color: @text-inverse;
+  background: rgba(26, 58, 58, 0.15);
+  color: #1a3a3a;
+  font-weight: 600;
 
   &:hover {
-    background: @sidebar-active;
+    background: rgba(26, 58, 58, 0.15);
   }
 }
+
+// ── Toggle button (collapse/expand) ───────────────────────────────────────────
 
 .toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: @space-4 @space-3;
-  padding: @space-2;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: @radius-md;
+  margin: 1rem 0.75rem;
+  padding: 0.5rem;
+  border: 1px solid rgba(26, 58, 58, 0.2);
+  border-radius: 0.5rem;
   background: transparent;
-  color: @text-tertiary;
+  color: rgba(26, 58, 58, 0.7);
   cursor: pointer;
-  transition: all @transition-fast;
+  transition: all 150ms ease;
 
   &:hover {
-    background: @sidebar-hover;
-    color: @text-inverse;
+    background: rgba(26, 58, 58, 0.1);
+    color: #1a3a3a;
+  }
+}
+
+// ── Mobile close button ────────────────────────────────────────────────────────
+
+.mobileClose {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 0.5rem;
+  background: rgba(26, 58, 58, 0.12);
+  color: #1a3a3a;
+  cursor: pointer;
+  transition: all 150ms ease;
+
+  &:hover {
+    background: rgba(26, 58, 58, 0.2);
+  }
+}
+
+// ── Top-level class so CSS Modules always exports it ──────────────────────────
+
+.mobileOpen {
+  transform: translateX(0) !important;
+}
+
+// ── Mobile ─────────────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+    box-shadow: 0 20px 25px -5px rgba(122, 232, 227, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+
+  .mobileClose {
+    display: flex;
+  }
+
+  .toggle {
+    display: none;
   }
 }

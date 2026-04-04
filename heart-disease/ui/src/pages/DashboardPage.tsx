@@ -26,6 +26,13 @@ import styles from './DashboardPage.module.less';
 export default function DashboardPage() {
   const navigate = useNavigate();
   const history = useSelector((s: RootState) => s.prediction.history);
+  const user = useSelector((s: RootState) => s.auth.user);
+
+  const displayName = user
+    ? [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email
+    : '';
+  const roleLabel =
+    user?.role === 'doctor' ? 'Doctor' : user?.role === 'admin' ? 'Admin' : 'Patient';
 
   const totalPredictions = history.length;
   const highRiskCount = history.filter((r) => r.result.prediction === 1).length;
@@ -57,8 +64,12 @@ export default function DashboardPage() {
     <div className={styles.page}>
       <div className={styles.welcome}>
         <div>
-          <h2>Welcome back, Doctor</h2>
-          <p>Here's an overview of your heart disease risk assessments.</p>
+          <h2>Welcome back, {displayName || roleLabel}</h2>
+          <p>
+            {user?.role === 'doctor'
+              ? "Here's an overview of your patients' heart disease risk assessments."
+              : "Here's an overview of your heart disease risk assessments."}
+          </p>
         </div>
         <motion.button
           className={styles.ctaBtn}
@@ -78,6 +89,8 @@ export default function DashboardPage() {
           subtitle="All time assessments"
           icon={Activity}
           color="blue"
+          onClick={() => navigate('/history')}
+          linkLabel="View all history"
         />
         <KPICard
           title="Average Risk"
@@ -85,6 +98,8 @@ export default function DashboardPage() {
           subtitle="Mean probability score"
           icon={TrendingUp}
           color="amber"
+          onClick={totalPredictions > 0 ? () => navigate('/history') : undefined}
+          linkLabel="View assessments"
         />
         <KPICard
           title="High Risk Cases"
@@ -92,6 +107,8 @@ export default function DashboardPage() {
           subtitle="Prediction = 1"
           icon={AlertTriangle}
           color="red"
+          onClick={highRiskCount > 0 ? () => navigate('/history') : undefined}
+          linkLabel="Review cases"
         />
         <KPICard
           title="Low Risk Cases"
@@ -99,6 +116,8 @@ export default function DashboardPage() {
           subtitle="Prediction = 0"
           icon={ShieldCheck}
           color="green"
+          onClick={lowRiskCount > 0 ? () => navigate('/history') : undefined}
+          linkLabel="View cases"
         />
       </div>
 

@@ -74,9 +74,10 @@
   color: @text-primary;
   align-items: center;
   transition: background @transition-fast;
+  cursor: pointer;
 
   &:hover {
-    background: @bg-primary;
+    background: @bg-secondary;
   }
 
   &:last-child {
@@ -124,6 +125,26 @@
 .rowActions {
   display: flex;
   gap: @space-2;
+  align-items: center;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: @radius-md;
+  background: transparent;
+  color: @text-tertiary;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: @primary-50;
+    color: @primary;
+  }
 }
 
 .deleteBtn {
@@ -173,6 +194,225 @@
 
     &:hover {
       background: @primary-dark;
+    }
+  }
+}
+
+// ── Detail Modal ──────────────────────────────────────────────────────────────
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: @space-4;
+}
+
+.modal {
+  background: #f0fffe;
+  border: 1px solid rgba(122, 232, 227, 0.4);
+  border-radius: @radius-2xl;
+  box-shadow: @shadow-xl;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: @space-5;
+  padding: @space-6;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: @space-4;
+  background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+  margin: -@space-6 -@space-6 0;
+  padding: @space-5 @space-6;
+  border-radius: @radius-2xl @radius-2xl 0 0;
+}
+
+.modalHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: @space-3;
+}
+
+.modalIconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: @radius-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: @font-size-xl;
+  font-weight: 700;
+  color: #1a3a3a;
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.modalDate {
+  font-size: @font-size-sm;
+  color: rgba(26, 58, 58, 0.7);
+  margin-top: @space-1;
+}
+
+.modalClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(26, 58, 58, 0.25);
+  border-radius: @radius-lg;
+  background: transparent;
+  color: #1a3a3a;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: rgba(26, 58, 58, 0.1);
+    color: #1a3a3a;
+  }
+}
+
+.modalResult {
+  display: flex;
+  align-items: center;
+  gap: @space-5;
+  padding: @space-5;
+  border-radius: @radius-xl;
+  border: 1px solid;
+}
+
+.modalResultLeft {
+  flex-shrink: 0;
+}
+
+.modalResultRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+}
+
+.modalRiskBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-1;
+  padding: @space-1 @space-3;
+  border-radius: @radius-full;
+  font-size: @font-size-sm;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.modalRiskLabel {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: @text-tertiary;
+  margin: 0;
+}
+
+.modalRiskDesc {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.modalSection {
+  display: flex;
+  flex-direction: column;
+  gap: @space-3;
+}
+
+.modalSectionTitle {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.modalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: @space-2;
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modalParam {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: @space-3 @space-4;
+  background: @bg-secondary;
+  border-radius: @radius-lg;
+  gap: @space-3;
+}
+
+.modalParamLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.modalParamValue {
+  font-size: @font-size-sm;
+  color: @text-primary;
+  font-weight: 600;
+  text-align: right;
+}
+
+// ── Responsive Table ──────────────────────────────────────────────────────────
+
+@media (max-width: @breakpoint-md) {
+  .thead {
+    display: none;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @space-2;
+    align-items: center;
+    padding: @space-4;
+
+    > span:nth-child(1) {
+      width: 100%;
+      font-size: @font-size-xs;
+    }
+
+    > span:nth-child(4) {
+      flex: 2;
+    }
+
+    > span:nth-child(5) {
+      flex: 1;
+    }
+
+    > span:nth-child(6) {
+      margin-left: auto;
     }
   }
 }

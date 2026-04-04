@@ -9,9 +9,11 @@
   flex: 1;
   margin-left: @sidebar-width;
   transition: margin-left @transition-base;
-  min-height: 100vh;
+  height: 100vh;        // constrain to viewport — prevents window-level scroll
+  overflow: hidden;     // scroll lives inside .content, not the window
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .collapsed {
@@ -21,7 +23,17 @@
 .content {
   flex: 1;
   padding: @space-8;
+  margin-top: 36px;     // push content area below the fixed banner (36px tall)
+  overflow-y: auto;     // content scrolls here; top edge never rises above banner
   animation: fadeIn 0.3s ease;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 99;
 }
 
 @keyframes fadeIn {
@@ -32,5 +44,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: @breakpoint-md) {
+  .main {
+    margin-left: 0 !important;
+  }
+
+  .content {
+    padding: @space-4;
+    margin-top: 36px; // keep banner clearance on mobile too
   }
 }

@@ -5,13 +5,15 @@ import type { AuthUser, LoginPayload, RegisterPayload } from '../../types';
 
 interface AuthState {
   user: AuthUser | null;
+  avatarUrl: string | null;
   loading: boolean;
   error: string | null;
-  initialized: boolean; // true after we've attempted to load user from stored token
+  initialized: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
+  avatarUrl: localStorage.getItem('avatarUrl') ?? null,
   loading: false,
   error: null,
   initialized: false,
@@ -23,8 +25,8 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (payload: LoginPayload, { rejectWithValue }) => {
     try {
-      await apiLogin(payload);          // stores tokens in localStorage
-      return await getMe();             // fetch full user object
+      await apiLogin(payload);
+      return await getMe();
     } catch (e: unknown) {
       return rejectWithValue((e as Error).message);
     }
@@ -70,6 +72,14 @@ const authSlice = createSlice({
     clearAuthError(state) {
       state.error = null;
     },
+    setAvatarUrl(state, action: PayloadAction<string | null>) {
+      state.avatarUrl = action.payload;
+      if (action.payload) {
+        localStorage.setItem('avatarUrl', action.payload);
+      } else {
+        localStorage.removeItem('avatarUrl');
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -106,5 +116,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthError } = authSlice.actions;
+export const { logout, clearAuthError, setAvatarUrl } = authSlice.actions;
 export default authSlice.reducer;

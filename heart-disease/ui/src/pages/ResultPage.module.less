@@ -163,17 +163,19 @@
   align-items: center;
   gap: @space-2;
   padding: @space-3 @space-6;
-  background: @primary;
-  color: @text-inverse;
+  background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+  color: #1a3a3a;
   border: none;
   border-radius: @radius-lg;
   font-size: @font-size-sm;
   font-weight: 600;
   cursor: pointer;
-  transition: background @transition-fast;
+  box-shadow: 0 4px 14px rgba(164, 252, 248, 0.35);
+  transition: all @transition-fast;
 
   &:hover {
-    background: @primary-dark;
+    box-shadow: 0 6px 22px rgba(164, 252, 248, 0.55);
+    transform: translateY(-1px);
   }
 }
 
