@@ -45,12 +45,21 @@ class TopFactor(BaseModel):
     direction: str           # "increases_risk" | "decreases_risk"
 
 
+class FeaturePercentile(BaseModel):
+    feature: str
+    label: str
+    value: float
+    percentiles: Dict[str, float]   # {"combined": 72.0, "cleveland": 68.0, ...}
+    interpretation: str
+
+
 class PredictionResult(BaseModel):
     id: Optional[str] = None
     probability: float
     prediction: int
     risk_level: str
     top_factors: List[TopFactor] = []
+    population_percentiles: List[FeaturePercentile] = []
 
 
 class FeatureImportanceItem(BaseModel):
@@ -93,6 +102,8 @@ def predict(
 ):
     import pandas as pd
     from src.models.explain import compute_top_factors
+    from src.models.data_loader import percentile_of_value, FEATURE_COLS as _FEAT_COLS
+    from src.models.explain import FEATURE_LABELS
 
     md = _get_model_data()
     model = md["model"]
@@ -115,6 +126,35 @@ def predict(
             top_n=6,
         )
 
+    # Population-percentile benchmarking across all 4 dataset cohorts
+    population_percentiles: List[Dict] = []
+    quantile_arrays = md.get("quantile_arrays")
+    if quantile_arrays:
+        patient_dict = features.model_dump()
+        for feat in _FEAT_COLS:
+            value = patient_dict.get(feat)
+            if value is None or feat not in quantile_arrays:
+                continue
+            feat_quantiles = quantile_arrays[feat]
+            percentiles = {
+                scope: percentile_of_value(value, q_array)
+                for scope, q_array in feat_quantiles.items()
+            }
+            combined_pct = percentiles.get("combined", 50.0)
+            label = FEATURE_LABELS.get(feat, feat)
+            direction = "higher" if combined_pct >= 50 else "lower"
+            rank = combined_pct if combined_pct >= 50 else (100 - combined_pct)
+            population_percentiles.append({
+                "feature": feat,
+                "label": label,
+                "value": value,
+                "percentiles": percentiles,
+                "interpretation": (
+                    f"Your {label} ({value:g}) is {direction} than "
+                    f"{rank:.0f}% of the combined population."
+                ),
+            })
+
     # Persist when authenticated
     record_id = None
     if current_user:
@@ -136,6 +176,7 @@ def predict(
         prediction=pred,
         risk_level=level,
         top_factors=top_factors,
+        population_percentiles=population_percentiles,
     )
 
 
