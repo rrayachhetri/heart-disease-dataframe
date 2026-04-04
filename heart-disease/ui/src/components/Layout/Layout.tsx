@@ -9,34 +9,22 @@ interface Props {
 }
 
 export default function Layout({ children }: Props) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => window.innerWidth < 768);
 
   useEffect(() => {
-    const check = () => {
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-        setMobileOpen(false);
-      }
-    };
-    check();
+    const check = () => setCollapsed(window.innerWidth < 768);
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
 
   return (
     <div className={styles.layout}>
-      {mobileOpen && (
-        <div className={styles.overlay} onClick={() => setMobileOpen(false)} />
-      )}
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed(!collapsed)}
-        mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
       />
       <div className={`${styles.main} ${collapsed ? styles.collapsed : ''}`}>
-        <Header onMobileMenuToggle={() => setMobileOpen(!mobileOpen)} />
+        <Header />
         <QuoteBanner collapsed={collapsed} />
         <main className={styles.content}>{children}</main>
       </div>

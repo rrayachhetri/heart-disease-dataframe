@@ -1,7 +1,8 @@
 @import '../styles/variables.less';
 
 .page {
-  max-width: 900px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .resultCard {
@@ -151,6 +152,114 @@
     color: @warning;
     line-height: 1.5;
   }
+}
+
+// ── Why This Score? ────────────────────────────────────────────────────────────
+.factorsCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+  margin-bottom: @space-6;
+
+  h3 {
+    font-size: @font-size-base;
+    font-weight: 700;
+    color: @text-primary;
+    margin-bottom: @space-1;
+  }
+
+  > p {
+    font-size: @font-size-sm;
+    color: @text-secondary;
+    margin-bottom: @space-5;
+  }
+}
+
+.factorList {
+  display: flex;
+  flex-direction: column;
+  gap: @space-4;
+}
+
+.factorRow {
+  display: grid;
+  grid-template-columns: 180px 1fr 64px;
+  align-items: center;
+  gap: @space-3;
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+
+    .factorBarWrap {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.factorInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.factorLabel {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factorValues {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+}
+
+.factorMeanText {
+  color: @text-tertiary;
+}
+
+.factorBarWrap {
+  height: 10px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.factorBar {
+  height: 100%;
+  border-radius: @radius-full;
+  min-width: 4px;
+}
+
+.factorBarRisk {
+  background: linear-gradient(90deg, #F59E0B, #DC2626);
+}
+
+.factorBarSafe {
+  background: linear-gradient(90deg, #34D399, #059669);
+}
+
+.factorBadge {
+  font-size: @font-size-xs;
+  font-weight: 700;
+  padding: 2px @space-2;
+  border-radius: @radius-full;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.badgeRisk {
+  background: @danger-50;
+  color: @danger;
+}
+
+.badgeSafe {
+  background: @success-50;
+  color: @success;
 }
 
 .actions {

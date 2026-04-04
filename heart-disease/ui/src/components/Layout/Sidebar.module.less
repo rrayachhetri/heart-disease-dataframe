@@ -1,3 +1,5 @@
+@import '../../styles/variables.less';
+
 // ── Sidebar color tokens ───────────────────────────────────────────────────────
 // bg: #a4fcf8 (light aqua)  text: #1a3a3a (dark slate)
 
@@ -33,9 +35,9 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(26, 58, 58, 0.12);
-  min-height: 64px;
+  padding: 0 1.5rem;
+  height: 64px;
+  flex-shrink: 0;
 }
 
 .logoIcon {
@@ -56,7 +58,7 @@
 
 .nav {
   flex: 1;
-  padding: 1rem 0.75rem;
+  padding: calc(1rem + 36px) 0.75rem 1rem; // 36px clears the full-width banner strip
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -69,6 +71,7 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
+  border: 1px solid transparent;
   color: rgba(26, 58, 58, 0.7);
   font-size: 0.875rem;
   font-weight: 500;
@@ -78,18 +81,23 @@
   cursor: pointer;
 
   &:hover {
-    background: rgba(26, 58, 58, 0.1);
+    background: rgba(248, 250, 252, 0.45);
     color: #1a3a3a;
+    border-color: rgba(248, 250, 252, 0.75);
+    box-shadow: 0 0 0 2px rgba(248, 250, 252, 0.25);
   }
 }
 
 .active {
-  background: rgba(26, 58, 58, 0.15);
+  background: rgba(248, 250, 252, 0.65);
   color: #1a3a3a;
   font-weight: 600;
+  border-color: rgba(248, 250, 252, 0.9);
+  box-shadow: 0 0 0 2px rgba(248, 250, 252, 0.35);
 
   &:hover {
-    background: rgba(26, 58, 58, 0.15);
+    background: rgba(248, 250, 252, 0.65);
+    border-color: rgba(248, 250, 252, 0.9);
   }
 }
 
@@ -146,13 +154,12 @@
 
 @media (max-width: 768px) {
   .sidebar {
-    transform: translateX(-100%);
-    width: 260px !important;
+    width: @sidebar-collapsed-width !important;
     box-shadow: 0 20px 25px -5px rgba(122, 232, 227, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   }
 
   .mobileClose {
-    display: flex;
+    display: none;
   }
 
   .toggle {

@@ -1,5 +1,5 @@
 import { API_BASE_URL, authHeaders } from './config';
-import type { PatientData, PredictionResult, ServerPredictionRecord } from '../types';
+import type { PatientData, PredictionResult, ServerPredictionRecord, ModelInfo } from '../types';
 
 export async function predictHeartDisease(data: PatientData): Promise<PredictionResult> {
   const response = await fetch(`${API_BASE_URL}/predictions`, {
@@ -40,5 +40,12 @@ export async function deletePrediction(id: string): Promise<void> {
 export async function checkHealth(): Promise<{ status: string; model_loaded: boolean }> {
   const response = await fetch(`${API_BASE_URL}/health`);
   if (!response.ok) throw new Error(`Health check failed: ${response.status}`);
+  return response.json();
+}
+
+/** Fetch ensemble model performance metrics and feature importances. */
+export async function fetchModelInfo(): Promise<ModelInfo> {
+  const response = await fetch(`${API_BASE_URL}/predictions/model-info`);
+  if (!response.ok) throw new Error(`Model info fetch failed: ${response.status}`);
   return response.json();
 }

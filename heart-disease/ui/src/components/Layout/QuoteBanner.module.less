@@ -3,16 +3,16 @@
 .banner {
   position: fixed;
   top: 64px;
-  left: 215px;
+  left: 0;
   right: 0;
   background: linear-gradient(90deg, #a4fcf8 0%, #8af5f1 50%, #a4fcf8 100%);
   overflow: hidden;
   height: 36px;
   display: flex;
   align-items: center;
-  z-index: 49;
+  z-index: 101; // above sidebar (100) — full-width overlay
   border-bottom: 1px solid rgba(26, 58, 58, 0.15);
-  transition: left 250ms ease;
+  transition: none;
 
   &::before,
   &::after {
@@ -35,7 +35,7 @@
 }
 
 .collapsed {
-  left: 72px;
+  left: 0;
 }
 
 @media (max-width: @breakpoint-md) {

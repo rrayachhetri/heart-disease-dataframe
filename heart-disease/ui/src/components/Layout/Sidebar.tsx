@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
   LayoutDashboard,
@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Stethoscope,
-  X,
 } from 'lucide-react';
 import type { RootState } from '../../store';
 import styles from './Sidebar.module.less';
@@ -29,12 +28,9 @@ const doctorNavItems = [
 interface Props {
   collapsed: boolean;
   onToggle: () => void;
-  mobileOpen: boolean;
-  onMobileClose: () => void;
 }
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Props) {
-  const location = useLocation();
+export default function Sidebar({ collapsed, onToggle }: Props) {
   const user = useSelector((s: RootState) => s.auth.user);
   const navItems = user?.role === 'doctor' ? doctorNavItems : patientNavItems;
 
@@ -43,7 +39,6 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
       className={[
         styles.sidebar,
         collapsed ? styles.collapsed : '',
-        mobileOpen ? styles.mobileOpen : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -51,13 +46,6 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
       <div className={styles.logo}>
         <Activity className={styles.logoIcon} size={28} />
         {!collapsed && <span className={styles.logoText}>CardioSense</span>}
-        <button
-          className={styles.mobileClose}
-          onClick={onMobileClose}
-          aria-label="Close sidebar"
-        >
-          <X size={18} />
-        </button>
       </div>
 
       <nav className={styles.nav}>
@@ -65,11 +53,11 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
           <NavLink
             key={path}
             to={path}
-            className={`${styles.navItem} ${
-              location.pathname === path ? styles.active : ''
-            }`}
+            end={path === '/'}
+            className={({ isActive }) =>
+              `${styles.navItem}${isActive ? ` ${styles.active}` : ''}`
+            }
             title={collapsed ? label : undefined}
-            onClick={onMobileClose}
           >
             <Icon size={20} />
             {!collapsed && <span>{label}</span>}
