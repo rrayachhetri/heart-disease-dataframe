@@ -39,6 +39,8 @@ export default function DashboardPage() {
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
   const [showVcInfo, setShowVcInfo] = useState(false);
   const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
+  const [selectedCohort, setSelectedCohort] = useState<string | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState('age');
 
   useEffect(() => {
     fetchModelInfo()
@@ -384,15 +386,23 @@ export default function DashboardPage() {
               <h3>Training Data — Population Cohorts</h3>
               <p className={styles.datasetSubtitle}>
                 Model trained on {datasetSummaries.reduce((s, d) => s + d.meta.total_records, 0)} patients
-                across 4 UCI Heart Disease research datasets
+                across 4 UCI Heart Disease research datasets — click a cohort to explore
               </p>
             </div>
           </div>
+
+          {/* Clickable tiles */}
           <div className={styles.cohortGrid}>
             {datasetSummaries.map((ds) => {
               const diseaseRate = Math.round(ds.meta.disease_rate * 100);
+              const isSelected = selectedCohort === ds.name;
               return (
-                <div key={ds.name} className={styles.cohortTile}>
+                <button
+                  key={ds.name}
+                  className={`${styles.cohortTile} ${isSelected ? styles.cohortTileSelected : ''}`}
+                  onClick={() => setSelectedCohort(isSelected ? null : ds.name)}
+                  type="button"
+                >
                   <div className={styles.cohortName}>{ds.name.charAt(0).toUpperCase() + ds.name.slice(1)}</div>
                   <div className={styles.cohortRecords}>{ds.meta.total_records} patients</div>
                   <div className={styles.cohortRateRow}>
@@ -419,10 +429,115 @@ export default function DashboardPage() {
                     <span>Avg age: {ds.features.age?.mean.toFixed(0) ?? '–'}</span>
                     <span>Avg chol: {ds.features.chol?.mean.toFixed(0) ?? '–'}</span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
+
+          {/* ── Cohort Detail Panel ───────────────────────────────────────── */}
+          <AnimatePresence>
+            {selectedCohort && (() => {
+              const cohort = datasetSummaries.find((d) => d.name === selectedCohort)!;
+              const FEATURE_LABELS: Record<string, string> = {
+                age: 'Age', sex: 'Sex', cp: 'Chest Pain', trestbps: 'Resting BP',
+                chol: 'Cholesterol', fbs: 'Fasting BS', restecg: 'Resting ECG',
+                thalach: 'Max Heart Rate', exang: 'Ex. Angina', oldpeak: 'ST Depression',
+                slope: 'ST Slope', ca: 'Major Vessels', thal: 'Thalassemia',
+              };
+              const FEAT_UNITS: Record<string, string> = {
+                age: 'yrs', trestbps: 'mmHg', chol: 'mg/dL', thalach: 'bpm', oldpeak: 'mm',
+              };
+              const featureKeys = Object.keys(FEATURE_LABELS).filter((k) => cohort.features[k]);
+              const stats = cohort.features[selectedFeature];
+
+              // Bar chart: compare selected feature mean across all 4 cohorts
+              const COHORT_COLORS: Record<string, string> = {
+                cleveland: '#7c3aed', hungarian: '#0891b2', switzerland: '#059669', va: '#d97706',
+              };
+              const compChartData = datasetSummaries.map((ds) => ({
+                name: ds.name.charAt(0).toUpperCase() + ds.name.slice(1),
+                mean: ds.features[selectedFeature]?.mean ?? 0,
+                fill: COHORT_COLORS[ds.name] ?? '#7ae8e3',
+              }));
+
+              return (
+                <motion.div
+                  key="detail"
+                  className={styles.cohortDetail}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className={styles.cohortDetailHeader}>
+                    <span className={styles.cohortDetailTitle}>
+                      {cohort.name.charAt(0).toUpperCase() + cohort.name.slice(1)} Cohort — Feature Explorer
+                    </span>
+                    <button className={styles.cohortDetailClose} onClick={() => setSelectedCohort(null)}>×</button>
+                  </div>
+
+                  {/* Feature selector pills */}
+                  <div className={styles.featurePills}>
+                    {featureKeys.map((k) => (
+                      <button
+                        key={k}
+                        type="button"
+                        className={`${styles.featurePill} ${selectedFeature === k ? styles.featurePillActive : ''}`}
+                        onClick={() => setSelectedFeature(k)}
+                      >
+                        {FEATURE_LABELS[k]}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className={styles.cohortDetailBody}>
+                    {/* Stats cards */}
+                    {stats && (
+                      <div className={styles.statsCards}>
+                        {[
+                          { label: 'Mean', value: stats.mean.toFixed(1), unit: FEAT_UNITS[selectedFeature] },
+                          { label: 'Std Dev', value: `±${stats.std.toFixed(1)}`, unit: '' },
+                          { label: 'Median', value: stats.median.toFixed(1), unit: FEAT_UNITS[selectedFeature] },
+                          { label: 'IQR', value: `${stats.q1.toFixed(1)}–${stats.q3.toFixed(1)}`, unit: '' },
+                          { label: 'Min', value: stats.min.toFixed(1), unit: '' },
+                          { label: 'Max', value: stats.max.toFixed(1), unit: '' },
+                        ].map(({ label, value, unit }) => (
+                          <div key={label} className={styles.statCard}>
+                            <div className={styles.statValue}>{value}{unit ? <span className={styles.statUnit}> {unit}</span> : null}</div>
+                            <div className={styles.statLabel}>{label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Cross-cohort comparison bar chart */}
+                    <div className={styles.compChart}>
+                      <p className={styles.compChartTitle}>
+                        {FEATURE_LABELS[selectedFeature]} — mean across all cohorts
+                      </p>
+                      <ResponsiveContainer width="100%" height={160}>
+                        <BarChart data={compChartData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
+                          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 11 }} />
+                          <Tooltip
+                            formatter={(v: number) => [
+                              `${v.toFixed(1)}${FEAT_UNITS[selectedFeature] ? ' ' + FEAT_UNITS[selectedFeature] : ''}`,
+                              FEATURE_LABELS[selectedFeature],
+                            ]}
+                          />
+                          <Bar dataKey="mean" radius={[4, 4, 0, 0]}>
+                            {compChartData.map((entry) => (
+                              <Cell key={entry.name} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </AnimatePresence>
         </motion.div>
       )}
     </div>
