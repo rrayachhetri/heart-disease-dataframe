@@ -1,9 +1,9 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, HeartPulse, ShieldCheck, AlertTriangle, Brain } from 'lucide-react';
+import { ArrowLeft, HeartPulse, ShieldCheck, AlertTriangle, Brain, Globe } from 'lucide-react';
 import type { RootState } from '../store';
-import type { TopFactor } from '../types';
+import type { TopFactor, PopulationPercentile } from '../types';
 import RiskGauge from '../components/Dashboard/RiskGauge';
 import styles from './ResultPage.module.less';
 
@@ -21,6 +21,22 @@ const FIELD_LABELS: Record<string, string> = {
   slope: 'ST Slope',
   ca: 'Major Vessels',
   thal: 'Thalassemia',
+};
+
+const COHORT_LABELS: Record<string, string> = {
+  combined: 'All Cohorts',
+  cleveland: 'Cleveland',
+  hungarian: 'Hungarian',
+  switzerland: 'Switzerland',
+  va: 'VA',
+};
+
+const COHORT_COLORS: Record<string, string> = {
+  combined: '#2563EB',
+  cleveland: '#7c3aed',
+  hungarian: '#0891b2',
+  switzerland: '#059669',
+  va: '#d97706',
 };
 
 export default function ResultPage() {
@@ -46,6 +62,14 @@ export default function ResultPage() {
   const pct = Math.round(probability * 100);
   const topFactors: TopFactor[] = result.top_factors ?? [];
   const maxAbs = topFactors.length > 0 ? Math.abs(topFactors[0].contribution) : 1;
+
+  // Show only features that appear in top_factors for the benchmark, fallback to first 6
+  const topFeatureNames = new Set(topFactors.map((f) => f.feature));
+  const benchmarkItems: PopulationPercentile[] = (result.population_percentiles ?? [])
+    .filter((p) => topFeatureNames.has(p.feature))
+    .slice(0, 6);
+
+  const cohortKeys = ['combined', 'cleveland', 'hungarian', 'switzerland', 'va'];
 
   return (
     <div className={styles.page}>
@@ -159,6 +183,70 @@ export default function ResultPage() {
               );
             })}
           </div>
+        </motion.div>
+      )}
+
+      {/* ── How Do You Compare? (Population Benchmark) ─────────────────── */}
+      {benchmarkItems.length > 0 && (
+        <motion.div
+          className={styles.benchmarkCard}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <h3>
+            <Globe size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+            How Do You Compare?
+          </h3>
+          <p>
+            Your key values as percentile ranks within each of the 4 research cohorts (Cleveland, Hungarian,
+            Switzerland, VA) and the combined pool of 920 patients.
+          </p>
+
+          {/* Cohort legend */}
+          <div className={styles.cohortLegend}>
+            {cohortKeys.map((k) => (
+              <span key={k} className={styles.cohortDot}>
+                <i style={{ background: COHORT_COLORS[k] }} />
+                {COHORT_LABELS[k]}
+              </span>
+            ))}
+          </div>
+
+          <div className={styles.benchmarkList}>
+            {benchmarkItems.map((item, idx) => (
+              <div key={item.feature} className={styles.benchmarkRow}>
+                <div className={styles.benchmarkLabel}>
+                  <span className={styles.benchmarkFeature}>{item.label}</span>
+                  <span className={styles.benchmarkValue}>{item.value}</span>
+                </div>
+                <div className={styles.benchmarkBars}>
+                  {cohortKeys.map((cohort, ci) => {
+                    const pctVal = item.percentiles[cohort] ?? 0;
+                    return (
+                      <div key={cohort} className={styles.benchmarkBarRow}>
+                        <span className={styles.benchmarkCohort}>{COHORT_LABELS[cohort]}</span>
+                        <div className={styles.benchmarkBarBg}>
+                          <motion.div
+                            className={styles.benchmarkBarFill}
+                            style={{ background: COHORT_COLORS[cohort] }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pctVal}%` }}
+                            transition={{ duration: 0.7, delay: 0.1 + idx * 0.04 + ci * 0.03 }}
+                          />
+                        </div>
+                        <span className={styles.benchmarkPct}>{pctVal.toFixed(0)}th</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className={styles.benchmarkNote}>
+            {benchmarkItems[0]?.interpretation}
+          </p>
         </motion.div>
       )}
 

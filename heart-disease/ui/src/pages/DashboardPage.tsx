@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Cpu,
   Info,
+  Database,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,7 +27,7 @@ import {
 } from 'recharts';
 import type { RootState } from '../store';
 import type { ModelInfo } from '../types';
-import { fetchModelInfo } from '../api/predictApi';
+import { fetchModelInfo, fetchDatasetComparison, type DatasetSummary } from '../api/predictApi';
 import KPICard from '../components/Dashboard/KPICard';
 import styles from './DashboardPage.module.less';
 
@@ -37,11 +38,15 @@ export default function DashboardPage() {
 
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
   const [showVcInfo, setShowVcInfo] = useState(false);
+  const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
 
   useEffect(() => {
     fetchModelInfo()
       .then(setModelInfo)
       .catch(() => { /* API may not be running — fail silently */ });
+    fetchDatasetComparison()
+      .then((r) => setDatasetSummaries(r.datasets.filter((d) => d.name !== 'combined')))
+      .catch(() => { /* fail silently */ });
   }, []);
 
   const displayName = user
@@ -363,6 +368,61 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
           )}
+        </motion.div>
+      )}
+      {/* ── Dataset Cohorts Card ────────────────────────────────────────── */}
+      {datasetSummaries.length > 0 && (
+        <motion.div
+          className={styles.datasetCard}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className={styles.datasetCardHeader}>
+            <Database size={18} />
+            <div>
+              <h3>Training Data — Population Cohorts</h3>
+              <p className={styles.datasetSubtitle}>
+                Model trained on {datasetSummaries.reduce((s, d) => s + d.meta.total_records, 0)} patients
+                across 4 UCI Heart Disease research datasets
+              </p>
+            </div>
+          </div>
+          <div className={styles.cohortGrid}>
+            {datasetSummaries.map((ds) => {
+              const diseaseRate = Math.round(ds.meta.disease_rate * 100);
+              return (
+                <div key={ds.name} className={styles.cohortTile}>
+                  <div className={styles.cohortName}>{ds.name.charAt(0).toUpperCase() + ds.name.slice(1)}</div>
+                  <div className={styles.cohortRecords}>{ds.meta.total_records} patients</div>
+                  <div className={styles.cohortRateRow}>
+                    <span className={styles.cohortRateLabel}>Disease rate</span>
+                    <span className={styles.cohortRateValue}>{diseaseRate}%</span>
+                  </div>
+                  <div className={styles.cohortBarBg}>
+                    <motion.div
+                      className={styles.cohortBarFill}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${diseaseRate}%` }}
+                      transition={{ duration: 0.8, delay: 0.6 }}
+                      style={{
+                        background:
+                          diseaseRate > 70
+                            ? 'linear-gradient(90deg, #F59E0B, #DC2626)'
+                            : diseaseRate > 45
+                            ? 'linear-gradient(90deg, #7ae8e3, #2563EB)'
+                            : 'linear-gradient(90deg, #34D399, #059669)',
+                      }}
+                    />
+                  </div>
+                  <div className={styles.cohortAvgRow}>
+                    <span>Avg age: {ds.features.age?.mean.toFixed(0) ?? '–'}</span>
+                    <span>Avg chol: {ds.features.chol?.mean.toFixed(0) ?? '–'}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </motion.div>
       )}
     </div>

@@ -336,3 +336,134 @@
     }
   }
 }
+
+// ── Population Benchmark ────────────────────────────────────────────────────
+.benchmarkCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+  margin-bottom: @space-6;
+
+  h3 {
+    font-size: @font-size-base;
+    font-weight: 700;
+    color: @text-primary;
+    margin-bottom: @space-1;
+  }
+
+  > p {
+    font-size: @font-size-sm;
+    color: @text-secondary;
+    margin-bottom: @space-4;
+    line-height: 1.55;
+  }
+}
+
+.cohortLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: @space-3 @space-5;
+  margin-bottom: @space-5;
+}
+
+.cohortDot {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+
+  i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: @radius-full;
+    flex-shrink: 0;
+  }
+}
+
+.benchmarkList {
+  display: flex;
+  flex-direction: column;
+  gap: @space-5;
+}
+
+.benchmarkRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: @space-4;
+  align-items: start;
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.benchmarkLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.benchmarkFeature {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+}
+
+.benchmarkValue {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+}
+
+.benchmarkBars {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+}
+
+.benchmarkBarRow {
+  display: grid;
+  grid-template-columns: 74px 1fr 36px;
+  align-items: center;
+  gap: @space-2;
+}
+
+.benchmarkCohort {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  text-align: right;
+}
+
+.benchmarkBarBg {
+  height: 6px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.benchmarkBarFill {
+  height: 100%;
+  border-radius: @radius-full;
+  opacity: 0.85;
+}
+
+.benchmarkPct {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-secondary;
+  text-align: right;
+}
+
+.benchmarkNote {
+  margin-top: @space-4;
+  padding: @space-3 @space-4;
+  background: @bg-secondary;
+  border-radius: @radius-lg;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  line-height: 1.5;
+  border-left: 3px solid #7ae8e3;
+}

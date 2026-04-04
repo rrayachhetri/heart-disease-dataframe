@@ -406,3 +406,97 @@
     padding-left: calc(18px + @space-3); // icon width + gap = aligns with "Model Performance" text
   }
 }
+
+// ── Dataset Cohorts Card ────────────────────────────────────────────────────
+.datasetCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+  margin-top: @space-8;
+}
+
+.datasetCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  margin-bottom: @space-6;
+  color: #0d9488;
+
+  h3 {
+    font-size: @font-size-base;
+    font-weight: 700;
+    color: @text-primary;
+    margin: 0 0 2px;
+  }
+}
+
+.datasetSubtitle {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: 0;
+}
+
+.cohortGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: @space-4;
+}
+
+.cohortTile {
+  background: @bg-primary;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  padding: @space-4;
+}
+
+.cohortName {
+  font-size: @font-size-base;
+  font-weight: 700;
+  color: @text-primary;
+  margin-bottom: 2px;
+}
+
+.cohortRecords {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-bottom: @space-3;
+}
+
+.cohortRateRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: @space-2;
+}
+
+.cohortRateLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+}
+
+.cohortRateValue {
+  font-size: @font-size-sm;
+  font-weight: 700;
+  color: @text-primary;
+}
+
+.cohortBarBg {
+  height: 6px;
+  background: @border-color;
+  border-radius: @radius-full;
+  overflow: hidden;
+  margin-bottom: @space-3;
+}
+
+.cohortBarFill {
+  height: 100%;
+  border-radius: @radius-full;
+}
+
+.cohortAvgRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+}

@@ -6,21 +6,28 @@
 
 ## Overview
 
-CardioSense is a full-stack heart disease risk prediction platform built on an ensemble ML model trained on the Cleveland Heart Disease Dataset. It predicts cardiovascular risk from 13 clinical features, explains which factors drove each score, and (Phase 1+) connects patients with relevant, in-network doctors for consultations.
+CardioSense is a full-stack heart disease risk prediction platform built on an ensemble ML model trained on **all 4 UCI Heart Disease datasets** (Cleveland, Hungarian, Switzerland, VA — 920 combined patients). It predicts cardiovascular risk from 13 clinical features, explains which factors drove each score, benchmarks every prediction against multiple research populations, and connects patients with relevant, in-network doctors for consultations.
 
-### Current Capabilities (Phase 1)
+### Current Capabilities
 
 | Capability | Status |
 |---|---|
-| ML Risk Prediction (VotingClassifier — RF-300 + GBM-200 + LR, CV AUC 0.894) | ✅ |
+| ML Risk Prediction (VotingClassifier — RF-300 + GBM-200 + LR, CV AUC 0.886) | ✅ |
+| **Multi-dataset training (Cleveland + Hungarian + Switzerland + VA, 920 patients)** | ✅ **New** |
+| **Median imputation for missing values (`?`, `-9`) across all datasets** | ✅ **New** |
 | Per-prediction explainability (baseline-perturbation, top 6 factors) | ✅ |
+| **Population-percentile benchmark — every prediction ranked across all 4 cohorts** | ✅ **New** |
+| **Dataset comparison endpoint (`GET /api/analytics/datasets`)** | ✅ **New** |
+| **Population benchmark endpoint (`POST /api/analytics/population-benchmark`)** | ✅ **New** |
+| **Dashboard — Dataset Cohorts card (disease rates, record counts, feature stats)** | ✅ **New** |
+| **Result page — "How Do You Compare?" percentile bars across all 4 cohorts** | ✅ **New** |
 | Model performance endpoint (`GET /api/predictions/model-info`) | ✅ |
 | REST API (FastAPI) | ✅ |
 | React + TypeScript Web UI | ✅ |
-| **User Authentication (JWT — login / register)** | ✅ Phase 1 |
-| **Role-based access: Patient / Doctor** | ✅ Phase 1 |
-| **Server-side prediction history (SQLite → PostgreSQL)** | ✅ Phase 1 |
-| **Doctor profile management + NPI stub** | ✅ Phase 1 |
+| User Authentication (JWT — login / register) | ✅ Phase 1 |
+| Role-based access: Patient / Doctor | ✅ Phase 1 |
+| Server-side prediction history (SQLite → PostgreSQL) | ✅ Phase 1 |
+| Doctor profile management + NPI stub | ✅ Phase 1 |
 | Dashboard KPIs, charts, notifications | ✅ |
 | MLflow experiment tracking | ✅ |
 | Docker support | ✅ |
@@ -45,12 +52,15 @@ heart-disease/
 │   │   ├── database.py             # SQLAlchemy engine, SessionLocal, init_db()
 │   │   └── models.py               # User, Patient, Doctor, Prediction ORM models
 │   ├── routers/
-│   │   ├── predictions.py          # POST/GET/DELETE /api/predictions + /model-info
+│   │   ├── predictions.py          # POST/GET/DELETE /api/predictions + /model-info (includes population_percentiles)
+│   │   ├── analytics.py            # GET /api/analytics/datasets, POST /api/analytics/population-benchmark
 │   │   └── doctors.py              # GET/PUT /api/doctors/me, GET /api/doctors
 │   ├── data/
-│   │   └── prepare.py              # Cleveland data → processed.parquet
+│   │   ├── prepare.py              # Cleveland data → processed.parquet (legacy single-dataset)
+│   │   └── prepare_multi.py        # (deprecated — logic moved into data_loader.py)
 │   └── models/
-│       ├── train.py                # Ensemble training (RF-300 + GBM-200 + LR) + MLflow
+│       ├── data_loader.py          # Multi-dataset loader: loads all 4 UCI datasets, imputes, computes stats + quantile arrays
+│       ├── train.py                # Ensemble training (RF-300 + GBM-200 + LR) + MLflow — uses data_loader
 │       └── explain.py              # Baseline-perturbation explainability (top_factors)
 ├── alembic/
 │   ├── env.py                      # Alembic migration environment
@@ -125,11 +135,12 @@ DATABASE_URL=postgresql://user:password@localhost:5432/cardiosense
 ### 3. Prepare data and train model
 
 ```powershell
-python .\src\data\prepare.py    # writes data/processed.parquet
-python .\src\models\train.py    # saves models/ensemble_model.joblib, logs to mlruns/
+python .\src\models\train.py    # loads all 4 UCI datasets, imputes, saves models/ensemble_model.joblib + data/processed_multi.parquet
 ```
 
-The training script prints a full report including CV AUC ± std and per-feature importance bars.
+> `prepare.py` is no longer required. The training script loads and merges all datasets automatically with missing-value imputation.
+
+The training script prints a full report including CV AUC ± std, per-feature importance bars, and per-cohort disease rates.
 
 ### 4. Start the API
 
@@ -244,6 +255,24 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/predictions" -Method POST `
       "contribution": 0.147,
       "direction": "increases_risk"
     }
+  ],
+  "population_percentiles": [
+    {
+      "feature": "thal",
+      "label": "Thalassemia",
+      "value": 7,
+      "cohort": "combined",
+      "percentile": 88,
+      "interpretation": "Higher than 88% of the combined study population (n=920)"
+    },
+    {
+      "feature": "thal",
+      "label": "Thalassemia",
+      "value": 7,
+      "cohort": "cleveland",
+      "percentile": 91,
+      "interpretation": "Higher than 91% of the Cleveland cohort (n=303)"
+    }
   ]
 }
 ```
@@ -274,6 +303,72 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/predictions" -Method POST `
 | `low` | < 40% |
 | `moderate` | 40% – 69% |
 | `high` | ≥ 70% |
+
+---
+
+## Analytics API (Multi-Dataset)
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/analytics/datasets` | Summary stats for all 4 training cohorts | Public |
+| `POST` | `/api/analytics/population-benchmark` | Percentile ranks for supplied feature values | Public |
+
+### `GET /api/analytics/datasets`
+
+Returns record counts, disease rates, and per-feature mean/std/min/max for every training cohort (cleveland, hungarian, switzerland, va, combined).
+
+**Example response (abbreviated):**
+
+```json
+{
+  "datasets": [
+    {
+      "name": "cleveland",
+      "meta": { "total_records": 303, "disease_rate": 0.459, "feature_count": 13 },
+      "features": {
+        "age": { "mean": 54.44, "std": 9.04, "min": 29.0, "max": 77.0, "missing_rate": 0.0 },
+        "chol": { "mean": 246.69, "std": 51.78, "min": 126.0, "max": 564.0, "missing_rate": 0.0 }
+      }
+    }
+  ],
+  "note": "Combined dataset used for model training: 920 records from 4 UCI research cohorts."
+}
+```
+
+### `POST /api/analytics/population-benchmark`
+
+Returns per-feature percentile ranks and plain-English interpretations across all cohorts.
+
+**Request body:**
+
+```json
+{
+  "features": {
+    "age": 63,
+    "chol": 233,
+    "thalach": 150,
+    "oldpeak": 2.3
+  }
+}
+```
+
+**Example response (abbreviated):**
+
+```json
+{
+  "benchmarks": [
+    {
+      "feature": "age",
+      "label": "Age",
+      "value": 63,
+      "cohorts": [
+        { "cohort": "combined", "percentile": 72, "interpretation": "Higher than 72% of the combined study population (n=920)" },
+        { "cohort": "cleveland", "percentile": 75, "interpretation": "Higher than 75% of the Cleveland cohort (n=303)" }
+      ]
+    }
+  ]
+}
+```
 
 ---
 
@@ -313,9 +408,9 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
 |---|---|---|
 | **Login** | `/login` | JWT login, link to register |
 | **Register** | `/register` | Patient or Doctor account creation |
-| **Dashboard** | `/` | KPI cards, risk distribution pie chart, risk trend area chart, model performance card with AUC badge + feature importance bar chart |
+| **Dashboard** | `/` | KPI cards, risk distribution pie chart, risk trend area chart, model performance card with AUC badge + feature importance bar chart, **Dataset Cohorts card** (4 research cohorts with record counts, disease rates, and feature averages) |
 | **Predict** | `/predict` | Sectioned form (Personal / Symptoms / Vitals), validation |
-| **Result** | `/result` | Animated SVG risk gauge, color-coded verdict, patient summary, **"Why This Score?"** animated contribution bars per feature |
+| **Result** | `/result` | Animated SVG risk gauge, color-coded verdict, patient summary, **"Why This Score?"** animated contribution bars per feature, **"How Do You Compare?"** population benchmark section with per-cohort percentile bars for each top-impact feature |
 | **History** | `/history` | Server-side history when logged in, localStorage fallback for anonymous |
 | **Doctor Profile** | `/doctor/profile` | Doctor-only: NPI, specialty, fee, insurance, accepting patients toggle |
 
@@ -379,12 +474,14 @@ mlflow ui --backend-store-uri ./mlruns
 
 ## Notes
 
-- Preprocessing drops rows with missing values. An sklearn Pipeline with imputation can be added as a next step.
-- The ensemble model (`ensemble_model.joblib`) stores the trained model, feature importances, population statistics, and CV metrics as a single dict — enabling explainability without a separate feature store.
+- **Multi-dataset training:** The model is now trained on 920 patients from four UCI research cohorts (Cleveland 303, Hungarian 294, Switzerland 123, VA 200). This triples the training set and dramatically stabilizes CV performance (std dropped from ±0.042 to ±0.006).
+- **Missing value imputation:** Cleveland/Switzerland/VA datasets use `?` for missing values; Hungarian uses `-9`/`-9.0`. All are detected and replaced with cohort-pool medians via `src/models/data_loader.py`. Physiologically-impossible zeros (e.g., `chol=0`, `trestbps=0`) are also imputed.
+- **Population percentiles:** Every prediction response includes `population_percentiles` — the patient's value for each top-impact feature ranked against 5 scopes (combined, cleveland, hungarian, switzerland, va). Computed via pre-built 101-point quantile arrays stored in the model joblib (O(log N) lookup, no raw data stored at runtime).
+- **Dataset disease rates vary dramatically:** Switzerland 93.5 %, VA 74.5 %, Cleveland 45.9 %, Hungarian 36.1 %. The benchmark "How Do You Compare?" section on the Result page always labels which cohort each bar represents so percentiles are interpretable in context.
+- The ensemble model (`ensemble_model.joblib`) stores the trained model, feature importances, population statistics, quantile arrays, and CV metrics as a single dict — enabling explainability and benchmarking without a separate feature store.
 - Per-prediction explanations use baseline perturbation: each feature's contribution = P(risk | feature=patient_value, rest=mean) − P(risk | all=mean). This is model-agnostic and requires no additional libraries.
 - The ML model is for **educational/research purposes only** and is not a medical diagnostic device.
 - JWT access tokens expire in 30 minutes; refresh tokens in 7 days (configurable via `.env`).
-- All predictions are linked to the authenticated user. Anonymous predictions (no token) are processed but not persisted.
 
 ---
 
