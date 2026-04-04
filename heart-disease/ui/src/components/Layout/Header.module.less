@@ -2,102 +2,313 @@
 
 .header {
   height: @header-height;
-  background: @bg-card;
-  border-bottom: 1px solid @border-color;
+  background: linear-gradient(90deg, #a4fcf8 0%, #7ae8e3 100%);
+  border-bottom: 1px solid rgba(26, 58, 58, 0.15);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 @space-8;
+  padding: 0 @space-6;
   position: sticky;
   top: 0;
   z-index: 50;
+  gap: @space-4;
+
+  @media (max-width: @breakpoint-sm) {
+    padding: 0 @space-3;
+    gap: @space-2;
+  }
 }
+
+// ── Left ──────────────────────────────────────────────────────────────────────
 
 .left {
   display: flex;
   align-items: center;
-  gap: @space-4;
+  gap: @space-3;
+  min-width: 0;
+  flex: 1;
+}
+
+.menuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: @radius-lg;
+  background: transparent;
+  color: #1a3a3a;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: rgba(26, 58, 58, 0.1);
+    color: #1a3a3a;
+  }
+
+  @media (max-width: @breakpoint-md) {
+    display: flex;
+  }
 }
 
 .title {
   font-size: @font-size-xl;
   font-weight: 600;
-  color: @text-primary;
+  color: #1a3a3a;
   letter-spacing: -0.025em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: @breakpoint-sm) {
+    font-size: @font-size-base;
+  }
 }
+
+// ── Right ─────────────────────────────────────────────────────────────────────
 
 .right {
   display: flex;
   align-items: center;
-  gap: @space-3;
+  gap: @space-2;
+  flex-shrink: 0;
+  flex: 1;
+  justify-content: flex-end;
 }
 
-.userInfo {
+// ── Shared popover wrapper ─────────────────────────────────────────────────────
+
+.popoverWrap {
+  position: relative;
+}
+
+// ── Center search (large screens only) ───────────────────────────────────────
+
+.center {
+  // Hidden on screens ≤ 1280px — zero width, no layout impact
+  display: none;
+  flex: 2;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  max-width: 480px;
+  margin: 0 @space-4;
+
+  @media (min-width: 1281px) {
+    display: flex;
+  }
+}
+
+.searchWrap {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: center;
+  width: 100%;
+  height: 38px;
+  background: @bg-secondary;
+  border: 1px solid @border-color;
+  border-radius: @radius-full;
+  padding: 0 @space-3;
+  gap: @space-2;
+  transition: border-color @transition-fast, box-shadow @transition-fast;
+
+  &:focus-within,
+  &.searchWrapOpen {
+    border-color: #a4fcf8;
+    box-shadow: 0 0 0 3px rgba(164, 252, 248, 0.2);
+    background: @bg-card;
+  }
 }
 
-.userName {
+.searchIcon {
+  color: @text-tertiary;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: @font-size-sm;
+  color: @text-primary;
+  outline: none;
+
+  &::placeholder {
+    color: @text-tertiary;
+  }
+}
+
+.searchClear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: @radius-full;
+  background: @border-color;
+  color: @text-tertiary;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: @text-tertiary;
+    color: @text-inverse;
+  }
+}
+
+.searchDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  box-shadow: @shadow-xl;
+  z-index: 200;
+  overflow: hidden;
+  animation: popIn 0.12s ease;
+}
+
+.searchResultItem {
+  display: flex;
+  align-items: center;
+  gap: @space-3;
+  padding: @space-3 @space-4;
+  cursor: pointer;
+  transition: background @transition-fast;
+  border-bottom: 1px solid @border-light;
+
+  &:hover {
+    background: @bg-secondary;
+  }
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.searchRiskBadge {
+  font-size: @font-size-xs;
+  font-weight: 700;
+  padding: 2px @space-2;
+  border-radius: @radius-full;
+  flex-shrink: 0;
+}
+
+.searchRiskPct {
   font-size: @font-size-sm;
   font-weight: 600;
   color: @text-primary;
-  line-height: 1;
+  flex: 1;
 }
 
-.userRole {
+.searchDate {
   font-size: @font-size-xs;
   color: @text-tertiary;
-  text-transform: capitalize;
-  line-height: 1;
+  flex-shrink: 0;
 }
 
-.notifWrapper {
-  position: relative;
+.searchEmpty {
+  padding: @space-4 @space-5;
+  font-size: @font-size-sm;
+  color: @text-tertiary;
+  text-align: center;
 }
+
+.searchFooter {
+  padding: @space-3 @space-4;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: #2D7A7A;
+  text-align: center;
+  cursor: pointer;
+  background: @bg-secondary;
+  transition: background @transition-fast;
+
+  &:hover {
+    background: @border-color;
+  }
+}
+
+// ── Icon button (bell) ────────────────────────────────────────────────────────
 
 .iconBtn {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
+  width: 38px;
+  height: 38px;
+  border: 1px solid transparent;
   border-radius: @radius-lg;
   background: transparent;
-  color: @text-secondary;
+  color: #1a3a3a;
   cursor: pointer;
   transition: all @transition-fast;
 
   &:hover {
-    background: @bg-secondary;
-    color: @text-primary;
+    background: rgba(26, 58, 58, 0.1);
+    color: #1a3a3a;
+    border-color: rgba(26, 58, 58, 0.2);
   }
+}
+
+.iconBtnActive {
+  background: rgba(26, 58, 58, 0.15);
+  color: #1a3a3a;
+  border-color: rgba(26, 58, 58, 0.25);
 }
 
 .badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  top: 5px;
+  right: 5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
   border-radius: @radius-full;
   background: @danger;
   color: @text-inverse;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  pointer-events: none;
+}
+
+// ── Avatar button ─────────────────────────────────────────────────────────────
+
+.avatarBtn {
+  display: flex;
+  align-items: center;
+  gap: @space-1;
+  padding: @space-1;
+  border: 1px solid transparent;
+  border-radius: @radius-lg;
+  background: transparent;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: rgba(26, 58, 58, 0.1);
+    border-color: rgba(26, 58, 58, 0.2);
+  }
+}
+
+.avatarBtnActive {
+  background: rgba(26, 58, 58, 0.1);
+  border-color: rgba(26, 58, 58, 0.2);
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: @radius-full;
   background: linear-gradient(135deg, @primary, @secondary);
   display: flex;
@@ -105,5 +316,362 @@
   justify-content: center;
   color: @text-inverse;
   font-size: @font-size-xs;
+  font-weight: 700;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: @radius-full;
+}
+
+.chevron {
+  color: @text-tertiary;
+  transition: transform @transition-fast;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+// ── Notifications Dropdown ────────────────────────────────────────────────────
+
+.notifDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 360px;
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  box-shadow: @shadow-xl;
+  z-index: 200;
+  overflow: hidden;
+  animation: popIn 0.15s ease;
+
+  @media (max-width: @breakpoint-sm) {
+    width: calc(100vw - @space-8);
+    right: -@space-4;
+  }
+}
+
+.notifHeader {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-4 @space-4 @space-4 @space-5;
+  border-bottom: 1px solid @border-color;
+}
+
+.notifTitle {
+  font-size: @font-size-sm;
   font-weight: 600;
+  color: @text-primary;
+  flex: 1;
+}
+
+.notifCount {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @danger;
+  background: @danger-50;
+  padding: 2px @space-2;
+  border-radius: @radius-full;
+}
+
+.notifActions {
+  display: flex;
+  gap: @space-1;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: @radius-md;
+    background: transparent;
+    color: @text-tertiary;
+    cursor: pointer;
+    transition: all @transition-fast;
+
+    &:hover {
+      background: @bg-secondary;
+      color: @text-primary;
+    }
+  }
+}
+
+.notifList {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notifEmpty {
+  padding: @space-10 @space-6;
+  text-align: center;
+  color: @text-tertiary;
+
+  p {
+    margin-top: @space-2;
+    font-size: @font-size-sm;
+  }
+}
+
+.notifItem {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  padding: @space-4 @space-5;
+  cursor: pointer;
+  transition: background @transition-fast;
+  border-bottom: 1px solid @border-light;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: @bg-secondary;
+  }
+}
+
+.notifRead {
+  opacity: 0.55;
+}
+
+.notifDot {
+  width: 8px;
+  height: 8px;
+  border-radius: @radius-full;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.notifContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.notifItemTitle {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.notifItemMsg {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  margin: @space-1 0 0;
+  line-height: 1.4;
+}
+
+.notifTime {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-top: @space-1;
+  display: block;
+}
+
+// ── User Dropdown ─────────────────────────────────────────────────────────────
+
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  box-shadow: @shadow-xl;
+  z-index: 200;
+  padding: @space-4;
+  display: flex;
+  flex-direction: column;
+  gap: @space-3;
+  animation: popIn 0.15s ease;
+
+  @media (max-width: @breakpoint-sm) {
+    width: calc(100vw - @space-6);
+    right: -@space-2;
+  }
+}
+
+.profileBlock {
+  display: flex;
+  align-items: center;
+  gap: @space-3;
+}
+
+.profileAvatarWrap {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: @radius-full;
+
+  &:hover .profileAvatarOverlay {
+    opacity: 1;
+  }
+}
+
+.profileAvatar {
+  width: 42px;
+  height: 42px;
+  border-radius: @radius-full;
+  background: linear-gradient(135deg, @primary, @secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @text-inverse;
+  font-size: @font-size-base;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.profileAvatarOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: @radius-full;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity @transition-fast;
+}
+
+.profileInfo {
+  min-width: 0;
+}
+
+.profileName {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileEmail {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  margin: 2px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rolePill {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-1;
+  padding: 3px @space-2;
+  border-radius: @radius-full;
+  background: @primary-50;
+  color: @primary;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  width: fit-content;
+  text-transform: capitalize;
+}
+
+.menuDivider {
+  height: 1px;
+  background: @border-light;
+  margin: 0 -@space-1;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  width: 100%;
+  padding: @space-2 @space-3;
+  border: none;
+  border-radius: @radius-md;
+  background: transparent;
+  color: @text-secondary;
+  font-size: @font-size-sm;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all @transition-fast;
+  text-align: left;
+
+  &:hover {
+    background: @bg-secondary;
+    color: @text-primary;
+  }
+}
+
+.menuItemDanger {
+  .menuItem();
+  color: @danger;
+
+  &:hover {
+    background: @danger-50;
+    color: @danger;
+  }
+}
+
+// ── Notifications section (inside user dropdown) ───────────────────────────────
+
+.notifSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 -@space-1;
+}
+
+.notifSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-2 @space-3 @space-2;
+  border-bottom: 1px solid @border-light;
+}
+
+.notifListInline {
+  max-height: 220px;
+  overflow-y: auto;
+
+  .notifEmpty {
+    padding: @space-5 @space-4;
+    text-align: center;
+    color: @text-tertiary;
+
+    p {
+      margin-top: @space-1;
+      font-size: @font-size-xs;
+    }
+  }
+
+  .notifItem {
+    padding: @space-3 @space-3;
+    border-bottom: 1px solid @border-light;
+
+    &:last-child { border-bottom: none; }
+  }
+}
+
+// ── Animation ─────────────────────────────────────────────────────────────────
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

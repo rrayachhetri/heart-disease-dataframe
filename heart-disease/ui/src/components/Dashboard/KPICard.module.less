@@ -5,11 +5,23 @@
   border: 1px solid @border-color;
   border-radius: @radius-xl;
   padding: @space-6;
-  transition: box-shadow @transition-base, transform @transition-base;
+  transition: box-shadow @transition-base, transform @transition-base, border-color @transition-base;
 
   &:hover {
     box-shadow: @shadow-lg;
-    transform: translateY(-2px);
+  }
+}
+
+.clickable {
+  cursor: pointer;
+
+  &:hover {
+    border-color: #CBD5E1;
+
+    .linkRow {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 }
 
@@ -71,4 +83,18 @@
 
 .trendLabel {
   color: @text-tertiary;
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: @space-1;
+  margin-top: @space-4;
+  padding-top: @space-4;
+  border-top: 1px solid @border-light;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity @transition-fast, transform @transition-fast;
 }
