@@ -2,11 +2,12 @@
 JWT creation/verification and password hashing utilities.
 """
 import os
+import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
 
+import bcrypt as _bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,17 +17,25 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def _prehash(plain: str) -> bytes:
+    """SHA-256 pre-hash so bcrypt always receives exactly 64 ASCII bytes.
+
+    bcrypt >= 4.x raises ValueError for passwords longer than 72 bytes.
+    Pre-hashing with SHA-256 produces a fixed-length 64-char hex digest that
+    is always within bcrypt's limit, regardless of the original password length.
+    """
+    return hashlib.sha256(plain.encode("utf-8")).hexdigest().encode("ascii")
 
 
 # ── Password helpers ──────────────────────────────────────────────────────────
 
 def hash_password(plain: str) -> str:
-    return pwd_context.hash(plain)
+    return _bcrypt.hashpw(_prehash(plain), _bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return _bcrypt.checkpw(_prehash(plain), hashed.encode("utf-8"))
 
 
 # ── JWT helpers ───────────────────────────────────────────────────────────────
