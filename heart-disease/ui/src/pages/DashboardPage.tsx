@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import {
   HeartPulse,
@@ -41,6 +41,25 @@ export default function DashboardPage() {
   const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
   const [selectedCohort, setSelectedCohort] = useState<string | null>(null);
   const [selectedFeature, setSelectedFeature] = useState('age');
+
+  // Ref for Feature Explorer auto-scroll
+  const featureExplorerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to Feature Explorer when a cohort is selected
+  useEffect(() => {
+    if (selectedCohort && featureExplorerRef.current) {
+      // Small delay to allow animation to start
+      const scrollTimer = setTimeout(() => {
+        featureExplorerRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100); // 100ms delay for animation to begin
+
+      return () => clearTimeout(scrollTimer);
+    }
+  }, [selectedCohort]);
 
   useEffect(() => {
     fetchModelInfo()
@@ -462,6 +481,7 @@ export default function DashboardPage() {
 
               return (
                 <motion.div
+                  ref={featureExplorerRef}
                   key="detail"
                   className={styles.cohortDetail}
                   initial={{ opacity: 0, height: 0 }}

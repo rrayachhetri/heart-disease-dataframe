@@ -1,21 +1,21 @@
 @import '../../styles/variables.less';
 
 // ── Sidebar color tokens ───────────────────────────────────────────────────────
-// bg: #a4fcf8 (light aqua)  text: #1a3a3a (dark slate)
+// bg: #F8FAFC (body bg)  accent/active: teal  text: dark slate
 
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  width: 215px;
-  background: linear-gradient(180deg, #a4fcf8 0%, #7ae8e3 100%);
+  width: 190px; // Increased to ensure "CardioSense" never gets cut off on any screen size
+  background: @bg-primary; // Solid background to match body
   display: flex;
   flex-direction: column;
   z-index: 100;
   transition: width 250ms ease, transform 250ms ease;
   overflow: hidden;
-  box-shadow: 2px 0 16px rgba(122, 232, 227, 0.35);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
 }
 
 // ── Collapsed state ────────────────────────────────────────────────────────────
@@ -35,9 +35,16 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0 1.5rem;
+  padding: 0 1.25rem; // Increased padding to prevent text cutoff
   height: 64px;
   flex-shrink: 0;
+  background: @header-gradient !important; // Use consistent gradient variable with high specificity
+  border-bottom: 1px solid rgba(26, 58, 58, 0.15);
+  position: relative; // Added for proper close button positioning
+
+  @media (max-width: 768px) {
+    padding: 0 1rem 0 1.25rem; // Reduce right padding on mobile to make room for close button
+  }
 }
 
 .logoIcon {
@@ -52,6 +59,10 @@
   white-space: nowrap;
   letter-spacing: -0.025em;
   flex: 1;
+
+  @media (max-width: 768px) {
+    padding-right: 2.5rem; // Add padding to prevent overlap with close button
+  }
 }
 
 // ── Nav ────────────────────────────────────────────────────────────────────────
@@ -69,10 +80,10 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem; // Adequate padding for comfortable spacing
   border-radius: 0.75rem;
   border: 1px solid transparent;
-  color: rgba(26, 58, 58, 0.7);
+  color: @text-secondary;
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
@@ -81,23 +92,21 @@
   cursor: pointer;
 
   &:hover {
-    background: rgba(248, 250, 252, 0.45);
-    color: #1a3a3a;
-    border-color: rgba(248, 250, 252, 0.75);
-    box-shadow: 0 0 0 2px rgba(248, 250, 252, 0.25);
+    background: rgba(45, 106, 106, 0.07);
+    color: #2D6A6A;
+    border-color: rgba(45, 106, 106, 0.12);
   }
 }
 
 .active {
-  background: rgba(248, 250, 252, 0.65);
-  color: #1a3a3a;
+  background: rgba(45, 106, 106, 0.1);
+  color: #2D6A6A;
   font-weight: 600;
-  border-color: rgba(248, 250, 252, 0.9);
-  box-shadow: 0 0 0 2px rgba(248, 250, 252, 0.35);
+  border-color: rgba(45, 106, 106, 0.2);
 
   &:hover {
-    background: rgba(248, 250, 252, 0.65);
-    border-color: rgba(248, 250, 252, 0.9);
+    background: rgba(45, 106, 106, 0.13);
+    border-color: rgba(45, 106, 106, 0.25);
   }
 }
 
@@ -108,17 +117,28 @@
   align-items: center;
   justify-content: center;
   margin: 1rem 0.75rem;
-  padding: 0.5rem;
-  border: 1px solid rgba(26, 58, 58, 0.2);
-  border-radius: 0.5rem;
-  background: transparent;
-  color: rgba(26, 58, 58, 0.7);
+  padding: 0.625rem; // Slightly larger for better touch target
+  border: 1px solid @border-color;
+  border-radius: 0.75rem; // More rounded for modern look
+  background: rgba(255, 255, 255, 0.6); // Semi-transparent background
+  color: @text-secondary;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 200ms ease; // Smoother transition
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); // Subtle shadow
 
   &:hover {
-    background: rgba(26, 58, 58, 0.1);
-    color: #1a3a3a;
+    background: rgba(45, 106, 106, 0.08);
+    color: #2D6A6A;
+    border-color: rgba(45, 106, 106, 0.25);
+    transform: scale(1.05); // Subtle scale effect
+    box-shadow: 0 2px 6px rgba(45, 106, 106, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
@@ -129,15 +149,19 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-left: auto;
-  width: 30px;
-  height: 30px;
+  position: absolute; // Absolutely positioned to avoid overlap
+  top: 50%;
+  right: 1rem; // Fixed position from right edge
+  transform: translateY(-50%); // Center vertically
+  width: 32px; // Slightly larger for better touch target
+  height: 32px;
   border: none;
   border-radius: 0.5rem;
   background: rgba(26, 58, 58, 0.12);
   color: #1a3a3a;
   cursor: pointer;
   transition: all 150ms ease;
+  z-index: 10;
 
   &:hover {
     background: rgba(26, 58, 58, 0.2);
@@ -152,17 +176,34 @@
 
 // ── Mobile ─────────────────────────────────────────────────────────────────────
 
-@media (max-width: 768px) {
+@media (max-width: @breakpoint-md) {
   .sidebar {
-    width: @sidebar-collapsed-width !important;
-    box-shadow: 0 20px 25px -5px rgba(122, 232, 227, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transform: translateX(-100%);
+    width: min(260px, calc(100vw - 40px)); // Increased width for better spacing - more room for title and close button
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: 100; // Below banner (101) but above overlay (99)
+    transition: transform 300ms cubic-bezier(0.25, 0.8, 0.25, 1), width 250ms ease; // Smooth slide animation
+  }
+
+  .mobileOpen {
+    transform: translateX(0) !important;
   }
 
   .mobileClose {
-    display: none;
+    display: flex;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
   }
 
   .toggle {
-    display: none;
+    display: none; // Hide desktop toggle on mobile - use header menu button instead
+  }
+
+  .collapsed {
+    width: min(260px, calc(100vw - 40px)); // Same increased width whether "collapsed" or not on mobile
+    transform: translateX(-100%);
   }
 }

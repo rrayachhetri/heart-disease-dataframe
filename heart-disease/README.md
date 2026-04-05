@@ -135,7 +135,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/cardiosense
 ### 3. Prepare data and train model
 
 ```powershell
-python .\src\models\train.py    # loads all 4 UCI datasets, imputes, saves models/ensemble_model.joblib + data/processed_multi.parquet
+python -m src.models.train    # loads all 4 UCI datasets, imputes, saves models/ensemble_model.joblib + data/processed_multi.parquet
 ```
 
 > `prepare.py` is no longer required. The training script loads and merges all datasets automatically with missing-value imputation.

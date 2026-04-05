@@ -1,9 +1,613 @@
 @import '../styles/variables.less';
 
 .page {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: @space-5;
 }
+
+// ── Hero Banner ───────────────────────────────────────────────────────────────
+.heroBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @space-6;
+  padding: @space-6 @space-8;
+  border-radius: @radius-2xl;
+  border: 2px solid;
+  flex-wrap: wrap;
+}
+
+.heroBannerHigh {
+  background: linear-gradient(135deg, #FEF2F2 0%, #FFF5F5 100%);
+  border-color: rgba(220, 38, 38, 0.22);
+}
+
+.heroBannerLow {
+  background: linear-gradient(135deg, #ECFDF5 0%, #F0FFF8 100%);
+  border-color: rgba(5, 150, 105, 0.22);
+}
+
+.heroLeft {
+  display: flex;
+  align-items: center;
+  gap: @space-4;
+  flex: 1;
+  min-width: 0;
+}
+
+.heroIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: @radius-xl;
+  flex-shrink: 0;
+
+  .heroBannerHigh & { background: rgba(220, 38, 38, 0.1); color: #DC2626; }
+  .heroBannerLow & { background: rgba(5, 150, 105, 0.1); color: #059669; }
+}
+
+.heroTitle {
+  font-size: @font-size-2xl;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0;
+  .heroBannerHigh & { color: #DC2626; }
+  .heroBannerLow & { color: #059669; }
+}
+
+.heroDesc {
+  margin: @space-1 0 0;
+  font-size: @font-size-sm;
+  line-height: 1.55;
+  color: @text-secondary;
+}
+
+.heroScore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.heroScoreNum {
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.heroScoreLabel {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-tertiary;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+// ── Top Grid ──────────────────────────────────────────────────────────────────
+.topGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-5;
+
+  @media (max-width: @breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gaugeCard,
+.patientCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+  transition: box-shadow @transition-base;
+}
+
+.cardTitle {
+  font-size: @font-size-base;
+  font-weight: 700;
+  color: @text-primary;
+  margin: 0 0 @space-4;
+}
+
+.gaugeWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: @space-2;
+}
+
+.scoreBar { margin-top: @space-4; }
+
+.scoreLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-bottom: @space-2;
+}
+
+.scoreBg {
+  height: 8px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.scoreFill {
+  height: 100%;
+  border-radius: @radius-full;
+}
+
+.riskBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-1;
+  padding: @space-1 @space-3;
+  border-radius: @radius-full;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  margin-top: @space-3;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-2;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  padding: @space-2 @space-3;
+  border-radius: @radius-md;
+  background: @bg-primary;
+  cursor: default;
+  transition: background @transition-fast, transform @transition-fast;
+}
+
+.detailLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+}
+
+.detailValue {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-primary;
+  text-align: right;
+}
+
+// ── Collapsible Section ───────────────────────────────────────────────────────
+.section {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  overflow: hidden;
+  transition: box-shadow @transition-base;
+
+  &:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  padding: @space-5 @space-6;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: @space-4;
+  transition: background @transition-fast;
+
+  &:hover {
+    background: @bg-secondary;
+  }
+}
+
+.sectionHeaderLeft {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  flex: 1;
+  min-width: 0;
+}
+
+.sectionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: @radius-md;
+  background: @bg-secondary;
+  color: @text-secondary;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sectionTitle {
+  font-size: @font-size-base;
+  font-weight: 700;
+  color: @text-primary;
+  display: block;
+}
+
+.sectionSubtitle {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: @space-1 0 0;
+  line-height: 1.5;
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  color: @text-tertiary;
+  flex-shrink: 0;
+  margin-top: @space-1;
+}
+
+.sectionBody {
+  padding: 0 @space-6 @space-6;
+}
+
+// ── Factor list ───────────────────────────────────────────────────────────────
+.factorList {
+  display: flex;
+  flex-direction: column;
+  gap: @space-1;
+}
+
+.factorRow {
+  border-radius: @radius-lg;
+  transition: background @transition-fast;
+  cursor: pointer;
+  padding: 10px 8px;
+  user-select: none;
+}
+
+.factorRowExpanded {
+  background: @bg-secondary;
+  border: 1px solid @border-color;
+}
+
+.factorMainRow {
+  display: grid;
+  grid-template-columns: 180px 1fr 76px;
+  align-items: center;
+  gap: @space-3;
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+
+    .factorBarWrap {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.factorInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.factorLabel {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factorValues {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+}
+
+.factorMeanText {
+  color: @text-tertiary;
+}
+
+.factorBarWrap {
+  height: 10px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.factorBar {
+  height: 100%;
+  border-radius: @radius-full;
+  min-width: 4px;
+}
+
+.factorBarRisk {
+  background: linear-gradient(90deg, #F59E0B, #DC2626);
+}
+
+.factorBarSafe {
+  background: linear-gradient(90deg, #34D399, #059669);
+}
+
+.factorBadge {
+  font-size: @font-size-xs;
+  font-weight: 700;
+  padding: 3px @space-2;
+  border-radius: @radius-full;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.badgeRisk {
+  background: @danger-50;
+  color: @danger;
+}
+
+.badgeSafe {
+  background: @success-50;
+  color: @success;
+}
+
+.factorDetail {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-2;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  line-height: 1.6;
+  margin-top: @space-2;
+  padding: @space-2 @space-3;
+  background: @bg-primary;
+  border-radius: @radius-md;
+  border-left: 3px solid #7ae8e3;
+}
+
+.factorHint {
+  display: flex;
+  align-items: center;
+  gap: @space-1;
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-top: @space-4;
+  font-style: italic;
+}
+
+// ── Cohort legend ─────────────────────────────────────────────────────────────
+.cohortLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: @space-2 @space-3;
+  margin-bottom: @space-5;
+}
+
+.cohortDot {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  background: @bg-secondary;
+  border: 1px solid @border-color;
+  border-radius: @radius-full;
+  padding: @space-1 @space-3;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    border-color: #7ae8e3;
+    background: rgba(164, 252, 248, 0.15);
+    color: #1a3a3a;
+  }
+
+  i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: @radius-full;
+    flex-shrink: 0;
+    transition: background @transition-fast;
+  }
+}
+
+.cohortDotHidden {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+// ── Benchmark ─────────────────────────────────────────────────────────────────
+.benchmarkList {
+  display: flex;
+  flex-direction: column;
+  gap: @space-5;
+}
+
+.benchmarkRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: @space-4;
+  align-items: start;
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.benchmarkLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.benchmarkFeature {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+}
+
+.benchmarkValue {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+}
+
+.benchmarkBars {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+}
+
+.benchmarkBarRow {
+  display: grid;
+  grid-template-columns: 74px 1fr 36px;
+  align-items: center;
+  gap: @space-2;
+  overflow: hidden;
+}
+
+.benchmarkCohort {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  text-align: right;
+}
+
+.benchmarkBarBg {
+  height: 6px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.benchmarkBarFill {
+  height: 100%;
+  border-radius: @radius-full;
+  opacity: 0.85;
+}
+
+.benchmarkPct {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-secondary;
+  text-align: right;
+}
+
+.benchmarkNote {
+  margin-top: @space-4;
+  padding: @space-3 @space-4;
+  background: @bg-secondary;
+  border-radius: @radius-lg;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  line-height: 1.5;
+  border-left: 3px solid #7ae8e3;
+}
+
+// ── Disclaimer ────────────────────────────────────────────────────────────────
+.disclaimer {
+  background: @warning-50;
+  border: 1px solid fadeout(@warning, 70%);
+  border-radius: @radius-lg;
+  padding: @space-4 @space-5;
+
+  p {
+    font-size: @font-size-sm;
+    color: @warning;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+.actions {
+  display: flex;
+  gap: @space-3;
+  flex-wrap: wrap;
+  padding-bottom: @space-4;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-3 @space-6;
+  background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+  color: #1a3a3a;
+  border: none;
+  border-radius: @radius-lg;
+  font-size: @font-size-sm;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(164, 252, 248, 0.35);
+  transition: all @transition-fast;
+}
+
+.ghostBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-3 @space-5;
+  background: transparent;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  color: @text-secondary;
+  font-size: @font-size-sm;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: @bg-secondary;
+    color: @text-primary;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty {
+  text-align: center;
+  padding: @space-12;
+  color: @text-tertiary;
+
+  h3 {
+    font-size: @font-size-lg;
+    color: @text-primary;
+    margin-top: @space-4;
+  }
+
+  p {
+    color: @text-secondary;
+    margin-top: @space-2;
+  }
+
+  button {
+    margin-top: @space-6;
+    padding: @space-3 @space-6;
+    background: @primary;
+    color: @text-inverse;
+    border: none;
+    border-radius: @radius-lg;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: @primary-dark;
+    }
+  }
+}
+
 
 .resultCard {
   border-radius: @radius-xl;

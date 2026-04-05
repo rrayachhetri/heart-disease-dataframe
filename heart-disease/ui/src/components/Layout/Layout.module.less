@@ -56,4 +56,13 @@
     padding: @space-4;
     margin-top: 36px; // keep banner clearance on mobile too
   }
+
+  // On mobile, sidebar becomes an overlay so main should be full width
+  .layout {
+    position: relative;
+  }
+  
+  .main {
+    margin-left: 0 !important; // Full width on mobile since sidebar is overlay
+  }
 }

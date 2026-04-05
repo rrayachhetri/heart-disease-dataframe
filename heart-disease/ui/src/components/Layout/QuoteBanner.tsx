@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
-import type { PredictionRecord } from '../../types';
+import type { PredictionRecord, ModelInfo } from '../../types';
+import { fetchModelInfo } from '../../api/predictApi';
 import styles from './QuoteBanner.module.less';
 
 // ── Static fallback tips ──────────────────────────────────────────────────────
@@ -17,6 +18,43 @@ const TIPS = [
   '💚 Omega-3 fatty acids in fish and nuts are your heart\'s best friends.',
   '❤️ Regular check-ups catch problems early. Prevention beats cure every time.',
 ];
+
+// ── Build messages derived from live ML model output ─────────────────────────
+function buildMLMessages(info: ModelInfo): string[] {
+  const { model_type, metrics, feature_importances } = info;
+  const auc = (metrics.cv_auc_mean * 100).toFixed(1);
+  const aucStd = (metrics.cv_auc_std * 100).toFixed(1);
+  const acc = (metrics.val_accuracy * 100).toFixed(1);
+  const sens = (metrics.val_sensitivity * 100).toFixed(1);
+  const spec = (metrics.val_specificity * 100).toFixed(1);
+  const f1 = (metrics.val_f1 * 100).toFixed(1);
+  const prec = (metrics.val_precision * 100).toFixed(1);
+
+  const msgs: string[] = [
+    `🤖 Model: ${model_type} — CV AUC ${auc}% ± ${aucStd}% · Trained on 920 patients across 4 UCI cohorts`,
+    `📊 Validation — Accuracy ${acc}% · Sensitivity ${sens}% · Specificity ${spec}%`,
+    `🎯 F1 ${f1}% · Precision ${prec}% · Recall ${sens}% — balanced cardiac risk classification`,
+  ];
+
+  if (feature_importances.length > 0) {
+    const top = feature_importances[0];
+    msgs.push(
+      `🏆 Strongest predictor: "${top.label}" — ${(top.importance * 100).toFixed(1)}% influence on risk scores`,
+    );
+  }
+
+  if (feature_importances.length >= 3) {
+    const top3 = feature_importances.slice(0, 3).map(f => f.label).join(', ');
+    msgs.push(`🔬 Top clinical drivers: ${top3} — most influential features in every prediction`);
+  }
+
+  if (feature_importances.length >= 5) {
+    const top5 = feature_importances.slice(0, 5).map(f => f.label).join(' · ');
+    msgs.push(`💡 Model focuses on: ${top5}`);
+  }
+
+  return msgs;
+}
 
 // ── Risk level badge ──────────────────────────────────────────────────────────
 function riskIcon(level: string) {
@@ -110,16 +148,22 @@ interface Props {
 export default function QuoteBanner({ collapsed = false }: Props) {
   const user = useSelector((s: RootState) => s.auth.user);
   const history = useSelector((s: RootState) => s.prediction.history);
+  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
+
+  useEffect(() => {
+    fetchModelInfo()
+      .then(setModelInfo)
+      .catch(() => { /* silent — fallback to tips only */ });
+  }, []);
 
   const track = useMemo(() => {
     const personal = buildPersonalised(user?.first_name ?? null, history);
-    // Interleave personal messages with general tips, personal first
-    const combined = personal.length > 0
-      ? [...personal, ...TIPS]
-      : TIPS;
+    const ml = modelInfo ? buildMLMessages(modelInfo) : [];
+    // Order: personalised → ML model stats → general tips
+    const combined = [...personal, ...ml, ...TIPS];
     // Duplicate for seamless infinite scroll
     return [...combined, ...combined];
-  }, [user, history]);
+  }, [user, history, modelInfo]);
 
   return (
     <div className={`${styles.banner}${collapsed ? ` ${styles.collapsed}` : ''}`} aria-hidden="true">

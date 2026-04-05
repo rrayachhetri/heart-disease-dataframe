@@ -2,7 +2,7 @@
 
 .header {
   height: @header-height;
-  background: linear-gradient(90deg, #a4fcf8 0%, #7ae8e3 100%);
+  background: @header-gradient !important; // Use consistent gradient variable with high specificity
   border-bottom: 1px solid rgba(26, 58, 58, 0.15);
   display: flex;
   align-items: center;
@@ -16,6 +16,11 @@
   @media (max-width: @breakpoint-sm) {
     padding: 0 @space-3;
     gap: @space-2;
+    background: @header-gradient !important; // Ensure consistency on small screens too
+  }
+
+  @media (min-width: @breakpoint-lg) {
+    background: @header-gradient !important; // Explicitly set for large screens
   }
 }
 
