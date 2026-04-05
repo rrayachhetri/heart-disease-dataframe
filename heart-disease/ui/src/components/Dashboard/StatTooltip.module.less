@@ -1,0 +1,148 @@
+@import '../../styles/variables.less';
+
+.wrapper {
+  position: relative;
+  display: block; // Changed from inline-flex to block to wrap stat cards properly
+  cursor: help;
+  
+  // Add hover effect to indicate the card is interactive
+  &:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon {
+  color: @text-tertiary;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  
+  .wrapper:hover & {
+    opacity: 1;
+    color: @primary;
+  }
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  pointer-events: none;
+  animation: tooltipFadeIn 0.15s ease;
+}
+
+.tooltipContent {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  padding: @space-2 @space-3;
+  font-size: @font-size-xs;
+  line-height: 1.4;
+  color: @text-secondary;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15);
+  max-width: 200px;
+  white-space: normal;
+  backdrop-filter: blur(8px);
+  
+  strong {
+    color: @text-primary;
+    font-weight: 600;
+  }
+
+  // Arrow pointing down
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: @bg-card;
+  }
+  
+  // Arrow border
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 7px solid transparent;
+    border-top-color: @border-color;
+    margin-top: 1px;
+  }
+
+  // Mobile responsive adjustments
+  @media (max-width: @breakpoint-sm) {
+    max-width: 180px;
+    font-size: @font-size-xs;
+    padding: @space-1 @space-2;
+  }
+
+  @media (max-width: 380px) {
+    max-width: 150px;
+    font-size: 11px;
+    padding: 6px @space-2;
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// Position adjustments for edge cases
+.tooltip[data-align-right="true"] {
+  left: auto;
+  right: 0;
+  transform: none;
+  
+  .tooltipContent {
+    &::after {
+      left: auto;
+      right: 16px;
+      transform: none;
+    }
+    
+    &::before {
+      left: auto;
+      right: 15px;
+      transform: none;
+    }
+  }
+}
+
+.tooltip[data-align-left="true"] {
+  left: 0;
+  right: auto;
+  transform: none;
+  
+  .tooltipContent {
+    &::after {
+      left: 16px;
+      right: auto;
+      transform: none;
+    }
+    
+    &::before {
+      left: 15px;
+      right: auto;
+      transform: none;
+    }
+  }
+}
