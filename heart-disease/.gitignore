@@ -23,7 +23,7 @@ build/
 data/
 data/*.csv
 data/processed.parquet
-models/
+/models/
 mlruns/
 *.joblib
 

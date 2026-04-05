@@ -8,6 +8,7 @@ from src.db.database import init_db
 from src.auth.routes import router as auth_router
 from src.routers.predictions import router as predictions_router
 from src.routers.doctors import router as doctors_router
+from src.routers.analytics import router as analytics_router
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
 ENSEMBLE_PATH = MODELS_DIR / "ensemble_model.joblib"
@@ -45,11 +46,29 @@ app.add_middleware(
 _model_data: dict | None = None
 
 
+def _patch_lr_compatibility(model):
+    """Patch LogisticRegression estimators missing 'multi_class' (sklearn < 1.6 pickles)."""
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    estimators = []
+    if hasattr(model, "estimators_"):
+        estimators = model.estimators_
+    elif hasattr(model, "named_steps"):
+        estimators = [model.named_steps.get("clf") or list(model.named_steps.values())[-1]]
+    for est in estimators:
+        target = est
+        if isinstance(est, Pipeline):
+            target = est.steps[-1][1]
+        if isinstance(target, LogisticRegression) and not hasattr(target, "multi_class"):
+            target.multi_class = "auto"
+
+
 def load_model() -> dict:
     """Load ensemble model (preferred) or legacy RF model (fallback)."""
     if ENSEMBLE_PATH.exists():
         data = joblib.load(ENSEMBLE_PATH)
         if isinstance(data, dict) and "model" in data:
+            _patch_lr_compatibility(data["model"])
             return data
 
     if LEGACY_RF_PATH.exists():
@@ -82,6 +101,7 @@ def startup_event():
 app.include_router(auth_router, prefix="/api")
 app.include_router(predictions_router, prefix="/api")
 app.include_router(doctors_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
 
 
 # ── Legacy / utility endpoints ────────────────────────────────────────────────

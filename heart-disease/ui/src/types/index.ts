@@ -26,6 +26,16 @@ export interface TopFactor {
   direction: 'increases_risk' | 'decreases_risk';
 }
 
+/** Population-percentile rank for a single feature across all dataset cohorts. */
+export interface PopulationPercentile {
+  feature: string;
+  label: string;
+  value: number;
+  /** e.g. { combined: 63, cleveland: 51, hungarian: 53, switzerland: 70, va: 58 } */
+  percentiles: Record<string, number>;
+  interpretation: string;
+}
+
 export interface PredictionResult {
   id?: string;       // server-assigned ID (present when authenticated)
   probability: number;
@@ -33,6 +43,8 @@ export interface PredictionResult {
   risk_level: string;
   /** Top contributing features (returned by ensemble model). */
   top_factors?: TopFactor[];
+  /** Population-percentile benchmarks across all 4 dataset cohorts. */
+  population_percentiles?: PopulationPercentile[];
 }
 
 export interface PredictionRecord {

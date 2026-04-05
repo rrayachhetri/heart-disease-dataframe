@@ -1,4 +1,4 @@
-import { Bell, LogOut, User, ChevronDown, Shield, CheckCheck, Trash2, Camera, X as XIcon, Search } from 'lucide-react';
+import { Bell, LogOut, User, ChevronDown, Shield, CheckCheck, Trash2, Camera, X as XIcon, Search, Menu } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
@@ -16,7 +16,14 @@ const pageTitles: Record<string, string> = {
   '/doctor/profile': 'Doctor Profile',
 };
 
-export default function Header() {
+interface Props {
+  onMenuClick?: () => void;
+  userMenuOpen: boolean;
+  onUserMenuToggle: () => void;
+  onUserMenuClose: () => void;
+}
+
+export default function Header({ onMenuClick, userMenuOpen, onUserMenuToggle, onUserMenuClose }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -25,7 +32,7 @@ export default function Header() {
   const user = useSelector((s: RootState) => s.auth.user);
   const avatarUrl = useSelector((s: RootState) => s.auth.avatarUrl);
 
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  // Removed local showUserMenu state - now controlled by Layout
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -96,7 +103,7 @@ export default function Header() {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setShowUserMenu(false);
+        onUserMenuClose(); // Use controlled handler
       }
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setSearchOpen(false);
@@ -104,12 +111,20 @@ export default function Header() {
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, []);
+  }, [onUserMenuClose]);
 
   return (
     <header className={styles.header}>
       {/* Left */}
       <div className={styles.left}>
+        {/* Mobile menu button */}
+        <button
+          className={styles.menuBtn}
+          onClick={onMenuClick}
+          aria-label="Toggle menu"
+        >
+          <Menu size={20} />
+        </button>
         <h1 className={styles.title}>{pageTitles[location.pathname] || 'CardioSense'}</h1>
       </div>
 
@@ -185,10 +200,8 @@ export default function Header() {
             />
 
             <button
-              className={`${styles.avatarBtn} ${showUserMenu ? styles.avatarBtnActive : ''}`}
-              onClick={() => {
-                setShowUserMenu(!showUserMenu);
-              }}
+              className={`${styles.avatarBtn} ${userMenuOpen ? styles.avatarBtnActive : ''}`}
+              onClick={onUserMenuToggle}
               aria-label="User menu"
               style={{ position: 'relative' }}
             >
@@ -206,11 +219,11 @@ export default function Header() {
               )}
               <ChevronDown
                 size={13}
-                className={`${styles.chevron} ${showUserMenu ? styles.chevronOpen : ''}`}
+                className={`${styles.chevron} ${userMenuOpen ? styles.chevronOpen : ''}`}
               />
             </button>
 
-            {showUserMenu && (
+            {userMenuOpen && (
               <div className={styles.userDropdown}>
                 {/* Profile block with photo change */}
                 <div className={styles.profileBlock}>
@@ -265,7 +278,7 @@ export default function Header() {
                       className={styles.menuItem}
                       onClick={() => {
                         navigate('/doctor/profile');
-                        setShowUserMenu(false);
+                        onUserMenuClose();
                       }}
                     >
                       <User size={15} />

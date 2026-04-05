@@ -211,6 +211,13 @@
   justify-content: center;
   z-index: 500;
   padding: @space-4;
+
+  @media (max-width: @breakpoint-md) {
+    padding: @space-2;
+    align-items: flex-start; // Allow modal to start from top on mobile
+    overflow-y: auto; // Enable scrolling on overlay for mobile
+    -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+  }
 }
 
 .modal {
@@ -219,30 +226,95 @@
   border-radius: @radius-2xl;
   box-shadow: @shadow-xl;
   width: 100%;
-  max-width: 560px;
-  max-height: 88vh;
+  max-width: 680px;
+  max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: @space-5;
+  gap: 0;
   padding: @space-6;
+
+  @media (max-width: @breakpoint-md) {
+    max-width: none;
+    width: calc(100vw - @space-4); // Full width minus small margins
+    max-height: none; // Remove height restriction on mobile
+    min-height: auto;
+    margin: @space-4 0; // Vertical margin for top/bottom spacing
+    border-radius: @radius-xl;
+    padding: @space-4;
+    overflow-y: visible; // Let content flow naturally on mobile
+  }
+
+  @media (max-width: @breakpoint-sm) {
+    width: calc(100vw - @space-3);
+    margin: @space-2 0;
+    padding: @space-3;
+    border-radius: @radius-lg;
+  }
 }
 
+// ── Header ────────────────────────────────────────────────────────────────────
 .modalHeader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: @space-4;
   background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
-  margin: -@space-6 -@space-6 0;
+  margin: -@space-6 -@space-6 @space-5;
   padding: @space-5 @space-6;
   border-radius: @radius-2xl @radius-2xl 0 0;
+
+  @media (max-width: @breakpoint-md) {
+    margin: -@space-4 -@space-4 @space-4;
+    padding: @space-4;
+    gap: @space-3;
+    border-radius: @radius-xl @radius-xl 0 0;
+    flex-wrap: wrap; // Allow wrapping on very small screens
+  }
+
+  @media (max-width: @breakpoint-sm) {
+    margin: -@space-3 -@space-3 @space-3;
+    padding: @space-3;
+    border-radius: @radius-lg @radius-lg 0 0;
+  }
 }
 
 .modalHeaderLeft {
   display: flex;
   align-items: center;
   gap: @space-3;
+  flex: 1;
+  min-width: 0;
+}
+
+.modalHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  flex-shrink: 0;
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  padding: 5px @space-3;
+  border: 1px solid rgba(26, 58, 58, 0.25);
+  border-radius: @radius-full;
+  background: rgba(255,255,255,0.35);
+  color: #1a3a3a;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    background: rgba(255,255,255,0.6);
+  }
+
+  @media (max-width: @breakpoint-md) {
+    padding: 8px @space-3; // Larger touch target
+    font-size: @font-size-sm;
+  }
 }
 
 .modalIconWrap {
@@ -266,7 +338,7 @@
 .modalDate {
   font-size: @font-size-sm;
   color: rgba(26, 58, 58, 0.7);
-  margin-top: @space-1;
+  margin-top: 2px;
 }
 
 .modalClose {
@@ -274,8 +346,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: 1px solid rgba(26, 58, 58, 0.25);
   border-radius: @radius-lg;
   background: transparent;
@@ -285,28 +357,43 @@
 
   &:hover {
     background: rgba(26, 58, 58, 0.1);
-    color: #1a3a3a;
+  }
+
+  @media (max-width: @breakpoint-md) {
+    width: 40px; // Larger touch target
+    height: 40px;
   }
 }
 
-.modalResult {
+// ── Risk Hero ─────────────────────────────────────────────────────────────────
+.modalHero {
   display: flex;
   align-items: center;
   gap: @space-5;
-  padding: @space-5;
+  padding: @space-4 @space-5;
   border-radius: @radius-xl;
   border: 1px solid;
+  margin-bottom: @space-4;
+
+  @media (max-width: @breakpoint-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
-.modalResultLeft {
+.modalHeroGauge {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.modalResultRight {
+.modalHeroInfo {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: @space-2;
+  min-width: 0;
 }
 
 .modalRiskBadge {
@@ -320,15 +407,6 @@
   width: fit-content;
 }
 
-.modalRiskLabel {
-  font-size: @font-size-xs;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: @text-tertiary;
-  margin: 0;
-}
-
 .modalRiskDesc {
   font-size: @font-size-sm;
   color: @text-secondary;
@@ -336,21 +414,109 @@
   line-height: 1.6;
 }
 
-.modalSection {
+.modalScoreBar {
+  margin-top: @space-1;
+}
+
+.modalScoreLabels {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-bottom: @space-1;
+}
+
+.modalScoreBg {
+  height: 6px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.modalScoreFill {
+  height: 100%;
+  border-radius: @radius-full;
+}
+
+// ── Collapsible section ───────────────────────────────────────────────────────
+.modalSection {
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  overflow: hidden;
+  margin-bottom: @space-3;
+  background: @bg-card;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: @breakpoint-md) {
+    border-radius: @radius-lg;
+    margin-bottom: @space-2;
+  }
+}
+
+.modalSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: @space-4 @space-5;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
   gap: @space-3;
+  transition: background @transition-fast;
+
+  &:hover {
+    background: @bg-secondary;
+  }
+
+  @media (max-width: @breakpoint-md) {
+    padding: @space-3 @space-4;
+    gap: @space-2;
+  }
+}
+
+.modalSectionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  flex: 1;
 }
 
 .modalSectionTitle {
-  font-size: @font-size-xs;
-  font-weight: 600;
-  color: @text-secondary;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
+  font-size: @font-size-sm;
+  font-weight: 700;
+  color: @text-primary;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
+.modalChevron {
+  display: flex;
+  align-items: center;
+  color: @text-tertiary;
+  flex-shrink: 0;
+}
+
+.modalSectionBody {
+  padding: 0 @space-5 @space-5;
+
+  @media (max-width: @breakpoint-md) {
+    padding: 0 @space-4 @space-4;
+  }
+}
+
+.modalSectionHint {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  font-style: italic;
+  margin: 0 0 @space-3;
+}
+
+// ── Clinical Parameters grid ──────────────────────────────────────────────────
 .modalGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -365,10 +531,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: @space-3 @space-4;
+  padding: @space-2 @space-3;
   background: @bg-secondary;
-  border-radius: @radius-lg;
+  border-radius: @radius-md;
   gap: @space-3;
+  cursor: default;
+  transition: transform @transition-fast;
 }
 
 .modalParamLabel {
@@ -379,9 +547,262 @@
 }
 
 .modalParamValue {
-  font-size: @font-size-sm;
+  font-size: @font-size-xs;
   color: @text-primary;
   font-weight: 600;
+  text-align: right;
+}
+
+// ── Factor list ───────────────────────────────────────────────────────────────
+.factorList {
+  display: flex;
+  flex-direction: column;
+  gap: @space-1;
+}
+
+.factorRow {
+  border-radius: @radius-lg;
+  cursor: pointer;
+  padding: 8px 6px;
+  user-select: none;
+  transition: background @transition-fast;
+
+  @media (max-width: @breakpoint-md) {
+    padding: 12px 8px; // Larger touch targets on mobile
+    border-radius: @radius-md;
+  }
+}
+
+.factorRowExpanded {
+  background: @bg-secondary;
+  border: 1px solid @border-color;
+}
+
+.factorMainRow {
+  display: grid;
+  grid-template-columns: 155px 1fr 68px;
+  align-items: center;
+  gap: @space-2;
+
+  @media (max-width: @breakpoint-md) {
+    grid-template-columns: 1fr 80px;
+    grid-template-rows: auto auto auto;
+    gap: @space-2;
+
+    .factorInfo { 
+      grid-column: 1 / -1; 
+      margin-bottom: @space-1;
+    }
+    .factorBarWrap { 
+      grid-column: 1; 
+    }
+    .factorBadge { 
+      grid-column: 2; 
+      justify-self: end;
+    }
+  }
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+
+    .factorInfo, .factorBarWrap, .factorBadge { 
+      grid-column: 1; 
+      justify-self: stretch;
+    }
+    .factorBadge {
+      justify-self: start;
+      margin-top: @space-1;
+    }
+  }
+}
+
+.factorInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.factorLabel {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factorValues {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+}
+
+.factorMeanText {
+  color: @text-tertiary;
+}
+
+.factorBarWrap {
+  height: 8px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.factorBar {
+  height: 100%;
+  border-radius: @radius-full;
+  min-width: 4px;
+}
+
+.factorBarRisk {
+  background: linear-gradient(90deg, #F59E0B, #DC2626);
+}
+
+.factorBarSafe {
+  background: linear-gradient(90deg, #34D399, #059669);
+}
+
+.factorBadge {
+  font-size: @font-size-xs;
+  font-weight: 700;
+  padding: 2px @space-2;
+  border-radius: @radius-full;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.badgeRisk { background: @danger-50; color: @danger; }
+.badgeSafe { background: @success-50; color: @success; }
+
+.factorDetail {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-2;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  line-height: 1.6;
+  margin-top: @space-2;
+  padding: @space-2 @space-3;
+  background: @bg-primary;
+  border-radius: @radius-md;
+  border-left: 3px solid #7ae8e3;
+}
+
+// ── Cohort legend ─────────────────────────────────────────────────────────────
+.cohortLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: @space-2 @space-2;
+  margin-bottom: @space-4;
+}
+
+.cohortDot {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  background: @bg-secondary;
+  border: 1px solid @border-color;
+  border-radius: @radius-full;
+  padding: 3px @space-3;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    border-color: #7ae8e3;
+    background: rgba(164, 252, 248, 0.18);
+    color: #1a3a3a;
+  }
+
+  i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: @radius-full;
+    flex-shrink: 0;
+    transition: background @transition-fast;
+  }
+}
+
+.cohortDotHidden {
+  opacity: 0.38;
+  text-decoration: line-through;
+}
+
+// ── Benchmark ─────────────────────────────────────────────────────────────────
+.benchmarkList {
+  display: flex;
+  flex-direction: column;
+  gap: @space-4;
+}
+
+.benchmarkRow {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: @space-3;
+  align-items: start;
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.benchmarkLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.benchmarkFeature {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+}
+
+.benchmarkValue {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+}
+
+.benchmarkBars {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+}
+
+.benchmarkBarRow {
+  display: grid;
+  grid-template-columns: 74px 1fr 36px;
+  align-items: center;
+  gap: @space-2;
+  overflow: hidden;
+}
+
+.benchmarkCohort {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  text-align: right;
+}
+
+.benchmarkBarBg {
+  height: 6px;
+  background: @bg-secondary;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.benchmarkBarFill {
+  height: 100%;
+  border-radius: @radius-full;
+  opacity: 0.85;
+}
+
+.benchmarkPct {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-secondary;
   text-align: right;
 }
 

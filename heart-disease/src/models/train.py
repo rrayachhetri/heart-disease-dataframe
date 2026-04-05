@@ -2,8 +2,9 @@
 Ensemble training for CardioSense.
 
 Model: Soft VotingClassifier (RF-300 + GradientBoosting-200 + Logistic Regression).
+Trained on the combined Cleveland + Hungarian + Switzerland + VA datasets (~920 records).
 Saves a model_data dict with: model, feature importances, population statistics,
-and cross-validated performance metrics.
+per-dataset stats, quantile arrays for percentile benchmarking, and CV metrics.
 """
 
 import mlflow
@@ -28,18 +29,18 @@ from sklearn.metrics import (
 )
 import joblib
 
-DATA = Path(__file__).resolve().parents[2] / "data" / "processed.parquet"
+from src.models.data_loader import (
+    load_all_datasets,
+    compute_dataset_stats,
+    compute_quantile_arrays,
+    FEATURE_COLS,
+    TARGET_COL,
+)
+
+DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 MODEL_DIR = Path(__file__).resolve().parents[2] / "models"
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
-
-FEATURE_COLS = [
-    "age", "sex", "cp", "trestbps", "chol", "fbs",
-    "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal",
-]
-
-
-def load_data(path: Path) -> pd.DataFrame:
-    return pd.read_parquet(path)
 
 
 def build_ensemble() -> VotingClassifier:
@@ -70,22 +71,30 @@ def build_ensemble() -> VotingClassifier:
 
 
 def train():
-    df = load_data(DATA)
-    df = df.dropna(subset=FEATURE_COLS + ["target"])
+    # Load and merge all 4 datasets with imputation applied
+    df = load_all_datasets()
     X = df[FEATURE_COLS]
-    y = df["target"]
+    y = df[TARGET_COL]
+
+    record_counts = df.groupby("dataset").size().to_dict()
+    print(f"\n  Dataset record counts: {record_counts}")
+    print(f"  Total records: {len(df)} | Disease rate: {y.mean():.2%}")
 
     # Population statistics used at inference time for per-feature explanations
     feature_stats = {
         col: {
-            "mean": float(X[col].mean()),
-            "std": float(max(X[col].std(), 1e-6)),
+            "mean":   float(X[col].mean()),
+            "std":    float(max(X[col].std(), 1e-6)),
             "median": float(X[col].median()),
-            "q1": float(X[col].quantile(0.25)),
-            "q3": float(X[col].quantile(0.75)),
+            "q1":     float(X[col].quantile(0.25)),
+            "q3":     float(X[col].quantile(0.75)),
         }
         for col in FEATURE_COLS
     }
+
+    # Per-dataset stats and quantile arrays for population benchmarking
+    dataset_stats = compute_dataset_stats(df)
+    quantile_arrays = compute_quantile_arrays(df)
 
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=0.2, stratify=y, random_state=42
@@ -105,14 +114,15 @@ def train():
         preds = (probs >= 0.5).astype(int)
 
         metrics = {
-            "val_auc": float(roc_auc_score(y_val, probs)),
-            "val_accuracy": float(accuracy_score(y_val, preds)),
+            "val_auc":         float(roc_auc_score(y_val, probs)),
+            "val_accuracy":    float(accuracy_score(y_val, preds)),
             "val_sensitivity": float(recall_score(y_val, preds, zero_division=0)),
             "val_specificity": float(recall_score(y_val, preds, pos_label=0, zero_division=0)),
-            "val_precision": float(precision_score(y_val, preds, zero_division=0)),
-            "val_f1": float(f1_score(y_val, preds, zero_division=0)),
-            "cv_auc_mean": float(cv_aucs.mean()),
-            "cv_auc_std": float(cv_aucs.std()),
+            "val_precision":   float(precision_score(y_val, preds, zero_division=0)),
+            "val_f1":          float(f1_score(y_val, preds, zero_division=0)),
+            "cv_auc_mean":     float(cv_aucs.mean()),
+            "cv_auc_std":      float(cv_aucs.std()),
+            "train_records":   float(len(df)),
         }
 
         for k, v in metrics.items():
@@ -123,32 +133,41 @@ def train():
         importances = dict(zip(FEATURE_COLS, rf_estimator.feature_importances_.tolist()))
 
         model_data = {
-            "model": clf,
-            "feature_cols": FEATURE_COLS,
+            "model":           clf,
+            "feature_cols":    FEATURE_COLS,
             "feature_importances": importances,
-            "feature_stats": feature_stats,
-            "metrics": metrics,
-            "model_type": "VotingClassifier (RF-300 + GBM-200 + LR)",
+            "feature_stats":   feature_stats,
+            "dataset_stats":   dataset_stats,
+            "quantile_arrays": quantile_arrays,
+            "metrics":         metrics,
+            "model_type":      "VotingClassifier (RF-300 + GBM-200 + LR) [Multi-Dataset]",
         }
+
+        # Persist updated training data for reproducibility
+        multi_parquet = DATA_DIR / "processed_multi.parquet"
+        df.to_parquet(multi_parquet, index=False)
 
         model_path = MODEL_DIR / "ensemble_model.joblib"
         joblib.dump(model_data, model_path)
         mlflow.log_artifact(str(model_path))
 
-        print(f"\n{'=' * 55}")
-        print("  Ensemble Model Training Complete")
-        print(f"{'─' * 55}")
-        print(f"  CV AUC : {cv_aucs.mean():.4f} ± {cv_aucs.std():.4f}")
-        print(f"{'─' * 55}")
+        print(f"\n{'=' * 60}")
+        print("  Ensemble Model Training Complete  [Multi-Dataset]")
+        print(f"{'-' * 60}")
+        print(f"  CV AUC : {cv_aucs.mean():.4f} +/- {cv_aucs.std():.4f}")
+        print(f"{'-' * 60}")
         for k, v in metrics.items():
             print(f"  {k:<28}: {v:.4f}")
-        print(f"{'─' * 55}")
+        print(f"{'-' * 60}")
         print("  Feature Importances (RF component):")
         for feat, imp in sorted(importances.items(), key=lambda x: -x[1]):
-            bar = "█" * int(imp * 40)
+            bar = "#" * int(imp * 40)
             print(f"  {feat:<15} {bar} {imp:.4f}")
-        print(f"{'=' * 55}")
-        print(f"  Saved → {model_path}")
+        print(f"{'-' * 60}")
+        print(f"  Dataset breakdown: {record_counts}")
+        print(f"{'=' * 60}")
+        print(f"  Saved -> {model_path}")
+        print(f"  Saved -> {multi_parquet}")
 
 
 if __name__ == "__main__":

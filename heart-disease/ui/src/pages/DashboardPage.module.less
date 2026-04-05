@@ -406,3 +406,237 @@
     padding-left: calc(18px + @space-3); // icon width + gap = aligns with "Model Performance" text
   }
 }
+
+// ── Dataset Cohorts Card ────────────────────────────────────────────────────
+.datasetCard {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  padding: @space-6;
+  margin-top: @space-8;
+}
+
+.datasetCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  margin-bottom: @space-6;
+  color: #0d9488;
+
+  h3 {
+    font-size: @font-size-base;
+    font-weight: 700;
+    color: @text-primary;
+    margin: 0 0 2px;
+  }
+}
+
+.datasetSubtitle {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: 0;
+}
+
+.cohortGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: @space-4;
+}
+
+.cohortTile {
+  background: @bg-primary;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  padding: @space-4;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: border-color @transition-fast, box-shadow @transition-fast, background @transition-fast;
+
+  &:hover {
+    border-color: rgba(122, 232, 227, 0.5);
+    background: rgba(122, 232, 227, 0.04);
+  }
+}
+
+.cohortName {
+  font-size: @font-size-base;
+  font-weight: 700;
+  color: @text-primary;
+  margin-bottom: 2px;
+}
+
+.cohortRecords {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-bottom: @space-3;
+}
+
+.cohortRateRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: @space-2;
+}
+
+.cohortRateLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+}
+
+.cohortRateValue {
+  font-size: @font-size-sm;
+  font-weight: 700;
+  color: @text-primary;
+}
+
+.cohortBarBg {
+  height: 6px;
+  background: @border-color;
+  border-radius: @radius-full;
+  overflow: hidden;
+  margin-bottom: @space-3;
+}
+
+.cohortBarFill {
+  height: 100%;
+  border-radius: @radius-full;
+}
+
+.cohortAvgRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+}
+
+// ── Interactive cohort detail ──────────────────────────────────────────────
+.cohortTileSelected {
+  border-color: #7ae8e3 !important;
+  box-shadow: 0 0 0 2px rgba(122, 232, 227, 0.35);
+  background: rgba(122, 232, 227, 0.06) !important;
+}
+
+.cohortDetail {
+  overflow: hidden;
+  margin-top: @space-5;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  background: @bg-primary;
+}
+
+.cohortDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: @space-3 @space-4;
+  border-bottom: 1px solid @border-color;
+  background: @bg-secondary;
+}
+
+.cohortDetailTitle {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+}
+
+.cohortDetailClose {
+  background: none;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  color: @text-tertiary;
+  cursor: pointer;
+  padding: 0 @space-1;
+
+  &:hover { color: @text-primary; }
+}
+
+.featurePills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: @space-2;
+  padding: @space-4;
+  border-bottom: 1px solid @border-color;
+}
+
+.featurePill {
+  padding: 3px @space-3;
+  border-radius: @radius-full;
+  border: 1px solid @border-color;
+  background: @bg-card;
+  font-size: @font-size-xs;
+  font-weight: 500;
+  color: @text-secondary;
+  cursor: pointer;
+  transition: all @transition-fast;
+
+  &:hover {
+    border-color: #7ae8e3;
+    color: @text-primary;
+  }
+}
+
+.featurePillActive {
+  background: #7ae8e3 !important;
+  border-color: #7ae8e3 !important;
+  color: #1a3a3a !important;
+  font-weight: 700;
+}
+
+.cohortDetailBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-4;
+  padding: @space-4;
+
+  @media (max-width: @breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statsCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: @space-3;
+}
+
+.statCard {
+  background: @bg-secondary;
+  border-radius: @radius-lg;
+  padding: @space-3 @space-3;
+  text-align: center;
+}
+
+.statValue {
+  font-size: @font-size-base;
+  font-weight: 700;
+  color: @text-primary;
+}
+
+.statUnit {
+  font-size: @font-size-xs;
+  font-weight: 400;
+  color: @text-tertiary;
+}
+
+.statLabel {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin-top: 2px;
+}
+
+.compChart {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+}
+
+.compChartTitle {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
