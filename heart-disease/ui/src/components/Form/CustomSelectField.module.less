@@ -1,0 +1,148 @@
+@import '../../styles/variables.less';
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+  position: relative;
+}
+
+.label {
+  font-size: @font-size-sm;
+  font-weight: 500;
+  color: @text-primary;
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+}
+
+.hint {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  font-weight: 400;
+}
+
+.selectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  background: @bg-card;
+  transition: all @transition-fast;
+  overflow: visible;
+
+  &:focus-within {
+    border-color: @primary;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
+.selectButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: @space-3 @space-4;
+  border: none;
+  outline: none;
+  font-size: @font-size-base;
+  color: @text-primary;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.selectedText {
+  flex: 1;
+}
+
+.chevron {
+  transition: transform @transition-fast;
+  color: @text-tertiary;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: @space-1;
+}
+
+.optionsList {
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-xl;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: @space-2;
+  max-height: 200px;
+  overflow-y: auto;
+  
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: @radius-lg;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: @border-color;
+    border-radius: @radius-lg;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: @text-tertiary;
+  }
+}
+
+.option {
+  padding: @space-3;
+  border-radius: @radius-lg;
+  cursor: pointer;
+  transition: all @transition-fast;
+  color: @text-primary;
+  font-weight: 500;
+  margin-bottom: @space-1;
+  background: transparent;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+    color: #ffffff;
+    font-weight: 600;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(164, 252, 248, 0.3);
+  }
+
+  &:focus {
+    outline: 2px solid rgba(164, 252, 248, 0.6);
+    outline-offset: -2px;
+    background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+    color: #ffffff;
+  }
+}
+
+.optionSelected {
+  background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(164, 252, 248, 0.2);
+
+  &:hover {
+    background: linear-gradient(135deg, #7ae8e3, #6dd5d0);
+    color: #ffffff;
+  }
+}

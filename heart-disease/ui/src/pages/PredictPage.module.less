@@ -3,6 +3,11 @@
 .page {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 @space-6;
+
+  @media (max-width: @breakpoint-sm) {
+    padding: 0 @space-3;
+  }
 }
 
 .header {

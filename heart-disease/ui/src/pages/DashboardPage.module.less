@@ -4,6 +4,11 @@
   max-width: 1200px;
   margin: 0 auto;
   overflow-x: hidden;
+  padding: 0 @space-6;
+
+  @media (max-width: @breakpoint-sm) {
+    padding: 0 @space-3;
+  }
 }
 
 .welcome {
@@ -515,6 +520,117 @@
   border-color: #7ae8e3 !important;
   box-shadow: 0 0 0 2px rgba(122, 232, 227, 0.35);
   background: rgba(122, 232, 227, 0.06) !important;
+}
+
+// ── Inline cohort details ──────────────────────────────────────────────
+.cohortDetailsInline {
+  overflow: hidden;
+  margin-top: @space-4;
+  border: 1px solid rgba(122, 232, 227, 0.3);
+  border-radius: @radius-lg;
+  background: linear-gradient(135deg, rgba(122, 232, 227, 0.02), rgba(122, 232, 227, 0.06));
+}
+
+.cohortDetailsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: @space-3 @space-4;
+  border-bottom: 1px solid rgba(122, 232, 227, 0.2);
+  background: rgba(122, 232, 227, 0.08);
+}
+
+.cohortDetailsTitle {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  margin: 0;
+}
+
+.cohortDetailsClose {
+  background: none;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  color: @text-tertiary;
+  cursor: pointer;
+  padding: 0 @space-1;
+
+  &:hover { color: @text-primary; }
+}
+
+.cohortDetailsContent {
+  padding: @space-4;
+}
+
+.cohortOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: @space-3;
+  margin-bottom: @space-4;
+}
+
+.cohortOverviewItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: @space-3;
+  background: @bg-primary;
+  border: 1px solid @border-color;
+  border-radius: @radius-md;
+}
+
+.cohortOverviewValue {
+  font-size: @font-size-lg;
+  font-weight: 700;
+  color: @text-primary;
+  margin-bottom: 2px;
+}
+
+.cohortRiskValue {
+  color: #f97316; // Orange color for disease rate
+}
+
+.cohortOverviewLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  text-align: center;
+}
+
+.cohortFeaturesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: @space-3;
+}
+
+.cohortFeatureItem {
+  padding: @space-3;
+  background: @bg-primary;
+  border: 1px solid @border-color;
+  border-radius: @radius-md;
+}
+
+.cohortFeatureLabel {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  margin-bottom: @space-2;
+}
+
+.cohortFeatureStats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cohortStatRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cohortStatLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
 }
 
 .cohortDetail {

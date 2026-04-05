@@ -29,6 +29,8 @@ import type { RootState } from '../store';
 import type { ModelInfo } from '../types';
 import { fetchModelInfo, fetchDatasetComparison, type DatasetSummary } from '../api/predictApi';
 import KPICard from '../components/Dashboard/KPICard';
+import CohortTooltip from '../components/Dashboard/CohortTooltip';
+import StatTooltip from '../components/Dashboard/StatTooltip';
 import styles from './DashboardPage.module.less';
 
 export default function DashboardPage() {
@@ -41,6 +43,24 @@ export default function DashboardPage() {
   const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
   const [selectedCohort, setSelectedCohort] = useState<string | null>(null);
   const [selectedFeature, setSelectedFeature] = useState('age');
+  
+  // Tooltip state
+  const [tooltipData, setTooltipData] = useState<{
+    cohort: DatasetSummary | null;
+    visible: boolean;
+    position: { x: number; y: number };
+  }>({
+    cohort: null,
+    visible: false,
+    position: { x: 0, y: 0 }
+  });
+
+  // State to track which cohort's details should be shown inline
+  const [showCohortDetails, setShowCohortDetails] = useState<string | null>(null);
+
+  // Simple hover timeout management
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Ref for Feature Explorer auto-scroll
   const featureExplorerRef = useRef<HTMLDivElement>(null);
@@ -55,11 +75,23 @@ export default function DashboardPage() {
           block: 'start',
           inline: 'nearest'
         });
-      }, 100); // 100ms delay for animation to begin
+      }, 100);
 
       return () => clearTimeout(scrollTimer);
     }
   }, [selectedCohort]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     fetchModelInfo()
@@ -419,7 +451,46 @@ export default function DashboardPage() {
                 <button
                   key={ds.name}
                   className={`${styles.cohortTile} ${isSelected ? styles.cohortTileSelected : ''}`}
-                  onClick={() => setSelectedCohort(isSelected ? null : ds.name)}
+                  onClick={() => {
+                    setSelectedCohort(isSelected ? null : ds.name);
+                    // Toggle cohort details on click
+                    setShowCohortDetails(showCohortDetails === ds.name ? null : ds.name);
+                  }}
+                  onMouseEnter={(e) => {
+                    // Clear any existing timeouts
+                    if (hideTimeoutRef.current) {
+                      clearTimeout(hideTimeoutRef.current);
+                      hideTimeoutRef.current = null;
+                    }
+                    if (hoverTimeoutRef.current) {
+                      clearTimeout(hoverTimeoutRef.current);
+                    }
+                    
+                    // Show tooltip with small delay to prevent flickering
+                    hoverTimeoutRef.current = setTimeout(() => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setTooltipData({
+                        cohort: ds,
+                        visible: true,
+                        position: {
+                          x: rect.right + 10,
+                          y: rect.top - 20
+                        }
+                      });
+                    }, 150); // Consistent 150ms delay
+                  }}
+                  onMouseLeave={() => {
+                    // Clear hover timeout if mouse leaves before showing
+                    if (hoverTimeoutRef.current) {
+                      clearTimeout(hoverTimeoutRef.current);
+                      hoverTimeoutRef.current = null;
+                    }
+                    
+                    // Add delay before hiding to allow mouse movement to tooltip
+                    hideTimeoutRef.current = setTimeout(() => {
+                      setTooltipData(prev => ({ ...prev, visible: false }));
+                    }, 200); // 200ms to move to tooltip
+                  }}
                   type="button"
                 >
                   <div className={styles.cohortName}>{ds.name.charAt(0).toUpperCase() + ds.name.slice(1)}</div>
@@ -452,6 +523,126 @@ export default function DashboardPage() {
               );
             })}
           </div>
+
+          {/* ── Inline Cohort Details ───────────────────────────────────────── */}
+          <AnimatePresence>
+            {showCohortDetails && (() => {
+              const cohort = datasetSummaries.find((d) => d.name === showCohortDetails);
+              if (!cohort) return null;
+
+              const diseaseRate = Math.round(cohort.meta.disease_rate * 100);
+              
+              // Key features to show inline with full statistical data
+              const keyFeatures = [
+                { 
+                  label: 'Age', 
+                  unit: 'yrs',
+                  mean: cohort.features.age?.mean ?? 0,
+                  std: cohort.features.age?.std ?? 0,
+                  median: cohort.features.age?.median ?? 0,
+                  q1: cohort.features.age?.q1 ?? 0,
+                  q3: cohort.features.age?.q3 ?? 0,
+                },
+                { 
+                  label: 'Cholesterol', 
+                  unit: 'mg/dL',
+                  mean: cohort.features.chol?.mean ?? 0,
+                  std: cohort.features.chol?.std ?? 0,
+                  median: cohort.features.chol?.median ?? 0,
+                  q1: cohort.features.chol?.q1 ?? 0,
+                  q3: cohort.features.chol?.q3 ?? 0,
+                },
+                { 
+                  label: 'Resting BP', 
+                  unit: 'mmHg',
+                  mean: cohort.features.trestbps?.mean ?? 0,
+                  std: cohort.features.trestbps?.std ?? 0,
+                  median: cohort.features.trestbps?.median ?? 0,
+                  q1: cohort.features.trestbps?.q1 ?? 0,
+                  q3: cohort.features.trestbps?.q3 ?? 0,
+                },
+                { 
+                  label: 'Max Heart Rate', 
+                  unit: 'bpm',
+                  mean: cohort.features.thalach?.mean ?? 0,
+                  std: cohort.features.thalach?.std ?? 0,
+                  median: cohort.features.thalach?.median ?? 0,
+                  q1: cohort.features.thalach?.q1 ?? 0,
+                  q3: cohort.features.thalach?.q3 ?? 0,
+                }
+              ];
+
+              // Gender distribution (assuming sex: 1=male, 0=female)
+              const malePercent = cohort.features.sex ? Math.round(cohort.features.sex.mean * 100) : 0;
+              const femalePercent = 100 - malePercent;
+
+              return (
+                <motion.div
+                  key="cohort-details"
+                  className={styles.cohortDetailsInline}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className={styles.cohortDetailsHeader}>
+                    <h4 className={styles.cohortDetailsTitle}>
+                      {cohort.name.charAt(0).toUpperCase() + cohort.name.slice(1)} Cohort — Population Statistics
+                    </h4>
+                    <button 
+                      className={styles.cohortDetailsClose} 
+                      onClick={() => setShowCohortDetails(null)}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className={styles.cohortDetailsContent}>
+                    {/* Overview Stats */}
+                    <div className={styles.cohortOverviewGrid}>
+                      <div className={styles.cohortOverviewItem}>
+                        <span className={styles.cohortOverviewValue}>{cohort.meta.total_records}</span>
+                        <span className={styles.cohortOverviewLabel}>Patients</span>
+                      </div>
+                      <div className={styles.cohortOverviewItem}>
+                        <span className={`${styles.cohortOverviewValue} ${styles.cohortRiskValue}`}>{diseaseRate}%</span>
+                        <span className={styles.cohortOverviewLabel}>Disease Rate</span>
+                      </div>
+                      <div className={styles.cohortOverviewItem}>
+                        <span className={styles.cohortOverviewValue}>{malePercent}%</span>
+                        <span className={styles.cohortOverviewLabel}>Male</span>
+                      </div>
+                      <div className={styles.cohortOverviewItem}>
+                        <span className={styles.cohortOverviewValue}>{femalePercent}%</span>
+                        <span className={styles.cohortOverviewLabel}>Female</span>
+                      </div>
+                    </div>
+
+                    {/* Key Clinical Features */}
+                    <div className={styles.cohortFeaturesList}>
+                      {keyFeatures.map((feature, index) => (
+                        <div key={index} className={styles.cohortFeatureItem}>
+                          <div className={styles.cohortFeatureLabel}>{feature.label}</div>
+                          <div className={styles.cohortFeatureStats}>
+                            <div className={styles.cohortStatRow}>
+                              <span className={styles.cohortStatLabel}>
+                                Mean: {feature.mean.toFixed(1)} {feature.unit} (±{feature.std.toFixed(1)})
+                              </span>
+                            </div>
+                            <div className={styles.cohortStatRow}>
+                              <span className={styles.cohortStatLabel}>
+                                Median: {feature.median.toFixed(1)} {feature.unit} | IQR: {feature.q1.toFixed(0)}–{feature.q3.toFixed(0)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </AnimatePresence>
 
           {/* ── Cohort Detail Panel ───────────────────────────────────────── */}
           <AnimatePresence>
@@ -522,10 +713,10 @@ export default function DashboardPage() {
                           { label: 'Min', value: stats.min.toFixed(1), unit: '' },
                           { label: 'Max', value: stats.max.toFixed(1), unit: '' },
                         ].map(({ label, value, unit }) => (
-                          <div key={label} className={styles.statCard}>
+                          <StatTooltip key={label} term={label === 'Std Dev' ? 'StdDev' : label} className={styles.statCard}>
                             <div className={styles.statValue}>{value}{unit ? <span className={styles.statUnit}> {unit}</span> : null}</div>
                             <div className={styles.statLabel}>{label}</div>
-                          </div>
+                          </StatTooltip>
                         ))}
                       </div>
                     )}
@@ -560,6 +751,24 @@ export default function DashboardPage() {
           </AnimatePresence>
         </motion.div>
       )}
+
+      {/* Cohort Tooltip */}
+      <CohortTooltip
+        cohort={tooltipData.cohort}
+        visible={tooltipData.visible}
+        position={tooltipData.position}
+        onMouseEnter={() => {
+          // Cancel any pending hide timeout when mouse enters tooltip
+          if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+          }
+        }}
+        onMouseLeave={() => {
+          // Hide tooltip immediately when mouse leaves tooltip
+          setTooltipData(prev => ({ ...prev, visible: false }));
+        }}
+      />
     </div>
   );
 }

@@ -8,7 +8,7 @@ import type { AppDispatch, RootState } from '../store';
 import { submitPrediction } from '../store/slices/predictionSlice';
 import { useNotification } from '../hooks/useNotification';
 import FormField from '../components/Form/FormField';
-import SelectField from '../components/Form/SelectField';
+import CustomSelectField from '../components/Form/CustomSelectField';
 import type { PatientData } from '../types';
 import styles from './PredictPage.module.less';
 
@@ -170,7 +170,7 @@ export default function PredictPage() {
               onChange={(e) => set('age')(e.target.value)}
               error={errors.age}
             />
-            <SelectField
+            <CustomSelectField
               label="Sex"
               value={form.sex}
               onChange={set('sex')}
@@ -194,7 +194,7 @@ export default function PredictPage() {
             <h3>Symptoms &amp; Pain</h3>
           </div>
           <div className={styles.grid2}>
-            <SelectField
+            <CustomSelectField
               label="Chest Pain Type"
               value={form.cp}
               onChange={set('cp')}
@@ -205,7 +205,7 @@ export default function PredictPage() {
                 { label: 'Asymptomatic', value: 3 },
               ]}
             />
-            <SelectField
+            <CustomSelectField
               label="Exercise Induced Angina"
               value={form.exang}
               onChange={set('exang')}
@@ -226,7 +226,7 @@ export default function PredictPage() {
               onChange={(e) => set('oldpeak')(e.target.value)}
               error={errors.oldpeak}
             />
-            <SelectField
+            <CustomSelectField
               label="ST Slope"
               value={form.slope}
               onChange={set('slope')}
@@ -280,7 +280,7 @@ export default function PredictPage() {
             />
           </div>
           <div className={styles.grid3}>
-            <SelectField
+            <CustomSelectField
               label="Fasting Blood Sugar > 120"
               value={form.fbs}
               onChange={set('fbs')}
@@ -289,7 +289,7 @@ export default function PredictPage() {
                 { label: 'Yes', value: 1 },
               ]}
             />
-            <SelectField
+            <CustomSelectField
               label="Resting ECG"
               value={form.restecg}
               onChange={set('restecg')}
@@ -299,7 +299,7 @@ export default function PredictPage() {
                 { label: 'LV Hypertrophy', value: 2 },
               ]}
             />
-            <SelectField
+            <CustomSelectField
               label="# Major Vessels (ca)"
               value={form.ca}
               onChange={set('ca')}
@@ -312,7 +312,7 @@ export default function PredictPage() {
             />
           </div>
           <div className={styles.grid2}>
-            <SelectField
+            <CustomSelectField
               label="Thalassemia"
               value={form.thal}
               onChange={set('thal')}
