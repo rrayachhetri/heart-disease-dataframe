@@ -100,7 +100,28 @@ def train():
         X, y, test_size=0.2, stratify=y, random_state=42
     )
 
+    mlflow.set_experiment("cardiosense")
     with mlflow.start_run():
+        # ── Run name + tags ─────────────────────────────────────────
+        mlflow.set_tag("mlflow.runName", "RF300+GBM200+LR | multi-dataset")
+        mlflow.set_tag("model_type", "VotingClassifier")
+        mlflow.set_tag("datasets", "cleveland+hungarian+switzerland+va")
+
+        # ── Hyperparameters ──────────────────────────────────────────
+        mlflow.log_param("rf_n_estimators", 300)
+        mlflow.log_param("rf_max_depth", "None")
+        mlflow.log_param("rf_min_samples_leaf", 2)
+        mlflow.log_param("rf_class_weight", "balanced")
+        mlflow.log_param("gbc_n_estimators", 200)
+        mlflow.log_param("gbc_max_depth", 4)
+        mlflow.log_param("gbc_learning_rate", 0.05)
+        mlflow.log_param("gbc_subsample", 0.8)
+        mlflow.log_param("lr_C", 1.0)
+        mlflow.log_param("ensemble_weights", "2-2-1")
+        mlflow.log_param("train_records", len(X_train))
+        mlflow.log_param("val_records", len(X_val))
+        mlflow.log_param("cv_folds", 5)
+
         # 5-fold stratified CV for robust AUC estimate
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         clf_cv = build_ensemble()
@@ -131,6 +152,10 @@ def train():
         # Feature importances from the RF base estimator
         rf_estimator = clf.named_estimators_["rf"]
         importances = dict(zip(FEATURE_COLS, rf_estimator.feature_importances_.tolist()))
+
+        # ── Feature importances as metrics ───────────────────────────
+        for feat, imp in importances.items():
+            mlflow.log_metric(f"fi_{feat}", imp)
 
         model_data = {
             "model":           clf,

@@ -1,4 +1,4 @@
-@import '../styles/variables.less';
+@import '../../styles/variables.less';
 
 .page {
   max-width: 1200px;
@@ -405,11 +405,251 @@
     font-size: @font-size-sm;
     font-weight: 600;
     color: @text-secondary;
-    margin-bottom: @space-4;
+    margin: 0 0 @space-4;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding-left: calc(18px + @space-3); // icon width + gap = aligns with "Model Performance" text
+    padding-left: 0;
   }
+}
+
+// ── Model Analytics (Radar + Metric Tiles) ──────────────────────────────────
+.trainTagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: @space-2;
+  margin-bottom: @space-4;
+}
+
+.trainTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px @space-3;
+  border-radius: @radius-full;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(122, 232, 227, 0.08);
+  color: #0d9488;
+  border: 1px solid rgba(122, 232, 227, 0.25);
+  letter-spacing: 0.01em;
+}
+
+// ── Model Report Card grade bar ─────────────────────────────────────────────
+.gradeBar {
+  display: flex;
+  align-items: center;
+  gap: @space-4;
+  background: @bg-primary;
+  border-radius: @radius-lg;
+  padding: @space-3 @space-5;
+  margin-bottom: @space-5;
+  border: 1px solid @border-color;
+}
+
+.gradeBadge {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  min-width: 42px;
+  text-align: center;
+  border-radius: @radius-md;
+  padding: @space-1 @space-2;
+
+  &.gradeA { background: rgba(5, 150, 105, 0.1);  color: #059669; }
+  &.gradeB { background: rgba(37, 99, 235, 0.1);  color: #2563eb; }
+  &.gradeC { background: rgba(217, 119, 6, 0.1);  color: #d97706; }
+}
+
+.gradeBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gradeTagline {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+}
+
+.gradeSubline {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  line-height: 1.5;
+}
+
+// ── Key Insight callout (Sensitivity / Specificity) ─────────────────────────
+.insightRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-4;
+  margin-bottom: @space-5;
+
+  @media (max-width: @breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.insightCard {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  background: @bg-primary;
+  border-radius: @radius-lg;
+  padding: @space-3 @space-4;
+  border: 1px solid @border-color;
+}
+
+.insightIcon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.insightValue {
+  font-size: @font-size-xl;
+  font-weight: 800;
+  color: @text-primary;
+  line-height: 1.1;
+}
+
+.insightLabel {
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-secondary;
+  margin: 2px 0;
+}
+
+.insightSub {
+  font-size: 11px;
+  color: @text-tertiary;
+  line-height: 1.5;
+}
+
+// ── Radar + tiles layout ────────────────────────────────────────────────────
+.analyticsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @space-6;
+  margin-bottom: @space-6;
+  align-items: stretch;
+
+  @media (max-width: @breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analyticsCard {
+  background: @bg-primary;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  padding: @space-4;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.radarWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  min-height: 380px;
+}
+
+.radarTitle {
+  font-size: @font-size-xs;
+  color: @text-tertiary;
+  margin: 0 0 @space-3 4px;
+  line-height: 1.4;
+}
+
+.metricTilesGrid {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+  justify-content: center;
+  flex: 1;
+}
+
+.metricTile {
+  background: @bg-primary;
+  border-radius: @radius-lg;
+  padding: @space-2 @space-4;
+  border-left: 3px solid transparent;
+
+  &.tileGreen { border-left-color: #059669; }
+  &.tileAmber { border-left-color: #d97706; }
+  &.tileRed   { border-left-color: #dc2626; }
+}
+
+.metricTileTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.metricTileLabel {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  font-weight: 600;
+}
+
+.metricTileBadge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: @radius-full;
+
+  &.tileGreen { background: rgba(5, 150, 105, 0.12);  color: #059669; }
+  &.tileAmber { background: rgba(217, 119, 6, 0.12);  color: #d97706; }
+  &.tileRed   { background: rgba(220, 38, 38, 0.12);  color: #dc2626; }
+}
+
+.metricTileRow {
+  display: flex;
+  align-items: center;
+  gap: @space-3;
+  margin-bottom: 3px;
+}
+
+.metricTileValue {
+  font-size: @font-size-sm;
+  font-weight: 700;
+  color: @text-primary;
+  min-width: 36px;
+}
+
+.metricTileBarBg {
+  flex: 1;
+  height: 4px;
+  background: @border-color;
+  border-radius: @radius-full;
+  overflow: hidden;
+}
+
+.metricTileBarFillGreen {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399, #059669);
+  border-radius: @radius-full;
+}
+
+.metricTileBarFillAmber {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #d97706);
+  border-radius: @radius-full;
+}
+
+.metricTileBarFillRed {
+  height: 100%;
+  background: linear-gradient(90deg, #f87171, #dc2626);
+  border-radius: @radius-full;
+}
+
+.metricTileSub {
+  font-size: 10px;
+  color: @text-tertiary;
+  line-height: 1.3;
 }
 
 // ── Dataset Cohorts Card ────────────────────────────────────────────────────

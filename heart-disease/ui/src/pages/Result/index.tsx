@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useState } from 'react';
+import { useAppSelector } from '../../store/hooks';
+import { getTextContent } from '../../content/text';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -9,36 +10,15 @@ import {
   AlertTriangle,
   Brain,
   Globe,
-  ChevronDown,
   Info,
   History,
   Activity,
 } from 'lucide-react';
-import type { RootState } from '../store';
-import type { TopFactor, PopulationPercentile } from '../types';
-import RiskGauge from '../components/Dashboard/RiskGauge';
+import type { TopFactor, PopulationPercentile } from '../../types';
+import RiskGauge from '../../components/Dashboard/RiskGauge';
+import { useCountUp } from '../../hooks/useCountUp';
+import Section from './Section';
 import styles from './ResultPage.module.less';
-
-// ── Animated count-up ─────────────────────────────────────────────────────────
-function useCountUp(target: number, durationMs = 1400, delayMs = 400): number {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    let rafId: number;
-    const timeout = setTimeout(() => {
-      const startTime = performance.now();
-      const tick = (now: number) => {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / durationMs, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setValue(Math.round(eased * target));
-        if (progress < 1) rafId = requestAnimationFrame(tick);
-      };
-      rafId = requestAnimationFrame(tick);
-    }, delayMs);
-    return () => { clearTimeout(timeout); cancelAnimationFrame(rafId); };
-  }, [target, durationMs, delayMs]);
-  return value;
-}
 
 const FIELD_LABELS: Record<string, string> = {
   age: 'Age', sex: 'Sex', cp: 'Chest Pain', trestbps: 'Resting BP',
@@ -76,60 +56,11 @@ const COHORT_COLORS: Record<string, string> = {
 
 const cohortKeys = ['combined', 'cleveland', 'hungarian', 'switzerland', 'va'];
 
-// ── Collapsible section wrapper ───────────────────────────────────────────────
-function Section({
-  title, icon, subtitle, delay, children,
-}: {
-  title: string; icon: React.ReactNode; subtitle?: string;
-  delay: number; children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(true);
-  return (
-    <motion.div
-      className={styles.section}
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-    >
-      <button className={styles.sectionHeader} onClick={() => setOpen((v) => !v)}>
-        <div className={styles.sectionHeaderLeft}>
-          <span className={styles.sectionIcon}>{icon}</span>
-          <div>
-            <span className={styles.sectionTitle}>{title}</span>
-            {subtitle && <p className={styles.sectionSubtitle}>{subtitle}</p>}
-          </div>
-        </div>
-        <motion.span
-          animate={{ rotate: open ? 0 : -90 }}
-          transition={{ duration: 0.2 }}
-          className={styles.chevron}
-        >
-          <ChevronDown size={16} />
-        </motion.span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: 'easeInOut' }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div className={styles.sectionBody}>{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 export default function ResultPage() {
   const navigate = useNavigate();
-  const result = useSelector((s: RootState) => s.prediction.currentResult);
-  const patientData = useSelector((s: RootState) => s.prediction.currentPatientData);
+  const result = useAppSelector((s) => s.prediction.currentResult);
+  const patientData = useAppSelector((s) => s.prediction.currentPatientData);
+  const t = getTextContent('result');
 
   const [expandedFactor, setExpandedFactor] = useState<string | null>(null);
   const [hiddenCohorts, setHiddenCohorts] = useState<Set<string>>(new Set());
@@ -139,9 +70,9 @@ export default function ResultPage() {
     return (
       <div className={styles.empty}>
         <HeartPulse size={48} />
-        <h3>No prediction result</h3>
-        <p>Submit a prediction first to see results here.</p>
-        <button onClick={() => navigate('/predict')}>Go to Prediction</button>
+        <h3>{t.emptyHeading}</h3>
+        <p>{t.emptyText}</p>
+        <button onClick={() => navigate('/predict')}>{t.emptyBtn}</button>
       </div>
     );
   }
@@ -197,12 +128,10 @@ export default function ResultPage() {
           </motion.div>
           <div>
             <h2 className={styles.heroTitle}>
-              {isHigh ? 'Higher Risk Detected' : 'Lower Risk Detected'}
+              {isHigh ? t.highRiskTitle : t.lowRiskTitle}
             </h2>
             <p className={styles.heroDesc}>
-              {isHigh
-                ? 'Elevated cardiovascular risk — a follow-up with a cardiologist is recommended.'
-                : 'Lower cardiovascular risk detected — continue monitoring and maintaining healthy habits.'}
+              {isHigh ? t.highRiskDesc : t.lowRiskDesc}
             </p>
           </div>
         </div>
@@ -210,7 +139,7 @@ export default function ResultPage() {
           <span className={styles.heroScoreNum} style={{ color: riskColor }}>
             {animatedPct}%
           </span>
-          <span className={styles.heroScoreLabel}>Risk Score</span>
+          <span className={styles.heroScoreLabel}>{t.riskScore}</span>
         </div>
       </motion.div>
 
@@ -223,13 +152,13 @@ export default function ResultPage() {
           transition={{ delay: 0.15, duration: 0.4 }}
           whileHover={{ boxShadow: '0 12px 40px rgba(0,0,0,0.10)' }}
         >
-          <h3 className={styles.cardTitle}>Risk Score</h3>
+          <h3 className={styles.cardTitle}>{t.riskScore}</h3>
           <div className={styles.gaugeWrap}>
             <RiskGauge probability={probability} size={200} />
           </div>
           <div className={styles.scoreBar}>
             <div className={styles.scoreLabels}>
-              <span>Low</span><span>Moderate</span><span>High</span>
+              <span>{t.scoreLabelLow}</span><span>{t.scoreLabelModerate}</span><span>{t.scoreLabelHigh}</span>
             </div>
             <div className={styles.scoreBg}>
               <motion.div
@@ -250,7 +179,7 @@ export default function ResultPage() {
             style={{ background: riskColor + '18', color: riskColor, border: `1px solid ${riskColor}33` }}
           >
             <Activity size={13} />
-            {pct >= 70 ? 'High Risk' : pct >= 40 ? 'Moderate Risk' : 'Low Risk'}
+            {pct >= 70 ? t.riskBadgeHigh : pct >= 40 ? t.riskBadgeModerate : t.riskBadgeLow}
           </div>
         </motion.div>
 
@@ -261,7 +190,7 @@ export default function ResultPage() {
           transition={{ delay: 0.2, duration: 0.4 }}
           whileHover={{ boxShadow: '0 12px 40px rgba(0,0,0,0.10)' }}
         >
-          <h3 className={styles.cardTitle}>Patient Data Summary</h3>
+          <h3 className={styles.cardTitle}>{t.patientDataSummary}</h3>
           <div className={styles.detailGrid}>
             {Object.entries(patientData).map(([key, val], i) => (
               <motion.div
@@ -283,9 +212,9 @@ export default function ResultPage() {
       {/* ── Why This Score? ──────────────────────────────────────────────── */}
       {topFactors.length > 0 && (
         <Section
-          title="Why This Score?"
+          title={t.whyThisScore}
           icon={<Brain size={15} />}
-          subtitle="Top features influencing this prediction. Click a row to see a plain-English explanation."
+          subtitle={t.whySubtitle}
           delay={0.35}
         >
           <div className={styles.factorList}>
@@ -361,7 +290,7 @@ export default function ResultPage() {
       {/* ── How Do You Compare? ──────────────────────────────────────────── */}
       {benchmarkItems.length > 0 && (
         <Section
-          title="How Do You Compare?"
+          title={t.compareSectionTitle}
           icon={<Globe size={15} />}
           subtitle="Your key values as percentile ranks across 4 research cohorts (920 combined patients). Click a cohort to hide/show its bars."
           delay={0.45}
@@ -479,7 +408,7 @@ export default function ResultPage() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
         >
-          {copied ? '✓ Copied!' : 'Copy Summary'}
+          {copied ? t.copiedBtn : t.copyBtn}
         </motion.button>
       </motion.div>
     </div>

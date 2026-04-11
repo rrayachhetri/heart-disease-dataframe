@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { Heart, Mail, Lock, User, Stethoscope, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { registerUser, loginUser, clearAuthError } from '../store/slices/authSlice';
-import type { AppDispatch, RootState } from '../store';
-import type { UserRole } from '../types';
-import styles from './AuthPage.module.less';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { registerUser, loginUser, clearAuthError } from '../../store/slices/authSlice';
+import { getTextContent } from '../../content/text';
+import type { UserRole } from '../../types';
+import styles from './Auth.module.less';
+
+const t = getTextContent('register');
 
 export default function RegisterPage() {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((s: RootState) => s.auth);
+  const { loading, error } = useAppSelector((s) => s.auth);
 
   const [form, setForm] = useState({
     first_name: '',
@@ -30,7 +32,6 @@ export default function RegisterPage() {
     dispatch(clearAuthError());
     const regResult = await dispatch(registerUser(form));
     if (registerUser.fulfilled.match(regResult)) {
-      // Auto-login after successful registration
       const loginResult = await dispatch(loginUser({ email: form.email, password: form.password }));
       if (loginUser.fulfilled.match(loginResult)) {
         navigate('/');
@@ -49,8 +50,8 @@ export default function RegisterPage() {
         <div className={styles.logo}>
           <Heart size={28} fill="currentColor" />
         </div>
-        <h1 className={styles.heading}>Create your account</h1>
-        <p className={styles.subheading}>Join CardioSense today</p>
+        <h1 className={styles.heading}>{t.heading}</h1>
+        <p className={styles.subheading}>{t.subheading}</p>
 
         {error && <div className={styles.errorBanner}>{error}</div>}
 
@@ -61,45 +62,45 @@ export default function RegisterPage() {
             className={`${styles.roleBtn} ${form.role === 'patient' ? styles.roleActive : ''}`}
             onClick={() => setForm((f) => ({ ...f, role: 'patient' }))}
           >
-            <User size={16} /> Patient
+            <User size={16} /> {t.patientRole}
           </button>
           <button
             type="button"
             className={`${styles.roleBtn} ${form.role === 'doctor' ? styles.roleActive : ''}`}
             onClick={() => setForm((f) => ({ ...f, role: 'doctor' }))}
           >
-            <Stethoscope size={16} /> Doctor
+            <Stethoscope size={16} /> {t.doctorRole}
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label}>First name</label>
-              <input className={styles.input} placeholder="Jane" value={form.first_name} onChange={set('first_name')} required />
+              <label className={styles.label}>{t.firstNameLabel}</label>
+              <input className={styles.input} placeholder={t.firstNamePlaceholder} value={form.first_name} onChange={set('first_name')} required />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Last name</label>
-              <input className={styles.input} placeholder="Doe" value={form.last_name} onChange={set('last_name')} required />
+              <label className={styles.label}>{t.lastNameLabel}</label>
+              <input className={styles.input} placeholder={t.lastNamePlaceholder} value={form.last_name} onChange={set('last_name')} required />
             </div>
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>Email</label>
+            <label className={styles.label}>{t.emailLabel}</label>
             <div className={styles.inputWrapper}>
               <Mail size={16} className={styles.inputIcon} />
-              <input type="email" className={styles.input} placeholder="you@example.com" value={form.email} onChange={set('email')} required autoComplete="email" />
+              <input type="email" className={styles.input} placeholder={t.emailPlaceholder} value={form.email} onChange={set('email')} required autoComplete="email" />
             </div>
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>Password</label>
+            <label className={styles.label}>{t.passwordLabel}</label>
             <div className={styles.inputWrapper}>
               <Lock size={16} className={styles.inputIcon} />
               <input
                 type={showPassword ? 'text' : 'password'}
                 className={styles.input}
-                placeholder="Min. 8 characters"
+                placeholder={t.passwordPlaceholder}
                 value={form.password}
                 onChange={set('password')}
                 required
@@ -112,13 +113,13 @@ export default function RegisterPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? 'Creating account…' : 'Create account'}
+            {loading ? t.submitLoading : t.submitLabel}
           </button>
         </form>
 
         <p className={styles.footer}>
-          Already have an account?{' '}
-          <Link to="/login" className={styles.link}>Sign in</Link>
+          {t.footerText}{' '}
+          <Link to="/login" className={styles.link}>{t.footerLink}</Link>
         </p>
       </motion.div>
     </div>

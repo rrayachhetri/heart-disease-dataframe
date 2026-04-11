@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/hooks';
+import { getTextContent } from '../../content/text';
 import { Stethoscope, Save, CheckCircle } from 'lucide-react';
-import type { RootState } from '../store';
-import { authHeaders, API_BASE_URL } from '../api/config';
-import type { DoctorProfile } from '../types';
+import type { DoctorProfile } from '../../types';
+import { authHeaders, API_BASE_URL } from '../../api/config';
 import styles from './DoctorProfilePage.module.less';
 
+const t = getTextContent('doctorProfile');
+
 export default function DoctorProfilePage() {
-  const { user } = useSelector((s: RootState) => s.auth);
+  const { user } = useAppSelector((s) => s.auth);
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -66,7 +68,7 @@ export default function DoctorProfilePage() {
   };
 
   if (!user || user.role !== 'doctor') {
-    return <div className={styles.notice}>This page is only available to doctors.</div>;
+    return <div className={styles.notice}>{t.doctorOnly}</div>;
   }
 
   return (
@@ -74,14 +76,12 @@ export default function DoctorProfilePage() {
       <div className={styles.header}>
         <Stethoscope size={24} />
         <div>
-          <h2 className={styles.title}>Doctor Profile</h2>
-          <p className={styles.subtitle}>
-            Complete your profile so patients can find and connect with you.
-          </p>
+          <h2 className={styles.title}>{t.pageTitle}</h2>
+          <p className={styles.subtitle}>{t.pageSubtitle}</p>
         </div>
         {profile?.is_npi_verified && (
           <span className={styles.verifiedBadge}>
-            <CheckCircle size={14} /> NPI Verified
+            <CheckCircle size={14} /> {t.verifiedBadge}
           </span>
         )}
       </div>
@@ -89,41 +89,41 @@ export default function DoctorProfilePage() {
       <form onSubmit={handleSave} className={styles.form}>
         <div className={styles.grid}>
           <div className={styles.field}>
-            <label>NPI Number</label>
-            <input value={form.npi_number} onChange={(e) => setForm((f) => ({ ...f, npi_number: e.target.value }))} placeholder="10-digit NPI" />
-            <span className={styles.hint}>Phase 1: entering NPI auto-verifies. Phase 2 will use real NPI registry.</span>
+            <label>{t.npiLabel}</label>
+            <input value={form.npi_number} onChange={(e) => setForm((f) => ({ ...f, npi_number: e.target.value }))} placeholder={t.npiPlaceholder} />
+            <span className={styles.hint}>{t.npiHint}</span>
           </div>
           <div className={styles.field}>
-            <label>Specialty</label>
-            <input value={form.specialty} onChange={(e) => setForm((f) => ({ ...f, specialty: e.target.value }))} placeholder="e.g. Cardiology" />
+            <label>{t.specialtyLabel}</label>
+            <input value={form.specialty} onChange={(e) => setForm((f) => ({ ...f, specialty: e.target.value }))} placeholder={t.specialtyPlaceholder} />
           </div>
           <div className={styles.field}>
-            <label>Phone</label>
-            <input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+1 555 000 0000" />
+            <label>{t.phoneLabel}</label>
+            <input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder={t.phonePlaceholder} />
           </div>
           <div className={styles.field}>
-            <label>Consultation Fee (USD)</label>
+            <label>{t.feeLabel}</label>
             <input type="number" min={0} value={form.consultation_fee} onChange={(e) => setForm((f) => ({ ...f, consultation_fee: Number(e.target.value) }))} />
           </div>
           <div className={`${styles.field} ${styles.fullWidth}`}>
-            <label>Accepted Insurance Plans (comma-separated)</label>
-            <input value={form.accepted_insurance} onChange={(e) => setForm((f) => ({ ...f, accepted_insurance: e.target.value }))} placeholder="BlueCross, Aetna, UnitedHealth" />
+            <label>{t.insuranceLabel}</label>
+            <input value={form.accepted_insurance} onChange={(e) => setForm((f) => ({ ...f, accepted_insurance: e.target.value }))} placeholder={t.insurancePlaceholder} />
           </div>
           <div className={`${styles.field} ${styles.fullWidth}`}>
-            <label>Bio</label>
-            <textarea rows={4} value={form.bio} onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))} placeholder="Brief professional background…" />
+            <label>{t.bioLabel}</label>
+            <textarea rows={4} value={form.bio} onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))} placeholder={t.bioPlaceholder} />
           </div>
         </div>
 
         <div className={styles.actions}>
           <label className={styles.toggle}>
             <input type="checkbox" checked={form.is_accepting_patients} onChange={(e) => setForm((f) => ({ ...f, is_accepting_patients: e.target.checked }))} />
-            Accepting new patients
+            {t.acceptingPatients}
           </label>
           {saveError && <span className={styles.saveError}>{saveError}</span>}
           <button type="submit" className={styles.saveBtn} disabled={saving}>
             <Save size={16} />
-            {saving ? 'Saving…' : saved ? '✓ Saved!' : 'Save profile'}
+            {saving ? t.savingLabel : saved ? t.savedLabel : t.saveLabel}
           </button>
         </div>
       </form>

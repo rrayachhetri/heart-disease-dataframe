@@ -1,0 +1,153 @@
+@import '../../styles/variables.less';
+
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: #1e3a5f;
+  border-bottom: 1px solid rgba(37, 99, 235, 0.5);
+  overflow: hidden;
+}
+
+.banner.urgent {
+  background: #3b0a0a;
+  border-bottom-color: rgba(220, 38, 38, 0.5);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: @space-3;
+  padding: @space-3 @space-6;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (max-width: @breakpoint-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: @space-3 @space-4;
+  }
+}
+
+.left {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+}
+
+.icon {
+  color: #93c5fd;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.iconUrgent {
+  color: #fca5a5;
+  flex-shrink: 0;
+  margin-top: 2px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: @font-size-sm;
+  font-weight: 700;
+  color: #e0f2fe;
+}
+
+.urgent .title {
+  color: #fee2e2;
+}
+
+.sub {
+  font-size: @font-size-xs;
+  color: rgba(224, 242, 254, 0.7);
+  line-height: 1.5;
+}
+
+.countdown {
+  color: #7dd3fc;
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
+  letter-spacing: 0.04em;
+}
+
+.countdownUrgent {
+  color: #fca5a5;
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
+  letter-spacing: 0.04em;
+}
+
+.actions {
+  display: flex;
+  gap: @space-3;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stayBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-2 @space-4;
+  background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+  color: #1a3a3a;
+  border: none;
+  border-radius: @radius-lg;
+  font-size: @font-size-xs;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity @transition-fast;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.leaveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  padding: @space-2 @space-3;
+  background: transparent;
+  color: rgba(224, 242, 254, 0.6);
+  border: 1px solid rgba(224, 242, 254, 0.2);
+  border-radius: @radius-lg;
+  font-size: @font-size-xs;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color @transition-fast, border-color @transition-fast;
+
+  &:hover {
+    color: #fee2e2;
+    border-color: rgba(252, 165, 165, 0.4);
+  }
+}
+
+.progressBar {
+  height: 3px;
+  background: linear-gradient(90deg, #7ae8e3, #2563eb);
+  width: 100%;
+  transform-origin: left;
+}
+
+.urgent .progressBar {
+  background: linear-gradient(90deg, #f87171, #dc2626);
+}

@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { User, Heart, Activity, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import type { AppDispatch, RootState } from '../store';
-import { submitPrediction } from '../store/slices/predictionSlice';
-import { useNotification } from '../hooks/useNotification';
-import FormField from '../components/Form/FormField';
-import CustomSelectField from '../components/Form/CustomSelectField';
-import type { PatientData } from '../types';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { submitPrediction } from '../../store/slices/predictionSlice';
+import { getTextContent } from '../../content/text';
+import { useNotification } from '../../hooks/useNotification';
+import FormField from '../../components/Form/FormField';
+import CustomSelectField from '../../components/Form/CustomSelectField';
+import type { PatientData } from '../../types';
 import styles from './PredictPage.module.less';
 
 interface FormState {
@@ -44,14 +44,16 @@ const INITIAL: FormState = {
   thal: 2,
 };
 
+const t = getTextContent('predict');
+
 export default function PredictPage() {
   const [form, setForm] = useState<FormState>(INITIAL);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>(
     {}
   );
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const loading = useSelector((s: RootState) => s.prediction.loading);
+  const dispatch = useAppDispatch();
+  const loading = useAppSelector((s) => s.prediction.loading);
   const { sendNotification, requestPermission, permission } = useNotification();
 
   const set =
@@ -90,7 +92,7 @@ export default function PredictPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error('Please fix the errors in the form.');
+      toast.error(t.validationError);
       return;
     }
 
@@ -121,18 +123,14 @@ export default function PredictPage() {
 
       sendNotification({
         type: isHigh ? 'warning' : 'success',
-        title: isHigh ? 'High Risk Detected' : 'Low Risk Result',
-        message: `Patient risk score: ${pct}%. ${
-          isHigh
-            ? 'Recommend follow-up consultation.'
-            : 'No immediate concern.'
-        }`,
+        title: isHigh ? t.notificationHighTitle : t.notificationLowTitle,
+        message: isHigh ? t.notificationHighMsg(pct) : t.notificationLowMsg(pct),
       });
 
-      toast.success('Prediction complete!');
+      toast.success(t.submitSuccess);
       navigate('/result');
     } catch {
-      toast.error('Failed to get prediction. Is the API running?');
+      toast.error(t.submitError);
     }
   };
 
@@ -144,8 +142,8 @@ export default function PredictPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h2>Patient Risk Assessment</h2>
-        <p>Enter patient clinical data to predict heart disease risk.</p>
+        <h2>{t.pageTitle}</h2>
+        <p>{t.pageSubtitle}</p>
       </div>
 
       <form onSubmit={handleSubmit} className={styles.form}>
@@ -158,7 +156,7 @@ export default function PredictPage() {
         >
           <div className={styles.sectionHeader}>
             <User size={18} />
-            <h3>Personal Information</h3>
+            <h3>{t.sectionPersonal}</h3>
           </div>
           <div className={styles.grid2}>
             <FormField
@@ -191,7 +189,7 @@ export default function PredictPage() {
         >
           <div className={styles.sectionHeader}>
             <Heart size={18} />
-            <h3>Symptoms &amp; Pain</h3>
+            <h3>{t.sectionSymptoms}</h3>
           </div>
           <div className={styles.grid2}>
             <CustomSelectField
@@ -248,7 +246,7 @@ export default function PredictPage() {
         >
           <div className={styles.sectionHeader}>
             <Activity size={18} />
-            <h3>Vitals &amp; Lab Results</h3>
+            <h3>{t.sectionVitals}</h3>
           </div>
           <div className={styles.grid3}>
             <FormField
@@ -337,17 +335,17 @@ export default function PredictPage() {
             className={styles.resetBtn}
             onClick={handleReset}
           >
-            Reset Form
+            {t.resetBtn}
           </button>
           <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? (
               <>
                 <Loader2 size={18} className={styles.spinner} />
-                Analyzing...
+                {t.submitLoading}
               </>
             ) : (
               <>
-                Predict Risk
+                {t.submitLabel}
                 <ArrowRight size={18} />
               </>
             )}

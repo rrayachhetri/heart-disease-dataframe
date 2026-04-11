@@ -1,7 +1,10 @@
 import { type LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { getTextContent } from '../../content/text';
 import styles from './KPICard.module.less';
+
+const t = getTextContent('kpiCard');
 
 interface Props {
   title: string;
@@ -14,11 +17,18 @@ interface Props {
   linkLabel?: string;
 }
 
-const colorMap = {
-  blue: { bg: '#EFF6FF', icon: '#2563EB', border: '#BFDBFE', accent: '#2563EB' },
-  green: { bg: '#ECFDF5', icon: '#059669', border: '#A7F3D0', accent: '#059669' },
-  red: { bg: '#FEF2F2', icon: '#DC2626', border: '#FECACA', accent: '#DC2626' },
-  amber: { bg: '#FFFBEB', icon: '#D97706', border: '#FDE68A', accent: '#D97706' },
+const iconBoxVariants: Record<string, string> = {
+  blue: styles.iconBoxBlue,
+  green: styles.iconBoxGreen,
+  red: styles.iconBoxRed,
+  amber: styles.iconBoxAmber,
+};
+
+const linkRowVariants: Record<string, string> = {
+  blue: styles.linkRowBlue,
+  green: styles.linkRowGreen,
+  red: styles.linkRowRed,
+  amber: styles.linkRowAmber,
 };
 
 export default function KPICard({
@@ -29,10 +39,8 @@ export default function KPICard({
   color,
   trend,
   onClick,
-  linkLabel = 'View details',
+  linkLabel = t.viewDetails,
 }: Props) {
-  const c = colorMap[color];
-
   return (
     <motion.div
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
@@ -49,11 +57,8 @@ export default function KPICard({
           <p className={styles.value}>{value}</p>
           {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
         </div>
-        <div
-          className={styles.iconBox}
-          style={{ backgroundColor: c.bg, borderColor: c.border }}
-        >
-          <Icon size={22} style={{ color: c.icon }} />
+        <div className={`${styles.iconBox} ${iconBoxVariants[color]}`}>
+          <Icon size={22} />
         </div>
       </div>
       {trend && (
@@ -65,7 +70,7 @@ export default function KPICard({
         </div>
       )}
       {onClick && (
-        <div className={styles.linkRow} style={{ color: c.accent }}>
+        <div className={`${styles.linkRow} ${linkRowVariants[color]}`}>
           <span>{linkLabel}</span>
           <ArrowRight size={14} />
         </div>

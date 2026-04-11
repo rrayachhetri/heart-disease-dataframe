@@ -1,5 +1,8 @@
 import { motion } from 'framer-motion';
+import { getTextContent } from '../../content/text';
 import styles from './RiskGauge.module.less';
+
+const t = getTextContent('riskGauge');
 
 interface Props {
   probability: number;
@@ -50,7 +53,7 @@ export default function RiskGauge({ probability, size = 200 }: Props) {
         >
           {pct}%
         </motion.span>
-        <span className={styles.subtext}>Risk Score</span>
+        <span className={styles.subtext}>{t.subtext}</span>
       </div>
     </div>
   );
