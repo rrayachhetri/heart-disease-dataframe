@@ -1,0 +1,118 @@
+@import '../../styles/variables.less';
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a4fcf8 0%, #7ae8e3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: @space-6;
+}
+
+.card {
+  background: @bg-card;
+  border-radius: @radius-2xl;
+  padding: @space-10 @space-8;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+.brand {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #7ae8e3, #1a3a3a);
+  border-radius: @radius-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @text-inverse;
+  margin: 0 auto @space-6;
+}
+
+.iconWrap {
+  width: 72px;
+  height: 72px;
+  background: @warning-50;
+  border-radius: @radius-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @warning;
+  margin: 0 auto @space-6;
+  border: 2px solid rgba(217, 119, 6, 0.2);
+}
+
+.heading {
+  font-size: @font-size-2xl;
+  font-weight: 700;
+  color: @text-primary;
+  margin-bottom: @space-3;
+}
+
+.sub {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  line-height: 1.65;
+  margin-bottom: @space-5;
+
+  strong {
+    color: @text-primary;
+    font-weight: 600;
+  }
+}
+
+.infoBox {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-2;
+  background: #eff6ff;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: @radius-lg;
+  padding: @space-3 @space-4;
+  font-size: @font-size-xs;
+  color: #1d4ed8;
+  text-align: left;
+  margin-bottom: @space-6;
+  line-height: 1.55;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.signInBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: @space-2;
+  width: 100%;
+  padding: @space-3 @space-6;
+  background: linear-gradient(135deg, #a4fcf8, #7ae8e3);
+  color: #1a3a3a;
+  border: none;
+  border-radius: @radius-lg;
+  font-size: @font-size-sm;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(122, 232, 227, 0.4);
+  transition: box-shadow @transition-fast, transform @transition-fast;
+  margin-bottom: @space-5;
+
+  &:hover {
+    box-shadow: 0 6px 22px rgba(122, 232, 227, 0.6);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.footnote {
+  font-size: 11px;
+  color: @text-tertiary;
+  line-height: 1.5;
+}

@@ -1,8 +1,31 @@
 import { API_BASE_URL, authHeaders } from './config';
 import type { PatientData, PredictionResult, ServerPredictionRecord, ModelInfo, PopulationPercentile } from '../types';
+import { store } from '../store';
+import { setUnavailable } from '../store/slices/systemSlice';
+
+/**
+ * Thin wrapper around fetch that dispatches setUnavailable on network
+ * errors and 5xx server errors, so the system-unavailable page is shown.
+ * 4xx responses are NOT treated as system outages (e.g. 401 = auth issue).
+ */
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  let res: Response;
+  try {
+    res = await fetch(input as RequestInfo, init);
+  } catch {
+    // TypeError = network offline, DNS failure, CORS, etc.
+    store.dispatch(setUnavailable('network'));
+    throw new Error('Network request failed');
+  }
+  if (res.status >= 500) {
+    store.dispatch(setUnavailable(res.status === 503 ? 'model_not_loaded' : 'api_down'));
+    throw new Error(`API error: ${res.status}`);
+  }
+  return res;
+}
 
 export async function predictHeartDisease(data: PatientData): Promise<PredictionResult> {
-  const response = await fetch(`${API_BASE_URL}/predictions`, {
+  const response = await apiFetch(`${API_BASE_URL}/predictions`, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(data),
@@ -19,7 +42,7 @@ export async function fetchPredictionHistory(
   skip = 0,
   limit = 50
 ): Promise<{ predictions: ServerPredictionRecord[]; total: number }> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_BASE_URL}/predictions?skip=${skip}&limit=${limit}`,
     { headers: authHeaders() }
   );
@@ -28,7 +51,7 @@ export async function fetchPredictionHistory(
 }
 
 export async function deletePrediction(id: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/predictions/${id}`, {
+  const response = await apiFetch(`${API_BASE_URL}/predictions/${id}`, {
     method: 'DELETE',
     headers: authHeaders(),
   });
@@ -38,14 +61,14 @@ export async function deletePrediction(id: string): Promise<void> {
 }
 
 export async function checkHealth(): Promise<{ status: string; model_loaded: boolean }> {
-  const response = await fetch(`${API_BASE_URL}/health`);
+  const response = await apiFetch(`${API_BASE_URL}/health`);
   if (!response.ok) throw new Error(`Health check failed: ${response.status}`);
   return response.json();
 }
 
 /** Fetch ensemble model performance metrics and feature importances. */
 export async function fetchModelInfo(): Promise<ModelInfo> {
-  const response = await fetch(`${API_BASE_URL}/predictions/model-info`);
+  const response = await apiFetch(`${API_BASE_URL}/predictions/model-info`);
   if (!response.ok) throw new Error(`Model info fetch failed: ${response.status}`);
   return response.json();
 }
@@ -69,7 +92,7 @@ export interface DatasetComparisonResponse {
 
 /** Fetch per-dataset descriptive stats and disease rates. */
 export async function fetchDatasetComparison(): Promise<DatasetComparisonResponse> {
-  const response = await fetch(`${API_BASE_URL}/analytics/datasets`);
+  const response = await apiFetch(`${API_BASE_URL}/analytics/datasets`);
   if (!response.ok) throw new Error(`Dataset comparison fetch failed: ${response.status}`);
   return response.json();
 }
@@ -78,7 +101,7 @@ export async function fetchDatasetComparison(): Promise<DatasetComparisonRespons
 export async function fetchPopulationBenchmark(
   data: PatientData
 ): Promise<{ feature_percentiles: PopulationPercentile[] }> {
-  const response = await fetch(`${API_BASE_URL}/analytics/population-benchmark`, {
+  const response = await apiFetch(`${API_BASE_URL}/analytics/population-benchmark`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

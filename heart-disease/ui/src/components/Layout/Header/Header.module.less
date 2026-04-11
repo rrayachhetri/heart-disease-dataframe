@@ -1,4 +1,4 @@
-@import '../../styles/variables.less';
+@import '../../../styles/variables.less';
 
 .header {
   height: @header-height;
@@ -203,6 +203,21 @@
   padding: 2px @space-2;
   border-radius: @radius-full;
   flex-shrink: 0;
+}
+
+.searchRiskBadgeHigh {
+  background: @danger-50;
+  color: @danger;
+}
+
+.searchRiskBadgeLow {
+  background: @success-50;
+  color: @success;
+}
+
+// Hidden file input (avatar upload)
+.hiddenInput {
+  display: none;
 }
 
 .searchRiskPct {

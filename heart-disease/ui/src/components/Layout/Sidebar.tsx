@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
@@ -11,20 +10,25 @@ import {
   Stethoscope,
   X,
 } from 'lucide-react';
-import type { RootState } from '../../store';
+import { useAppSelector } from '../../store/hooks';
+import { getTextContent } from '../../content/text';
 import styles from './Sidebar.module.less';
 
+const tNav  = getTextContent('nav');
+const tSide = getTextContent('sidebar');
+const tApp  = getTextContent('app');
+
 const patientNavItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/predict', label: 'New Prediction', icon: HeartPulse },
-  { path: '/history', label: 'History', icon: ClipboardList },
+  { path: '/', label: tNav.dashboard, icon: LayoutDashboard },
+  { path: '/predict', label: tNav.newPrediction, icon: HeartPulse },
+  { path: '/history', label: tNav.history, icon: ClipboardList },
 ];
 
 const doctorNavItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/predict', label: 'New Prediction', icon: HeartPulse },
-  { path: '/history', label: 'History', icon: ClipboardList },
-  { path: '/doctor/profile', label: 'My Profile', icon: Stethoscope },
+  { path: '/', label: tNav.dashboard, icon: LayoutDashboard },
+  { path: '/predict', label: tNav.newPrediction, icon: HeartPulse },
+  { path: '/history', label: tNav.history, icon: ClipboardList },
+  { path: '/doctor/profile', label: tNav.myProfile, icon: Stethoscope },
 ];
 
 interface Props {
@@ -36,7 +40,7 @@ interface Props {
 }
 
 export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose, onNavClick }: Props) {
-  const user = useSelector((s: RootState) => s.auth.user);
+  const user = useAppSelector((s) => s.auth.user);
   const navItems = user?.role === 'doctor' ? doctorNavItems : patientNavItems;
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
@@ -58,14 +62,14 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
     >
       <div className={styles.logo}>
         <Activity className={styles.logoIcon} size={28} />
-        {(!collapsed || mobileOpen) && <span className={styles.logoText}>CardioSense</span>}
+        {(!collapsed || mobileOpen) && <span className={styles.logoText}>{tApp.name}</span>}
         
         {/* Mobile close button */}
         {isMobile && (
           <button
             className={styles.mobileClose}
             onClick={onMobileClose}
-            aria-label="Close sidebar"
+            aria-label={tSide.closeSidebarAria}
           >
             <X size={16} />
           </button>
@@ -95,7 +99,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
         <button
           className={styles.toggle}
           onClick={onToggle}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? tSide.expandSidebarAria : tSide.collapseSidebarAria}
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>

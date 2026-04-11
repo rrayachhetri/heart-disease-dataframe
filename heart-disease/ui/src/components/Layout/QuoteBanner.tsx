@@ -1,9 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../../store';
-import type { PredictionRecord, ModelInfo } from '../../types';
+import { useAppSelector } from '../../store/hooks';
 import { fetchModelInfo } from '../../api/predictApi';
 import styles from './QuoteBanner.module.less';
+import type { PredictionRecord, ModelInfo } from '../../types';
 
 // ── Static fallback tips ──────────────────────────────────────────────────────
 const TIPS = [
@@ -146,8 +145,8 @@ interface Props {
 }
 
 export default function QuoteBanner({ collapsed = false }: Props) {
-  const user = useSelector((s: RootState) => s.auth.user);
-  const history = useSelector((s: RootState) => s.prediction.history);
+  const user = useAppSelector((s) => s.auth.user);
+  const history = useAppSelector((s) => s.prediction.history);
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
 
   useEffect(() => {

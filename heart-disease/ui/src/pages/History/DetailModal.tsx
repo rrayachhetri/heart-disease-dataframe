@@ -1,23 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useState } from 'react';
+import { getTextContent } from '../../content/text';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Trash2,
-  ClipboardList,
-  Eye,
   X,
   Activity,
   AlertTriangle,
   CheckCircle,
   Brain,
   Globe,
-  ChevronDown,
   Info,
 } from 'lucide-react';
-import type { RootState, AppDispatch } from '../store';
-import type { PredictionRecord, PatientData, TopFactor, PopulationPercentile } from '../types';
-import { clearHistory, removeFromHistory } from '../store/slices/predictionSlice';
-import { useNavigate } from 'react-router-dom';
+import type { PredictionRecord, PatientData, TopFactor, PopulationPercentile } from '../../types';
+import { useCountUp } from '../../hooks/useCountUp';
+import ModalSection from './ModalSection';
 import styles from './HistoryPage.module.less';
 
 const FEATURE_LABELS: Record<keyof PatientData, string> = {
@@ -52,71 +47,10 @@ const COHORT_COLORS: Record<string, string> = {
 
 const cohortKeys = ['combined', 'cleveland', 'hungarian', 'switzerland', 'va'];
 
-// ── Animated count-up ─────────────────────────────────────────────────────────
-function useCountUp(target: number, durationMs = 1200, delayMs = 300): number {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    let rafId: number;
-    const timeout = setTimeout(() => {
-      const startTime = performance.now();
-      const tick = (now: number) => {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / durationMs, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setValue(Math.round(eased * target));
-        if (progress < 1) rafId = requestAnimationFrame(tick);
-      };
-      rafId = requestAnimationFrame(tick);
-    }, delayMs);
-    return () => { clearTimeout(timeout); cancelAnimationFrame(rafId); };
-  }, [target, durationMs, delayMs]);
-  return value;
-}
-
-// ── Collapsible sub-section ───────────────────────────────────────────────────
-function ModalSection({
-  icon, title, children, defaultOpen = true,
-}: {
-  icon: React.ReactNode; title: string; children: React.ReactNode; defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className={styles.modalSection}>
-      <button className={styles.modalSectionHeader} onClick={() => setOpen((v) => !v)}>
-        <span className={styles.modalSectionHeaderLeft}>
-          {icon}
-          <span className={styles.modalSectionTitle}>{title}</span>
-        </span>
-        <motion.span
-          animate={{ rotate: open ? 0 : -90 }}
-          transition={{ duration: 0.2 }}
-          className={styles.modalChevron}
-        >
-          <ChevronDown size={14} />
-        </motion.span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div className={styles.modalSectionBody}>{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ── Detail Modal ──────────────────────────────────────────────────────────────
-function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: () => void }) {
+export default function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: () => void }) {
+  const tH = getTextContent('history');
   const pct = Math.round(record.result.probability * 100);
-  const animatedPct = useCountUp(pct);
+  const animatedPct = useCountUp(pct, 1200, 300);
   const isHigh = record.result.prediction === 1;
   const riskLevel = record.result.risk_level || (isHigh ? 'high' : 'low');
   const riskColor = riskLevel === 'high' ? '#DC2626' : riskLevel === 'moderate' ? '#D97706' : '#059669';
@@ -184,7 +118,7 @@ function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: (
                 : <CheckCircle size={20} color="#059669" />}
             </motion.div>
             <div>
-              <h3 className={styles.modalTitle}>Assessment Details</h3>
+              <h3 className={styles.modalTitle}>{tH.modalTitle}</h3>
               <p className={styles.modalDate}>{formatDate(record.timestamp)}</p>
             </div>
           </div>
@@ -194,14 +128,14 @@ function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: (
               onClick={handleCopy}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              title="Copy summary"
+              title={tH.copySummaryTitle}
             >
-              {copied ? '✓ Copied' : 'Copy'}
+              {copied ? tH.copiedBtn : tH.copyBtn}
             </motion.button>
             <motion.button
               className={styles.modalClose}
               onClick={onClose}
-              aria-label="Close"
+              aria-label={tH.closeAria}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -248,13 +182,11 @@ function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: (
               {riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)} Risk
             </span>
             <p className={styles.modalRiskDesc}>
-              {isHigh
-                ? 'Elevated cardiovascular risk detected. Medical consultation recommended.'
-                : 'No significant cardiovascular risk detected at this time.'}
+              {isHigh ? tH.riskHigh : tH.riskLow}
             </p>
             <div className={styles.modalScoreBar}>
               <div className={styles.modalScoreLabels}>
-                <span>Low</span><span>Moderate</span><span>High</span>
+                <span>{tH.scoreLabelLow}</span><span>{tH.scoreLabelModerate}</span><span>{tH.scoreLabelHigh}</span>
               </div>
               <div className={styles.modalScoreBg}>
                 <motion.div
@@ -274,7 +206,7 @@ function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: (
         </motion.div>
 
         {/* ── Clinical Parameters ── */}
-        <ModalSection icon={<Activity size={13} />} title="Clinical Parameters">
+        <ModalSection icon={<Activity size={13} />} title={tH.clinicalParams}>
           <div className={styles.modalGrid}>
             {(Object.entries(record.patientData) as [keyof PatientData, number][]).map(
               ([key, value], i) => (
@@ -296,8 +228,8 @@ function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: (
 
         {/* ── Why This Score? ── */}
         {topFactors.length > 0 && (
-          <ModalSection icon={<Brain size={13} />} title="Why This Score?">
-            <p className={styles.modalSectionHint}>Click a row for a plain-English explanation.</p>
+          <ModalSection icon={<Brain size={13} />} title={tH.whyThisScore}>
+            <p className={styles.modalSectionHint}>{tH.whyHint}</p>
             <div className={styles.factorList}>
               {topFactors.map((f, idx) => {
                 const barPct = maxAbs > 0 ? (Math.abs(f.contribution) / maxAbs) * 100 : 0;
@@ -367,7 +299,7 @@ function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: (
 
         {/* ── How Do You Compare? ── */}
         {benchmarkItems.length > 0 && (
-          <ModalSection icon={<Globe size={13} />} title="How Do You Compare?" defaultOpen={false}>
+          <ModalSection icon={<Globe size={13} />} title={tH.compareSection} defaultOpen={false}>
             <div className={styles.cohortLegend}>
               {cohortKeys.map((k) => (
                 <motion.button
@@ -434,124 +366,5 @@ function DetailModal({ record, onClose }: { record: PredictionRecord; onClose: (
         )}
       </motion.div>
     </motion.div>
-  );
-}
-
-export default function HistoryPage() {
-  const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
-  const history = useSelector((s: RootState) => s.prediction.history);
-  const [selected, setSelected] = useState<PredictionRecord | null>(null);
-
-  const formatDate = (ts: number) =>
-    new Date(ts).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-  if (history.length === 0) {
-    return (
-      <div className={styles.empty}>
-        <ClipboardList size={48} />
-        <h3>No prediction history</h3>
-        <p>Completed predictions will appear here.</p>
-        <button onClick={() => navigate('/predict')}>Make a Prediction</button>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <div>
-          <h2>Prediction History</h2>
-          <p>
-            {history.length} assessment{history.length !== 1 ? 's' : ''} recorded
-          </p>
-        </div>
-        <button className={styles.clearBtn} onClick={() => dispatch(clearHistory())}>
-          <Trash2 size={16} />
-          Clear All
-        </button>
-      </div>
-
-      <div className={styles.table}>
-        <div className={styles.thead}>
-          <span>Date</span>
-          <span>Age</span>
-          <span>Sex</span>
-          <span>Risk Score</span>
-          <span>Result</span>
-          <span>Actions</span>
-        </div>
-        <AnimatePresence>
-          {history.map((record) => {
-            const pct = Math.round(record.result.probability * 100);
-            const isHigh = record.result.prediction === 1;
-
-            return (
-              <motion.div
-                key={record.id}
-                className={styles.row}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                layout
-                onClick={() => setSelected(record)}
-              >
-                <span className={styles.date}>{formatDate(record.timestamp)}</span>
-                <span>{record.patientData.age}</span>
-                <span>{record.patientData.sex === 1 ? 'Male' : 'Female'}</span>
-                <span>
-                  <div className={styles.scoreMini}>
-                    <div
-                      className={styles.scoreMiniBar}
-                      style={{
-                        width: `${pct}%`,
-                        background: isHigh ? '#DC2626' : '#059669',
-                      }}
-                    />
-                    <span>{pct}%</span>
-                  </div>
-                </span>
-                <span>
-                  <span
-                    className={`${styles.badge} ${isHigh ? styles.badgeHigh : styles.badgeLow}`}
-                  >
-                    {isHigh ? 'High Risk' : 'Low Risk'}
-                  </span>
-                </span>
-                <span
-                  className={styles.rowActions}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    className={styles.viewBtn}
-                    onClick={() => setSelected(record)}
-                    title="View details"
-                  >
-                    <Eye size={14} />
-                  </button>
-                  <button
-                    className={styles.deleteBtn}
-                    onClick={() => dispatch(removeFromHistory(record.id))}
-                    title="Remove"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </span>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
-      <AnimatePresence>
-        {selected && <DetailModal record={selected} onClose={() => setSelected(null)} />}
-      </AnimatePresence>
-    </div>
   );
 }

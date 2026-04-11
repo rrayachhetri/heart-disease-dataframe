@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { Heart, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { loginUser, clearAuthError } from '../store/slices/authSlice';
-import type { AppDispatch, RootState } from '../store';
-import styles from './AuthPage.module.less';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { loginUser, clearAuthError } from '../../store/slices/authSlice';
+import { getTextContent } from '../../content/text';
+import styles from './Auth.module.less';
+
+const t = getTextContent('login');
 
 export default function LoginPage() {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((s: RootState) => s.auth);
+  const { loading, error } = useAppSelector((s) => s.auth);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,20 +39,20 @@ export default function LoginPage() {
         <div className={styles.logo}>
           <Heart size={28} fill="currentColor" />
         </div>
-        <h1 className={styles.heading}>Welcome back</h1>
-        <p className={styles.subheading}>Sign in to CardioSense</p>
+        <h1 className={styles.heading}>{t.heading}</h1>
+        <p className={styles.subheading}>{t.subheading}</p>
 
         {error && <div className={styles.errorBanner}>{error}</div>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>
-            <label className={styles.label}>Email</label>
+            <label className={styles.label}>{t.emailLabel}</label>
             <div className={styles.inputWrapper}>
               <Mail size={16} className={styles.inputIcon} />
               <input
                 type="email"
                 className={styles.input}
-                placeholder="you@example.com"
+                placeholder={t.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -60,13 +62,13 @@ export default function LoginPage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>Password</label>
+            <label className={styles.label}>{t.passwordLabel}</label>
             <div className={styles.inputWrapper}>
               <Lock size={16} className={styles.inputIcon} />
               <input
                 type={showPassword ? 'text' : 'password'}
                 className={styles.input}
-                placeholder="••••••••"
+                placeholder={t.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -83,13 +85,13 @@ export default function LoginPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? t.submitLoading : t.submitLabel}
           </button>
         </form>
 
         <p className={styles.footer}>
-          Don't have an account?{' '}
-          <Link to="/register" className={styles.link}>Create one</Link>
+          {t.footerText}{' '}
+          <Link to="/register" className={styles.link}>{t.footerLink}</Link>
         </p>
       </motion.div>
     </div>

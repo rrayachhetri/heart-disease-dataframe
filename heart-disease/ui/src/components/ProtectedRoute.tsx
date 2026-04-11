@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
+import SessionManager from './Session/SessionManager';
 
 interface Props {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ interface Props {
  * Wraps a route that requires authentication.
  * Redirects to /login if no user is in the auth store.
  * Waits for the auth initialization check before deciding.
+ * Mounts SessionManager to track activity and enforce the 10-minute idle timeout.
  */
 export default function ProtectedRoute({ children }: Props) {
   const { user, initialized } = useSelector((s: RootState) => s.auth);
@@ -22,5 +24,10 @@ export default function ProtectedRoute({ children }: Props) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SessionManager />
+      {children}
+    </>
+  );
 }
