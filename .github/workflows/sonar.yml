@@ -55,7 +55,12 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Verify Java version
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+
       - name: SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@v2
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
