@@ -49,6 +49,12 @@ jobs:
         working-directory: heart-disease/ui
         run: npm run test:coverage
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@v2
         env:
