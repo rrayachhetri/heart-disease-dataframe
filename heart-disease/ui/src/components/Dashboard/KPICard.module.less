@@ -15,6 +15,11 @@
 .clickable {
   cursor: pointer;
 
+  &:focus-visible {
+    outline: 3px solid @primary;
+    outline-offset: 2px;
+  }
+
   &:hover {
     border-color: #CBD5E1;
 

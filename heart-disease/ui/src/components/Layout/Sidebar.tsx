@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Stethoscope,
+  BarChart3,
   X,
 } from 'lucide-react';
 import { useAppSelector } from '../../store/hooks';
@@ -21,12 +22,14 @@ const tApp  = getTextContent('app');
 const patientNavItems = [
   { path: '/', label: tNav.dashboard, icon: LayoutDashboard },
   { path: '/predict', label: tNav.newPrediction, icon: HeartPulse },
+  { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
 ];
 
 const doctorNavItems = [
   { path: '/', label: tNav.dashboard, icon: LayoutDashboard },
   { path: '/predict', label: tNav.newPrediction, icon: HeartPulse },
+  { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
   { path: '/doctor/profile', label: tNav.myProfile, icon: Stethoscope },
 ];

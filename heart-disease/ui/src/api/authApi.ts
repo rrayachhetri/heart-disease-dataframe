@@ -46,3 +46,25 @@ export async function getMe(): Promise<AuthUser> {
   const res = await fetch(`${API_BASE_URL}/auth/me`, { headers: authHeaders() });
   return handleResponse<AuthUser>(res);
 }
+
+export async function forgotPassword(
+  email: string,
+  first_name: string,
+  last_name: string,
+): Promise<{ message: string; dev_reset_token?: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, first_name, last_name }),
+  });
+  return handleResponse(res);
+}
+
+export async function resetPassword(token: string, new_password: string): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, new_password }),
+  });
+  return handleResponse(res);
+}

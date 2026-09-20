@@ -67,6 +67,10 @@ export default function Layout({ children }: Props) {
 
   return (
     <div className={styles.layout}>
+      <a href="#main-content" className={styles.skipLink}>
+        Skip to main content
+      </a>
+
       {/* Mobile overlay - handles both sidebar and user menu */}
       {isMobile && (mobileOpen || userMenuOpen) && (
         <div 
@@ -91,7 +95,7 @@ export default function Layout({ children }: Props) {
           onUserMenuClose={handleUserMenuClose}
         />
         <QuoteBanner collapsed={collapsed} />
-        <main className={styles.content}>{children}</main>
+        <main id="main-content" className={styles.content} tabIndex={-1}>{children}</main>
       </div>
     </div>
   );

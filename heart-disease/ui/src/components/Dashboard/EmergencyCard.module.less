@@ -1,0 +1,74 @@
+@import '../../styles/variables.less';
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: @space-4;
+  background: @danger-50;
+  border: 1px solid @danger-light;
+  border-radius: @radius-xl;
+  padding: @space-5 @space-6;
+  margin-bottom: @space-6;
+
+  @media (max-width: @breakpoint-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: @radius-full;
+  background: @danger-light;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.heading {
+  font-size: @font-size-lg;
+  font-weight: 700;
+  color: @danger;
+  margin: 0 0 @space-1;
+}
+
+.body {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: 0;
+}
+
+.callBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  background: @danger;
+  color: #fff;
+  font-weight: 700;
+  font-size: @font-size-base;
+  padding: @space-3 @space-6;
+  border-radius: @radius-full;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background @transition-fast;
+
+  &:hover,
+  &:focus-visible {
+    background: @danger-light;
+  }
+
+  &:focus-visible {
+    outline: 3px solid @danger;
+    outline-offset: 2px;
+  }
+}

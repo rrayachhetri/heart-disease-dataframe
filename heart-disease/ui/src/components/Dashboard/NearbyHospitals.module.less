@@ -1,0 +1,134 @@
+@import '../../styles/variables.less';
+
+.card {
+  background: @bg-card;
+  border-radius: @radius-xl;
+  box-shadow: @shadow-sm;
+  padding: @space-6;
+  margin-bottom: @space-6;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  margin-bottom: @space-4;
+}
+
+.iconBox {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: @radius-lg;
+  background: #e0f2fe;
+  color: #0369a1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heading {
+  font-size: @font-size-lg;
+  font-weight: 700;
+  color: @text-primary;
+  margin: 0;
+}
+
+.subheading {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: @space-1 0 0;
+}
+
+.findBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-2;
+  background: #0369a1;
+  color: #fff;
+  font-weight: 600;
+  font-size: @font-size-sm;
+  padding: @space-3 @space-5;
+  border: none;
+  border-radius: @radius-md;
+  cursor: pointer;
+  transition: opacity @transition-fast;
+
+  &:hover { opacity: 0.9; }
+  &:focus-visible { outline: 3px solid #0369a1; outline-offset: 2px; }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: 0 0 @space-2;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.manualLink {
+  display: inline-flex;
+  align-items: center;
+  gap: @space-1;
+  font-size: @font-size-sm;
+  color: #0369a1;
+  font-weight: 600;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: @space-3;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @space-3;
+  padding: @space-3;
+  border-radius: @radius-md;
+  background: @bg-secondary;
+}
+
+.hospitalName {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  margin: 0;
+}
+
+.hospitalDistance {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  margin: @space-1 0 0;
+}
+
+.directionsBtn {
+  flex-shrink: 0;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: #0369a1;
+  border: 1px solid #0369a1;
+  border-radius: @radius-md;
+  padding: @space-2 @space-3;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover { background: #0369a1; color: #fff; }
+  &:focus-visible { outline: 3px solid #0369a1; outline-offset: 2px; }
+}

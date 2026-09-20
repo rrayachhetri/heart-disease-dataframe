@@ -43,6 +43,30 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+    # Identity confirmation — must match the profile on file before a reset token is issued.
+    first_name: str
+    last_name: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise ValueError("password must be at least 8 characters")
+        return v
+
+
+class MessageResponse(BaseModel):
+    message: str
+    dev_reset_token: Optional[str] = None
+
+
 class UserResponse(BaseModel):
     id: str
     email: str

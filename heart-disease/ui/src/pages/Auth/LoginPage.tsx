@@ -89,6 +89,13 @@ export default function LoginPage() {
           </button>
         </form>
 
+        {error && (
+          <p className={styles.footer}>
+            {t.forgotText}{' '}
+            <Link to="/forgot-password" className={styles.link}>{t.forgotLink}</Link>
+          </p>
+        )}
+
         <p className={styles.footer}>
           {t.footerText}{' '}
           <Link to="/register" className={styles.link}>{t.footerLink}</Link>

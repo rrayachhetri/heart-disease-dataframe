@@ -48,6 +48,19 @@ export default function KPICard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `${title}: ${value}. ${linkLabel}` : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       whileHover={onClick ? { y: -3 } : undefined}
       whileTap={onClick ? { scale: 0.98 } : undefined}
     >
@@ -57,7 +70,7 @@ export default function KPICard({
           <p className={styles.value}>{value}</p>
           {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
         </div>
-        <div className={`${styles.iconBox} ${iconBoxVariants[color]}`}>
+        <div className={`${styles.iconBox} ${iconBoxVariants[color]}`} aria-hidden="true">
           <Icon size={22} />
         </div>
       </div>
@@ -70,7 +83,7 @@ export default function KPICard({
         </div>
       )}
       {onClick && (
-        <div className={`${styles.linkRow} ${linkRowVariants[color]}`}>
+        <div className={`${styles.linkRow} ${linkRowVariants[color]}`} aria-hidden="true">
           <span>{linkLabel}</span>
           <ArrowRight size={14} />
         </div>

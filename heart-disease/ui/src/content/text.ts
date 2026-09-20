@@ -18,9 +18,10 @@ export const TEXT = {
     dashboard: 'Dashboard',
     newPrediction: 'New Prediction',
     predictionResult: 'Prediction Result',
-    history: 'Prediction History',
+    history: 'History',
     doctorProfile: 'Doctor Profile',
     myProfile: 'My Profile',
+    modelInsights: 'Model Insights',
   },
 
   header: {
@@ -126,6 +127,52 @@ export const TEXT = {
     >,
   },
 
+  modelInsights: {
+    heading: 'Model Insights',
+    subheading:
+      'Training data, population cohorts, and performance metrics for the underlying ML system.',
+    loading: 'Loading model insights\u2026',
+  },
+
+  emergency: {
+    heading: 'Having a medical emergency?',
+    body:
+      'Chest pain, shortness of breath, fainting, or other severe symptoms need immediate attention. Don\u2019t wait \u2014 call emergency services now.',
+    callBtn: 'Call 911',
+    callBtnAria: 'Call emergency services at 911',
+  },
+
+  nearbyHospitals: {
+    heading: 'Nearby Hospitals',
+    subheading: 'Find emergency and urgent care near you',
+    findBtn: 'Find hospitals near me',
+    finding: 'Finding your location\u2026',
+    searching: 'Searching nearby hospitals\u2026',
+    permissionDenied:
+      'Location access was denied. You can still search for hospitals manually.',
+    locationError: 'Couldn\u2019t determine your location. Please try again.',
+    searchError: 'Couldn\u2019t load nearby hospitals right now.',
+    noResults: 'No hospitals found nearby. Try the manual search instead.',
+    manualSearchLink: 'Search \u201chospitals near me\u201d on Google Maps',
+    directionsLabel: (name: string) => `Get directions to ${name}`,
+    directionsBtn: 'Directions',
+    distanceAway: (km: number) => `${km.toFixed(1)} km away`,
+  },
+
+  healthTrends: {
+    heading: 'Health Trends',
+    subheading: 'Based on your prediction history',
+    empty: 'Add at least two predictions to see how your vitals are trending.',
+    cholesterolLabel: 'Cholesterol',
+    bloodPressureLabel: 'Blood Pressure',
+    heartRateLabel: 'Max Heart Rate',
+    improvingTag: 'Improving',
+    worseningTag: 'Needs attention',
+    stableTag: 'Stable',
+    latestVsFirst: (latest: number, first: number) =>
+      `${latest} now vs ${first} at first assessment`,
+  },
+
   login: {
     heading: 'Welcome back',
     subheading: 'Sign in to CardioSense',
@@ -135,8 +182,40 @@ export const TEXT = {
     passwordPlaceholder: '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022',
     submitLoading: 'Signing in\u2026',
     submitLabel: 'Sign in',
+    forgotText: 'Forgot your password?',
+    forgotLink: 'Reset it',
     footerText: "Don\u2019t have an account?",
     footerLink: 'Create one',
+  },
+
+  forgotPassword: {
+    heading: 'Forgot your password?',
+    subheading: 'Confirm your details and we\u2019ll generate a reset link',
+    emailLabel: 'Email',
+    emailPlaceholder: 'you@example.com',
+    firstNameLabel: 'First name',
+    firstNamePlaceholder: 'Jane',
+    lastNameLabel: 'Last name',
+    lastNamePlaceholder: 'Doe',
+    submitLoading: 'Sending\u2026',
+    submitLabel: 'Send reset link',
+    devTokenNote: 'Dev mode (no email service configured) \u2014 use this link to reset your password:',
+    footerText: 'Remembered your password?',
+    footerLink: 'Sign in',
+  },
+
+  resetPassword: {
+    heading: 'Reset your password',
+    subheading: 'Choose a new password for your account',
+    tokenLabel: 'Reset token',
+    tokenPlaceholder: 'Paste the reset token from your email',
+    passwordLabel: 'New password',
+    passwordPlaceholder: 'Min. 8 characters',
+    submitLoading: 'Resetting\u2026',
+    submitLabel: 'Reset password',
+    successMessage: 'Password reset successful. You can now sign in.',
+    footerText: 'Remembered your password?',
+    footerLink: 'Sign in',
   },
 
   register: {

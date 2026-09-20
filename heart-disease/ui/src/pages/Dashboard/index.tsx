@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useAppSelector } from '../../store/hooks';
 import { getTextContent } from '../../content/text';
 import {
@@ -10,13 +9,11 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import type { ModelInfo }
- from '../../types';
-import { fetchModelInfo, fetchDatasetComparison, type DatasetSummary } from '../../api/predictApi';
 import KPICard from '../../components/Dashboard/KPICard';
+import EmergencyCard from '../../components/Dashboard/EmergencyCard';
+import NearbyHospitals from '../../components/Dashboard/NearbyHospitals';
+import HealthTrends from '../../components/Dashboard/HealthTrends';
 import PredictionCharts from './PredictionCharts';
-import CohortExplorer from './CohortExplorer';
-import ModelPerformanceCard from './ModelPerformanceCard';
 import styles from './DashboardPage.module.less';
 
 export default function DashboardPage() {
@@ -24,18 +21,6 @@ export default function DashboardPage() {
   const history = useAppSelector((s) => s.prediction.history);
   const user = useAppSelector((s) => s.auth.user);
   const t = getTextContent('dashboard');
-
-  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
-  const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
-
-  useEffect(() => {
-    fetchModelInfo()
-      .then(setModelInfo)
-      .catch(() => { /* fail silently */ });
-    fetchDatasetComparison()
-      .then((r) => setDatasetSummaries(r.datasets.filter((d) => d.name !== 'combined')))
-      .catch(() => { /* fail silently */ });
-  }, []);
 
   const displayName = user
     ? [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email
@@ -59,6 +44,8 @@ export default function DashboardPage() {
 
   return (
     <div className={styles.page}>
+      <EmergencyCard />
+
       {/* Welcome header */}
       <div className={styles.welcome}>
         <div>
@@ -146,11 +133,11 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      {/* Dataset Cohort Explorer */}
-      {datasetSummaries.length > 0 && <CohortExplorer datasets={datasetSummaries} />}
+      {/* Health trends derived from prediction history */}
+      <HealthTrends history={history} />
 
-      {/* Model Performance */}
-      {modelInfo && <ModelPerformanceCard modelInfo={modelInfo} />}
+      {/* Nearby hospitals / urgent care finder */}
+      <NearbyHospitals />
     </div>
   );
 }

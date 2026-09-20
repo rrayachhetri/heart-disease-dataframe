@@ -196,7 +196,13 @@ Logout                →  Tokens cleared, redirect to /login
 | `POST` | `/api/auth/register` | Create account | Public |
 | `POST` | `/api/auth/login` | Get access + refresh tokens | Public |
 | `POST` | `/api/auth/refresh` | Rotate tokens | Public |
+| `POST` | `/api/auth/forgot-password` | Request a password reset token (15 min expiry) | Public |
+| `POST` | `/api/auth/reset-password` | Reset password using a valid reset token | Public |
 | `GET` | `/api/auth/me` | Get current user profile | 🔒 Bearer |
+
+> **No email service is wired up yet.** `/forgot-password` logs the reset token to the server console and — outside of `ENVIRONMENT=production` — also returns it in the response body as `dev_reset_token` so the UI flow (`/forgot-password` → `/reset-password`) works end-to-end locally.
+
+> **Identity verification:** `/forgot-password` requires `email` + `first_name` + `last_name` to all match the account's profile before a reset token is issued. If the email doesn't exist, or the name doesn't match, the same generic message is returned either way — so an attacker can't use this endpoint to enumerate registered emails or guess names.
 
 **Example — Register:**
 
@@ -406,9 +412,11 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
 
 | Page | Path | Features |
 |---|---|---|
-| **Login** | `/login` | JWT login, link to register |
+| **Login** | `/login` | JWT login, link to register, "Forgot password?" (shown after a failed login) |
 | **Register** | `/register` | Patient or Doctor account creation |
-| **Dashboard** | `/` | KPI cards, risk distribution pie chart, risk trend area chart, model performance card with AUC badge + feature importance bar chart, **Dataset Cohorts card** (4 research cohorts with record counts, disease rates, and feature averages) |
+| **Forgot / Reset Password** | `/forgot-password`, `/reset-password` | Identity-confirmed password reset (email + first/last name match required) |
+| **Dashboard** | `/` | **Emergency card** (tap-to-call 911), KPI cards, risk distribution pie chart, risk trend area chart, **Health Trends** (cholesterol/BP/heart-rate trend vs. first assessment), **Nearby Hospitals** finder (geolocation + OpenStreetMap) |
+| **Model Insights** | `/model-insights` | Model performance card with AUC badge + feature importance bar chart, **Dataset Cohorts card** (4 research cohorts with record counts, disease rates, and feature averages) — split out from the patient Dashboard |
 | **Predict** | `/predict` | Sectioned form (Personal / Symptoms / Vitals), validation |
 | **Result** | `/result` | Animated SVG risk gauge, color-coded verdict, patient summary, **"Why This Score?"** animated contribution bars per feature, **"How Do You Compare?"** population benchmark section with per-cohort percentile bars for each top-impact feature |
 | **History** | `/history` | Server-side history when logged in, localStorage fallback for anonymous |
@@ -420,8 +428,26 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
 - Logout button (clears tokens, redirects to `/login`)
 
 **Sidebar:**
-- Patient: Dashboard, New Prediction, History
-- Doctor: Dashboard, New Prediction, History, **My Profile**
+- Patient: Dashboard, New Prediction, History, Model Insights
+- Doctor: Dashboard, New Prediction, History, Model Insights, **My Profile**
+
+---
+
+## Accessibility (ADA / WCAG)
+
+Accessibility improvements applied across the auth pages, dashboard, sidebar, and new widgets:
+
+- **Skip link** — `Skip to main content` link at the top of every authenticated page, visible on keyboard focus, jumps past the sidebar/header to `#main-content`.
+- **Keyboard operability** — clickable KPI cards are real interactive elements (`role="button"`, `tabIndex`, `Enter`/`Space` activation, visible focus ring) instead of click-only `div`s.
+- **Landmarks** — `<nav>`, `<main>`, and `<aside>` regions are already in place via `Sidebar`/`Layout`; new widgets use `<section aria-labelledby="...">` with a heading `id` for screen-reader navigation.
+- **ARIA live regions** — Nearby Hospitals uses `role="status"` for loading and `role="alert"` for errors so screen readers announce state changes.
+- **Decorative icons** — icons used purely for decoration are `aria-hidden="true"`; interactive icon-only controls have `aria-label`.
+- **Color contrast** — emergency/error/success states use the existing high-contrast danger/success palette (WCAG AA 4.5:1 for body text).
+- **Focus-visible outlines** — all new interactive elements (Call 911, Find hospitals, Directions, clickable KPI cards) show a clear focus ring for keyboard users.
+
+> This is not an exhaustive, certified accessibility audit — it targets the components touched in this pass (auth flow, dashboard, sidebar). A full WCAG 2.1 AA audit across every page (forms, charts, modals) is recommended before a production/clinical rollout.
+
+
 
 ---
 
@@ -437,6 +463,41 @@ predictions    id, user_id (nullable), risk_score, risk_level, prediction, featu
 
 Default: **SQLite** (`cardiosense.db` in project root).
 Production: set `DATABASE_URL=postgresql://...` in `.env`.
+
+### Inspect the local SQLite DB
+
+List all registered user accounts:
+
+```powershell
+.\.venv\Scripts\python.exe -c "import sqlite3; con=sqlite3.connect('cardiosense.db'); cur=con.execute('SELECT id, email, role, is_active, is_verified, created_at FROM users'); [print(r) for r in cur.fetchall()]; con.close()"
+```
+
+List saved predictions for a user:
+
+```powershell
+.\.venv\Scripts\python.exe -c "import sqlite3; con=sqlite3.connect('cardiosense.db'); cur=con.execute('SELECT id, user_id, risk_score, risk_level, created_at FROM predictions'); [print(r) for r in cur.fetchall()]; con.close()"
+```
+
+Or open `cardiosense.db` directly in [DB Browser for SQLite](https://sqlitebrowser.org/) to browse/edit tables visually.
+
+To wipe all local data and start fresh (tables recreate automatically on next server start since `AUTO_CREATE_TABLES=true`):
+
+```powershell
+Remove-Item .\cardiosense.db
+```
+
+---
+
+## Known Local-Setup Quirks
+
+- **`ModuleNotFoundError: No module named 'src'` running `python .\src\models\train.py` directly** — run it as a module instead (`python -m src.models.train`), or make sure the project root is on `sys.path` (already patched in `train.py`).
+- **`SECRET_KEY environment variable is not set`** — you must copy `.env.example` to `.env` and set a real `SECRET_KEY`; there is no default in code for security reasons. Generate one quickly with:
+  ```powershell
+  .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_urlsafe(48))"
+  ```
+- **`ModuleNotFoundError` for `email_validator`, `bcrypt`, `jose`, `passlib`, or `python_multipart`** — these are auth/schema dependencies not always pulled in transitively; reinstall everything with `pip install -r requirements.txt` to sync the venv.
+- **`pip check`** — run `.\.venv\Scripts\python.exe -m pip check` any time to confirm there are no broken/conflicting dependencies in the venv.
+- **`.env` is gitignored** — never commit real secrets; only `.env.example` (a template with no real values) is tracked.
 
 ---
 

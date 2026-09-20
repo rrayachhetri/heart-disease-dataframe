@@ -5,11 +5,14 @@ import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/Auth/ResetPasswordPage';
 import DashboardPage from './pages/Dashboard';
 import PredictPage from './pages/Predict';
 import ResultPage from './pages/Result';
 import HistoryPage from './pages/History';
 import DoctorProfilePage from './pages/DoctorProfile';
+import ModelInsightsPage from './pages/ModelInsights';
 import SessionTimeoutPage from './pages/SessionTimeout';
 import SystemUnavailablePage from './pages/SystemUnavailable';
 import SessionWarningBanner from './components/Session/SessionWarningBanner';
@@ -40,6 +43,8 @@ export default function App() {
         {/* Public auth routes — no Layout */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Public status pages */}
         <Route path="/session-timeout" element={<SessionTimeoutPage />} />
@@ -56,6 +61,7 @@ export default function App() {
                   <Route path="/predict" element={<PredictPage />} />
                   <Route path="/result" element={<ResultPage />} />
                   <Route path="/history" element={<HistoryPage />} />
+                  <Route path="/model-insights" element={<ModelInsightsPage />} />
                   <Route path="/doctor/profile" element={<DoctorProfilePage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

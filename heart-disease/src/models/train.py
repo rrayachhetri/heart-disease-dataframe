@@ -10,7 +10,12 @@ per-dataset stats, quantile arrays for percentile benchmarking, and CV metrics.
 import mlflow
 import numpy as np
 import pandas as pd
+import sys
 from pathlib import Path
+
+# Allow running this file directly (python src/models/train.py) as well as via -m
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 from sklearn.ensemble import (
     RandomForestClassifier,
     GradientBoostingClassifier,

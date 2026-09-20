@@ -1,0 +1,87 @@
+@import '../../styles/variables.less';
+
+.card {
+  background: @bg-card;
+  border-radius: @radius-xl;
+  box-shadow: @shadow-sm;
+  padding: @space-6;
+  margin-bottom: @space-6;
+}
+
+.heading {
+  font-size: @font-size-lg;
+  font-weight: 700;
+  color: @text-primary;
+  margin: 0;
+}
+
+.subheading {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: @space-1 0 @space-4;
+}
+
+.empty {
+  font-size: @font-size-sm;
+  color: @text-secondary;
+  margin: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: @space-3;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @space-3;
+  padding: @space-3;
+  border-radius: @radius-md;
+  background: @bg-secondary;
+}
+
+.metricLabel {
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+  margin: 0;
+}
+
+.metricValue {
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  margin: @space-1 0 0;
+}
+
+.tag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: @space-1;
+  font-size: @font-size-xs;
+  font-weight: 700;
+  padding: @space-1 @space-3;
+  border-radius: @radius-full;
+  white-space: nowrap;
+}
+
+.tagGood {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tagBad {
+  background: @danger-50;
+  color: @danger;
+}
+
+.tagNeutral {
+  background: @bg-secondary;
+  color: @text-secondary;
+}

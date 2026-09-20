@@ -21,6 +21,7 @@ if not SECRET_KEY:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+RESET_TOKEN_EXPIRE_MINUTES = int(os.getenv("RESET_TOKEN_EXPIRE_MINUTES", "15"))
 
 
 def _prehash(plain: str) -> bytes:
@@ -62,6 +63,13 @@ def create_refresh_token(user_id: str) -> str:
     return _create_token(
         {"sub": user_id, "type": "refresh"},
         timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+    )
+
+
+def create_reset_token(user_id: str) -> str:
+    return _create_token(
+        {"sub": user_id, "type": "reset"},
+        timedelta(minutes=RESET_TOKEN_EXPIRE_MINUTES),
     )
 
 
