@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 # Test-time environment defaults must be set before app modules import auth settings.
 os.environ.setdefault('SECRET_KEY', 'test-secret-key')
 os.environ.setdefault('ENVIRONMENT', 'development')
-os.environ.setdefault('DATABASE_URL', 'sqlite:///./test_cardiosense.db')
+os.environ.setdefault('DATABASE_URL', 'sqlite:///./.data/db/test_cardiosense.db')
 os.environ.setdefault('AUTO_CREATE_TABLES', 'false')
 
 import src.api.app as api_module

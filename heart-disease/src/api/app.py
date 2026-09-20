@@ -9,8 +9,9 @@ from src.auth.routes import router as auth_router
 from src.routers.predictions import router as predictions_router
 from src.routers.doctors import router as doctors_router
 from src.routers.analytics import router as analytics_router
+from src.config.paths import MODEL_DIR
 
-MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
+MODELS_DIR = MODEL_DIR
 ENSEMBLE_PATH = MODELS_DIR / "ensemble_model.joblib"
 LEGACY_RF_PATH = MODELS_DIR / "rf_model.joblib"
 

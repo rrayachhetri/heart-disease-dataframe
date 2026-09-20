@@ -6,10 +6,12 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
+from src.config.paths import DATABASE_DIR, ensure_data_directories
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cardiosense.db")
+ensure_data_directories()
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATABASE_DIR / 'cardiosense.db'}")
 
 # SQLite needs check_same_thread=False; ignored for other DBs
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}

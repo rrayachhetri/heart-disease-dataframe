@@ -45,6 +45,8 @@ export interface PredictionResult {
   top_factors?: TopFactor[];
   /** Population-percentile benchmarks across all 4 dataset cohorts. */
   population_percentiles?: PopulationPercentile[];
+  processing_time_ms?: number;
+  processing_metrics?: Record<string, number>;
 }
 
 export interface PredictionRecord {
@@ -96,6 +98,10 @@ export interface ModelInfo {
   model_type: string;
   metrics: ModelMetrics;
   feature_importances: FeatureImportanceItem[];
+  model_memory_mb: number;
+  processing_steps: string[];
+  runtime_ram_mb: number;
+  cpu_cores: number;
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

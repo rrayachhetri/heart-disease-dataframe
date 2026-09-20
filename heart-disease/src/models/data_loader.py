@@ -17,7 +17,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict
 
-ROOT = Path(__file__).resolve().parents[2]
+from src.config.paths import RAW_DATA_DIR
 
 FEATURE_COLS: list[str] = [
     "age", "sex", "cp", "trestbps", "chol", "fbs",
@@ -29,10 +29,10 @@ ALL_COLS = FEATURE_COLS + [TARGET_COL]
 # reprocessed.hungarian.data is the quality-verified version (space-separated,
 # uses -9 as missing marker instead of ?)
 _DATASETS: dict[str, tuple[Path, str]] = {
-    "cleveland":   (ROOT / "processed.cleveland.data",    "csv"),
-    "hungarian":   (ROOT / "reprocessed.hungarian.data",  "space"),
-    "switzerland": (ROOT / "processed.switzerland.data",  "csv"),
-    "va":          (ROOT / "processed.va.data",           "csv"),
+    "cleveland":   (RAW_DATA_DIR / "processed.cleveland.data",    "csv"),
+    "hungarian":   (RAW_DATA_DIR / "reprocessed.hungarian.data",  "space"),
+    "switzerland": (RAW_DATA_DIR / "processed.switzerland.data",  "csv"),
+    "va":          (RAW_DATA_DIR / "processed.va.data",           "csv"),
 }
 
 # Features where 0 is physiologically impossible and should be treated as NaN
@@ -85,7 +85,7 @@ def load_all_datasets() -> pd.DataFrame:
 
     if not frames:
         raise FileNotFoundError(
-            "No processed dataset files found. Expected files in the project root."
+            f"No processed dataset files found. Expected files in {RAW_DATA_DIR}."
         )
 
     combined = pd.concat(frames, ignore_index=True)

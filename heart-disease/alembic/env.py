@@ -5,6 +5,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 from dotenv import load_dotenv
+from src.config.paths import DATABASE_DIR
 
 load_dotenv()
 
@@ -15,7 +16,10 @@ import src.db.models  # noqa: F401, E402
 config = context.config
 
 # Override sqlalchemy.url from environment
-config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", "sqlite:///./cardiosense.db"))
+config.set_main_option(
+    "sqlalchemy.url",
+    os.getenv("DATABASE_URL", f"sqlite:///{DATABASE_DIR / 'cardiosense.db'}"),
+)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

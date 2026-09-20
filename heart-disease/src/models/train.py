@@ -41,11 +41,9 @@ from src.models.data_loader import (
     FEATURE_COLS,
     TARGET_COL,
 )
+from src.config.paths import DATABASE_DIR, MLFLOW_DIR, MODEL_DIR, PROCESSED_DATA_DIR, ensure_data_directories
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-MODEL_DIR = Path(__file__).resolve().parents[2] / "models"
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
+ensure_data_directories()
 
 
 def build_ensemble() -> VotingClassifier:
@@ -76,6 +74,15 @@ def build_ensemble() -> VotingClassifier:
 
 
 def train():
+    # Use MLflow's SQLite backend; newer MLflow versions reject filesystem tracking.
+    mlflow.set_tracking_uri(f"sqlite:///{DATABASE_DIR / 'mlflow.db'}")
+    mlflow.set_registry_uri(f"sqlite:///{DATABASE_DIR / 'mlflow.db'}")
+    if mlflow.get_experiment_by_name("cardiosense") is None:
+        mlflow.create_experiment(
+            "cardiosense",
+            artifact_location=MLFLOW_DIR.as_uri(),
+        )
+    mlflow.set_experiment("cardiosense")
     # Load and merge all 4 datasets with imputation applied
     df = load_all_datasets()
     X = df[FEATURE_COLS]
@@ -105,7 +112,6 @@ def train():
         X, y, test_size=0.2, stratify=y, random_state=42
     )
 
-    mlflow.set_experiment("cardiosense")
     with mlflow.start_run():
         # ── Run name + tags ─────────────────────────────────────────
         mlflow.set_tag("mlflow.runName", "RF300+GBM200+LR | multi-dataset")
@@ -174,7 +180,7 @@ def train():
         }
 
         # Persist updated training data for reproducibility
-        multi_parquet = DATA_DIR / "processed_multi.parquet"
+        multi_parquet = PROCESSED_DATA_DIR / "processed_multi.parquet"
         df.to_parquet(multi_parquet, index=False)
 
         model_path = MODEL_DIR / "ensemble_model.joblib"

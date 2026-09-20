@@ -121,6 +121,17 @@ export default function PredictPage() {
       const isHigh = result.result.prediction === 1;
       const pct = Math.round(result.result.probability * 100);
 
+      if (result.result.processing_time_ms !== undefined) {
+        localStorage.setItem(
+          'lastPredictionTelemetry',
+          JSON.stringify({
+            processingTimeMs: result.result.processing_time_ms,
+            processingMetrics: result.result.processing_metrics,
+            recordedAt: Date.now(),
+          })
+        );
+      }
+
       sendNotification({
         type: isHigh ? 'warning' : 'success',
         title: isHigh ? t.notificationHighTitle : t.notificationLowTitle,

@@ -4,8 +4,14 @@ Saves predictions to the DB when user is authenticated.
 Anonymous predictions are still accepted (user_id=None).
 """
 import json
+import os
+import time
 from typing import Any, Dict, List, Optional
 
+try:
+    import psutil
+except ImportError:  # Optional runtime telemetry dependency.
+    psutil = None
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -60,6 +66,8 @@ class PredictionResult(BaseModel):
     risk_level: str
     top_factors: List[TopFactor] = []
     population_percentiles: List[FeaturePercentile] = []
+    processing_time_ms: float
+    processing_metrics: Dict[str, float]
 
 
 class FeatureImportanceItem(BaseModel):
@@ -72,6 +80,17 @@ class ModelInfoResponse(BaseModel):
     model_type: str
     metrics: Dict[str, float]
     feature_importances: List[FeatureImportanceItem]
+    model_memory_mb: float
+    processing_steps: List[str]
+    runtime_ram_mb: float
+    cpu_cores: int
+
+
+def _runtime_ram_mb() -> float:
+    """Return process RSS when psutil is installed, otherwise report unavailable."""
+    if psutil is None:
+        return 0.0
+    return psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -105,19 +124,27 @@ def predict(
     from src.models.data_loader import percentile_of_value, FEATURE_COLS as _FEAT_COLS
     from src.models.explain import FEATURE_LABELS
 
+    started_at = time.perf_counter()
+    cpu_started_at = time.process_time()
+    stage_started_at = started_at
+    stage_times: Dict[str, float] = {}
     md = _get_model_data()
     model = md["model"]
     feature_cols = md["feature_cols"]
 
     row = {f: getattr(features, f) for f in feature_cols}
     X = pd.DataFrame([row], columns=feature_cols)
+    stage_times["feature_frame_ms"] = (time.perf_counter() - stage_started_at) * 1000
+    stage_started_at = time.perf_counter()
     prob = float(model.predict_proba(X)[0][1])
     pred = int(model.predict(X)[0])
     level = _risk_level(prob)
+    stage_times["model_inference_ms"] = (time.perf_counter() - stage_started_at) * 1000
 
     # Per-prediction explainability (only when population stats are available)
     top_factors: List[Dict] = []
     if md.get("feature_stats") and md.get("feature_cols"):
+        stage_started_at = time.perf_counter()
         top_factors = compute_top_factors(
             features=features.model_dump(),
             model=model,
@@ -125,11 +152,13 @@ def predict(
             feature_stats=md["feature_stats"],
             top_n=6,
         )
+        stage_times["explainability_ms"] = (time.perf_counter() - stage_started_at) * 1000
 
     # Population-percentile benchmarking across all 4 dataset cohorts
     population_percentiles: List[Dict] = []
     quantile_arrays = md.get("quantile_arrays")
     if quantile_arrays:
+        stage_started_at = time.perf_counter()
         patient_dict = features.model_dump()
         for feat in _FEAT_COLS:
             value = patient_dict.get(feat)
@@ -154,10 +183,12 @@ def predict(
                     f"{rank:.0f}% of the combined population."
                 ),
             })
+            stage_times["benchmarking_ms"] = (time.perf_counter() - stage_started_at) * 1000
 
     # Persist when authenticated
     record_id = None
     if current_user:
+        stage_started_at = time.perf_counter()
         record = Prediction(
             user_id=current_user.id,
             risk_score=prob,
@@ -169,6 +200,15 @@ def predict(
         db.commit()
         db.refresh(record)
         record_id = record.id
+        stage_times["database_persistence_ms"] = (time.perf_counter() - stage_started_at) * 1000
+
+    processing_time_ms = (time.perf_counter() - started_at) * 1000
+    processing_metrics = {
+        **{name: round(value, 2) for name, value in stage_times.items()},
+        "wall_time_ms": round(processing_time_ms, 2),
+        "cpu_time_ms": round((time.process_time() - cpu_started_at) * 1000, 2),
+        "runtime_ram_mb": round(_runtime_ram_mb(), 2),
+    }
 
     return PredictionResult(
         id=record_id,
@@ -177,6 +217,8 @@ def predict(
         risk_level=level,
         top_factors=top_factors,
         population_percentiles=population_percentiles,
+        processing_time_ms=round(processing_time_ms, 2),
+        processing_metrics=processing_metrics,
     )
 
 
@@ -202,7 +244,25 @@ def model_info():
         model_type=md.get("model_type", "Unknown"),
         metrics={k: round(v, 4) for k, v in md.get("metrics", {}).items()},
         feature_importances=importance_list,
+        model_memory_mb=round(_model_memory_mb(), 2),
+        processing_steps=[
+            "Validate 13 clinical inputs",
+            "Build a single-row feature frame",
+            "Run ensemble probability and classification",
+            "Compute feature explanations and cohort percentiles",
+            "Persist prediction when authenticated",
+        ],
+        runtime_ram_mb=round(_runtime_ram_mb(), 2),
+        cpu_cores=os.cpu_count() or 1,
     )
+
+
+def _model_memory_mb() -> float:
+    """Return the serialized model footprint used by the running API."""
+    from src.api.app import ENSEMBLE_PATH, LEGACY_RF_PATH
+
+    model_path = ENSEMBLE_PATH if ENSEMBLE_PATH.exists() else LEGACY_RF_PATH
+    return model_path.stat().st_size / (1024 * 1024) if model_path.exists() else 0.0
 
 
 @router.get("")

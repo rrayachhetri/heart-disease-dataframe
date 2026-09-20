@@ -1,10 +1,136 @@
 @import '../../styles/variables.less';
 
+.page {
+  max-width: 1200px;
+}
+
+.inferencePanel {
+  width: 100%;
+  flex: 1 1 100%;
+  padding: @space-4;
+  border: 1px solid rgba(45, 106, 106, 0.18);
+  border-radius: @radius-lg;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(236, 253, 245, 0.72));
+  box-shadow: @shadow-sm;
+}
+
+.inferenceHeader,
+.inferenceTitle,
+.inferenceStat,
+.processingLine {
+  display: flex;
+  align-items: center;
+}
+
+.inferenceHeader {
+  justify-content: space-between;
+  gap: @space-3;
+  margin-bottom: @space-3;
+}
+
+.inferenceTitle {
+  gap: @space-2;
+  color: #2d6a6a;
+
+  h3 {
+    margin: 0;
+    font-size: @font-size-sm;
+    color: @text-primary;
+  }
+}
+
+.liveBadge {
+  padding: 0.2rem 0.5rem;
+  border-radius: @radius-full;
+  background: @success-50;
+  color: @success;
+  font-size: @font-size-xs;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.inferenceStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: @space-3;
+}
+
+.inferenceStat {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: @space-2;
+  color: @text-tertiary;
+  font-size: @font-size-xs;
+
+  span {
+    min-width: 0;
+  }
+
+  strong {
+    flex-basis: 100%;
+    color: @text-primary;
+    font-size: @font-size-base;
+  }
+}
+
+.processingLine {
+  gap: @space-2;
+  margin-top: @space-3;
+  padding-top: @space-3;
+  border-top: 1px solid rgba(45, 106, 106, 0.12);
+  color: @text-secondary;
+  font-size: @font-size-xs;
+}
+
+.processingDetails {
+  margin-top: @space-3;
+  padding-top: @space-3;
+  border-top: 1px solid rgba(45, 106, 106, 0.12);
+}
+
+.detailHeading {
+  margin-bottom: @space-2;
+  color: @text-primary;
+  font-size: @font-size-xs;
+  font-weight: 700;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem @space-4;
+  color: @text-secondary;
+  font-size: @font-size-xs;
+
+  strong {
+    color: @text-primary;
+    font-weight: 700;
+    text-align: right;
+  }
+}
+
 .skeletonWrap {
   display: grid;
   gap: @space-6;
   margin-bottom: @space-6;
   overflow-x: clip;
+}
+
+@media (max-width: @breakpoint-md) {
+  .inferencePanel {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .inferenceStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: @breakpoint-sm) {
+  .inferenceStats {
+    grid-template-columns: 1fr;
+  }
 }
 
 .skeletonCard,

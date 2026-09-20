@@ -91,9 +91,12 @@ heart-disease/
 │           ├── Dashboard/          # KPICard, RiskGauge
 │           ├── Form/               # FormField, SelectField
 │           └── Notification/       # NotificationCenter
-├── models/
-│   ├── ensemble_model.joblib       # Trained VotingClassifier (RF + GBM + LR) with metadata
-│   └── rf_model.joblib             # Legacy RandomForest (fallback if ensemble not present)
+├── .data/                          # All datasets and generated runtime artifacts
+│   ├── raw/                        # UCI source and processed .data files
+│   ├── processed/                  # Parquet training outputs
+│   ├── models/                     # Trained model artifacts
+│   ├── mlruns/                     # MLflow tracking artifacts
+│   └── db/                         # SQLite databases
 ├── .env.example                    # Environment variable template
 ├── alembic.ini                     # Alembic configuration
 ├── requirements.txt                # Python dependencies
@@ -123,7 +126,7 @@ Edit `.env` and set at minimum:
 
 ```env
 SECRET_KEY=your-long-random-secret-key-here
-DATABASE_URL=sqlite:///./cardiosense.db   # SQLite (default, no setup needed)
+DATABASE_URL=sqlite:///./.data/db/cardiosense.db   # SQLite (default, no setup needed)
 ```
 
 For production with PostgreSQL:
@@ -135,7 +138,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/cardiosense
 ### 3. Prepare data and train model
 
 ```powershell
-python -m src.models.train    # loads all 4 UCI datasets, imputes, saves models/ensemble_model.joblib + data/processed_multi.parquet
+python -m src.models.train    # loads .data/raw datasets, saves .data/models + .data/processed artifacts
 ```
 
 > `prepare.py` is no longer required. The training script loads and merges all datasets automatically with missing-value imputation.
@@ -189,6 +192,17 @@ Pop-Location
 pip install -r .\requirements-dev.txt
 python -m pytest
 ```
+
+For the runtime telemetry dependency, install into the same virtual environment
+that launches Uvicorn:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r .\requirements.txt
+```
+
+If `psutil` is unavailable, the API still starts and reports `0 MB` for process
+RAM until the dependency is installed; model size, CPU time, and stage timings
+remain available.
 
 ### Run all tests
 
@@ -462,7 +476,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
 | **Register** | `/register` | Patient or Doctor account creation |
 | **Forgot / Reset Password** | `/forgot-password`, `/reset-password` | Identity-confirmed password reset (email + first/last name match required) |
 | **Dashboard** | `/` | **Emergency card** (tap-to-call 911), KPI cards, risk distribution pie chart, risk trend area chart, **Health Trends** (cholesterol/BP/heart-rate trend vs. first assessment), **Nearby Hospitals** finder (geolocation + OpenStreetMap) |
-| **Model Insights** | `/model-insights` | Model performance card with AUC badge + feature importance bar chart, **Dataset Cohorts card** (4 research cohorts with record counts, disease rates, and feature averages) — split out from the patient Dashboard |
+| **Model Insights** | `/model-insights` | Model performance card with AUC badge + feature importance bar chart, **Dataset Cohorts card** (4 research cohorts with record counts, disease rates, and feature averages), plus computed model footprint, process RAM, CPU capacity, and prediction-stage timings |
 | **Predict** | `/predict` | Sectioned form (Personal / Symptoms / Vitals), validation |
 | **Result** | `/result` | Animated SVG risk gauge, color-coded verdict, patient summary, **"Why This Score?"** animated contribution bars per feature, **"How Do You Compare?"** population benchmark section with per-cohort percentile bars for each top-impact feature |
 | **History** | `/history` | Server-side history when logged in, localStorage fallback for anonymous |
@@ -507,7 +521,7 @@ doctors        id, user_id, first_name, last_name, npi_number, specialty, bio, p
 predictions    id, user_id (nullable), risk_score, risk_level, prediction, features_json, created_at
 ```
 
-Default: **SQLite** (`cardiosense.db` in project root).
+Default: **SQLite** (`.data/db/cardiosense.db`).
 Production: set `DATABASE_URL=postgresql://...` in `.env`.
 
 ### Inspect the local SQLite DB
@@ -515,21 +529,21 @@ Production: set `DATABASE_URL=postgresql://...` in `.env`.
 List all registered user accounts:
 
 ```powershell
-.\.venv\Scripts\python.exe -c "import sqlite3; con=sqlite3.connect('cardiosense.db'); cur=con.execute('SELECT id, email, role, is_active, is_verified, created_at FROM users'); [print(r) for r in cur.fetchall()]; con.close()"
+.\.venv\Scripts\python.exe -c "import sqlite3; con=sqlite3.connect('.data/db/cardiosense.db'); cur=con.execute('SELECT id, email, role, is_active, is_verified, created_at FROM users'); [print(r) for r in cur.fetchall()]; con.close()"
 ```
 
 List saved predictions for a user:
 
 ```powershell
-.\.venv\Scripts\python.exe -c "import sqlite3; con=sqlite3.connect('cardiosense.db'); cur=con.execute('SELECT id, user_id, risk_score, risk_level, created_at FROM predictions'); [print(r) for r in cur.fetchall()]; con.close()"
+.\.venv\Scripts\python.exe -c "import sqlite3; con=sqlite3.connect('.data/db/cardiosense.db'); cur=con.execute('SELECT id, user_id, risk_score, risk_level, created_at FROM predictions'); [print(r) for r in cur.fetchall()]; con.close()"
 ```
 
-Or open `cardiosense.db` directly in [DB Browser for SQLite](https://sqlitebrowser.org/) to browse/edit tables visually.
+Or open `.data/db/cardiosense.db` directly in [DB Browser for SQLite](https://sqlitebrowser.org/) to browse/edit tables visually.
 
 To wipe all local data and start fresh (tables recreate automatically on next server start since `AUTO_CREATE_TABLES=true`):
 
 ```powershell
-Remove-Item .\cardiosense.db
+Remove-Item .\.data\db\cardiosense.db
 ```
 
 ---
@@ -554,14 +568,14 @@ docker build -t cardiosense:dev .
 docker run -p 8080:8080 --env-file .env cardiosense:dev
 ```
 
-> Ensure `models/rf_model.joblib` exists and `.env` is configured before building.
+> Ensure `.data/models/rf_model.joblib` exists and `.env` is configured before building.
 
 ---
 
 ## MLflow
 
 ```powershell
-mlflow ui --backend-store-uri ./mlruns
+mlflow ui --backend-store-uri sqlite:///./.data/db/mlflow.db --default-artifact-root ./.data/mlruns
 # open http://127.0.0.1:5000
 ```
 
@@ -586,6 +600,7 @@ mlflow ui --backend-store-uri ./mlruns
 - **Population percentiles:** Every prediction response includes `population_percentiles` — the patient's value for each top-impact feature ranked against 5 scopes (combined, cleveland, hungarian, switzerland, va). Computed via pre-built 101-point quantile arrays stored in the model joblib (O(log N) lookup, no raw data stored at runtime).
 - **Dataset disease rates vary dramatically:** Switzerland 93.5 %, VA 74.5 %, Cleveland 45.9 %, Hungarian 36.1 %. The benchmark "How Do You Compare?" section on the Result page always labels which cohort each bar represents so percentiles are interpretable in context.
 - The ensemble model (`ensemble_model.joblib`) stores the trained model, feature importances, population statistics, quantile arrays, and CV metrics as a single dict — enabling explainability and benchmarking without a separate feature store.
+- **Runtime inference telemetry:** Model Insights reports the serialized model footprint, current API process RSS, CPU core count, wall-clock prediction time, CPU time, feature-frame creation, model inference, explainability, population benchmarking, and database persistence timings. These are measured by the API at runtime; `model_memory_mb` is the serialized model file size, while `runtime_ram_mb` is the API process RSS.
 - Per-prediction explanations use baseline perturbation: each feature's contribution = P(risk | feature=patient_value, rest=mean) − P(risk | all=mean). This is model-agnostic and requires no additional libraries.
 - The ML model is for **educational/research purposes only** and is not a medical diagnostic device.
 - JWT access tokens expire in 30 minutes; refresh tokens in 7 days (configurable via `.env`).
@@ -643,7 +658,7 @@ python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload
 **What happens on startup:**
 1. Python imports `src/api/app.py`
 2. All routers are registered (auth, predictions, doctors)
-  3. `startup_event()` fires — loads `models/ensemble_model.joblib` into memory (falls back to `rf_model.joblib` if ensemble not present)
+  3. `startup_event()` fires — loads `.data/models/ensemble_model.joblib` into memory (falls back to `rf_model.joblib` if ensemble not present)
 4. `init_db()` creates the SQLite tables (`users`, `patients`, `doctors`, `predictions`) if they don't exist yet
 5. Uvicorn begins accepting connections on `127.0.0.1:8080`
 
@@ -906,7 +921,7 @@ The backend ships with an interactive API explorer. With the backend running:
 | `500` on register/login | FastAPI backend not running | Start uvicorn on port 8080 (Step 1 above) |
 | `Failed to fetch` / network error | Vite can't reach the backend proxy target | Confirm uvicorn is running on `127.0.0.1:8080` |
 | Redirected to `/login` after page refresh | Token expired or missing from localStorage | Log in again |
-| `503 Model not loaded` on predict | Model file missing at startup | Run `python -m src.models.train`; ensure `models/ensemble_model.joblib` exists |
+| `503 Model not loaded` on predict | Model file missing at startup | Run `python -m src.models.train`; ensure `.data/models/ensemble_model.joblib` exists |
 | CORS error in browser console | Frontend running on a port not in CORS allow-list | Add your port to `allow_origins` in `src/api/app.py` |
 | `Email already registered` | Duplicate email on register | Use a different email address |
 | `422 Unprocessable Entity` | Request body missing required fields | Check the request body matches the schema above |

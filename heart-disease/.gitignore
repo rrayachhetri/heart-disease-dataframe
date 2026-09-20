@@ -20,6 +20,10 @@ dist/
 build/
 
 # Data and model artifacts (do not commit large or generated files)
+.data/processed/
+.data/models/
+.data/mlruns/
+.data/db/
 data/
 data/*.csv
 data/processed.parquet

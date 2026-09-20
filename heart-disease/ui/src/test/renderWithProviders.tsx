@@ -5,24 +5,15 @@ import { MemoryRouter } from 'react-router-dom';
 import type { ReactElement } from 'react';
 
 import authReducer from '../store/slices/authSlice';
+import predictionReducer from '../store/slices/predictionSlice';
 import notificationReducer from '../store/slices/notificationSlice';
 import sessionReducer from '../store/slices/sessionSlice';
 import systemReducer from '../store/slices/systemSlice';
 import type { RootState } from '../store';
 
-const predictionStubReducer = (
-  state = {
-    currentResult: null,
-    currentPatientData: null,
-    history: [],
-    loading: false,
-    error: null,
-  }
-) => state;
-
 const reducer = {
   auth: authReducer,
-  prediction: predictionStubReducer,
+  prediction: predictionReducer,
   notifications: notificationReducer,
   session: sessionReducer,
   system: systemReducer,
