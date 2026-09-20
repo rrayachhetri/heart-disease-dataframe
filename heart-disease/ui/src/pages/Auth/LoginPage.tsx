@@ -20,8 +20,10 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || !email.trim() || !password.trim()) return;
+
     dispatch(clearAuthError());
-    const result = await dispatch(loginUser({ email, password }));
+    const result = await dispatch(loginUser({ email: email.trim(), password }));
     if (loginUser.fulfilled.match(result)) {
       navigate('/');
     }
@@ -89,7 +91,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button type="submit" className={styles.submitBtn} disabled={loading}>
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            disabled={loading || !email.trim() || !password.trim()}
+          >
             {loading ? t.submitLoading : t.submitLabel}
           </button>
         </form>

@@ -2,7 +2,7 @@ import { ChevronDown, X as XIcon, Search, Menu } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { setAvatarUrl } from '../../../store/slices/authSlice';
+import { setAvatarPosition, setAvatarUrl } from '../../../store/slices/authSlice';
 import { getTextContent } from '../../../content/text';
 import type { PredictionRecord } from '../../../types';
 import UserMenuDropdown from './UserMenuDropdown';
@@ -35,9 +35,11 @@ export default function Header({ onMenuClick, userMenuOpen, onUserMenuToggle, on
   const unreadCount = notifications.filter((n) => !n.read).length;
   const user = useAppSelector((s) => s.auth.user);
   const avatarUrl = useAppSelector((s) => s.auth.avatarUrl);
+  const avatarPosition = useAppSelector((s) => s.auth.avatarPosition);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [pendingAvatarUrl, setPendingAvatarUrl] = useState<string | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,13 +72,25 @@ export default function Header({ onMenuClick, userMenuOpen, onUserMenuToggle, on
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
-      dispatch(setAvatarUrl(dataUrl));
+      setPendingAvatarUrl(dataUrl);
+      dispatch(setAvatarPosition('50% 50%'));
     };
     reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const handleApplyAvatar = () => {
+    if (!pendingAvatarUrl) return;
+    dispatch(setAvatarUrl(pendingAvatarUrl));
+    setPendingAvatarUrl(null);
+  };
+
+  const handleCancelAvatarUpload = () => {
+    setPendingAvatarUrl(null);
   };
 
   useEffect(() => {
@@ -186,7 +200,12 @@ export default function Header({ onMenuClick, userMenuOpen, onUserMenuToggle, on
             >
               <div className={styles.avatar}>
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" className={styles.avatarImg} />
+                  <img
+                    src={avatarUrl}
+                    alt="avatar"
+                    className={styles.avatarImg}
+                    style={{ objectPosition: avatarPosition }}
+                  />
                 ) : (
                   initials
                 )}
@@ -203,7 +222,13 @@ export default function Header({ onMenuClick, userMenuOpen, onUserMenuToggle, on
             </button>
 
             {userMenuOpen && (
-              <UserMenuDropdown fileInputRef={fileInputRef} onClose={onUserMenuClose} />
+              <UserMenuDropdown
+                fileInputRef={fileInputRef}
+                onClose={onUserMenuClose}
+                pendingAvatarUrl={pendingAvatarUrl}
+                onApplyAvatar={handleApplyAvatar}
+                onCancelAvatarUpload={handleCancelAvatarUpload}
+              />
             )}
           </div>
         )}

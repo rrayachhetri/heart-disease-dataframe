@@ -15,10 +15,15 @@ interface Props {
  */
 export default function ProtectedRoute({ children }: Props) {
   const { user, initialized } = useSelector((s: RootState) => s.auth);
+  const sessionStatus = useSelector((s: RootState) => s.session.status);
   const location = useLocation();
 
   // Still loading the stored token — show nothing to avoid flash
   if (!initialized) return null;
+
+  if (sessionStatus === 'expired') {
+    return <Navigate to="/session-timeout" replace />;
+  }
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;

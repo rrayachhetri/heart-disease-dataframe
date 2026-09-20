@@ -1,13 +1,17 @@
 import { Bell, LogOut, User, Shield, CheckCheck, Trash2, Camera, X as XIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { logout, setAvatarUrl } from '../../../store/slices/authSlice';
+import { logout, setAvatarPosition, setAvatarUrl } from '../../../store/slices/authSlice';
 import { markAllAsRead, clearNotifications, markAsRead } from '../../../store/slices/notificationSlice';
 import styles from './Header.module.less';
 
 interface Props {
   fileInputRef: React.RefObject<HTMLInputElement>;
   onClose: () => void;
+  pendingAvatarUrl?: string | null;
+  onApplyAvatar?: () => void;
+  onCancelAvatarUpload?: () => void;
 }
 
 const TYPE_COLOR: Record<string, string> = {
@@ -29,13 +33,52 @@ function notificationRoute(targetRoute?: string): string {
   return targetRoute || '/history';
 }
 
-export default function UserMenuDropdown({ fileInputRef, onClose }: Props) {
+export default function UserMenuDropdown({
+  fileInputRef,
+  onClose,
+  pendingAvatarUrl,
+  onApplyAvatar,
+  onCancelAvatarUpload,
+}: Props) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const avatarUrl = useAppSelector((s) => s.auth.avatarUrl);
+  const avatarPosition = useAppSelector((s) => s.auth.avatarPosition);
   const notifications = useAppSelector((s) => s.notifications.notifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const [showAlignControls, setShowAlignControls] = useState(Boolean(pendingAvatarUrl));
+
+  const parsePosition = (value: string) => {
+    const [x = '50%', y = '50%'] = value.split(' ');
+    return {
+      x: Number.parseInt(x, 10) || 50,
+      y: Number.parseInt(y, 10) || 50,
+    };
+  };
+
+  const { x, y } = parsePosition(avatarPosition);
+
+  const updateAvatarPosition = (axis: 'x' | 'y', value: number) => {
+    const next = axis === 'x'
+      ? `${value}% ${y}%`
+      : `${x}% ${value}%`;
+    dispatch(setAvatarPosition(next));
+  };
+
+  const applyPendingAvatar = () => {
+    if (pendingAvatarUrl && onApplyAvatar) {
+      onApplyAvatar();
+      setShowAlignControls(false);
+    }
+  };
+
+  const cancelPendingAvatar = () => {
+    if (onCancelAvatarUpload) {
+      onCancelAvatarUpload();
+    }
+    setShowAlignControls(false);
+  };
 
   if (!user) return null;
 
@@ -60,7 +103,12 @@ export default function UserMenuDropdown({ fileInputRef, onClose }: Props) {
         >
           <div className={styles.profileAvatar}>
             {avatarUrl ? (
-              <img src={avatarUrl} alt="avatar" className={styles.avatarImg} />
+              <img
+                src={avatarUrl}
+                alt="avatar"
+                className={styles.avatarImg}
+                style={{ objectPosition: avatarPosition }}
+              />
             ) : (
               initials
             )}
@@ -85,11 +133,83 @@ export default function UserMenuDropdown({ fileInputRef, onClose }: Props) {
         <Camera size={15} />
         Change Photo
       </button>
-      {avatarUrl && (
-        <button className={styles.menuItem} onClick={() => dispatch(setAvatarUrl(null))}>
-          <XIcon size={15} />
-          Remove Photo
-        </button>
+
+      {pendingAvatarUrl && (
+        <div className={styles.alignPanel}>
+          <div className={styles.alignPreviewWrap}>
+            <img
+              src={pendingAvatarUrl}
+              alt="Pending avatar preview"
+              className={styles.alignPreviewImg}
+              style={{ objectPosition: `${x}% ${y}%` }}
+            />
+          </div>
+          <label className={styles.alignLabel}>
+            <span>Horizontal</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={x}
+              onChange={(event) => updateAvatarPosition('x', Number(event.target.value))}
+            />
+          </label>
+          <label className={styles.alignLabel}>
+            <span>Vertical</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={y}
+              onChange={(event) => updateAvatarPosition('y', Number(event.target.value))}
+            />
+          </label>
+          <div className={styles.alignActions}>
+            <button type="button" className={styles.alignApplyBtn} onClick={applyPendingAvatar}>
+              Apply photo
+            </button>
+            <button type="button" className={styles.alignCancelBtn} onClick={cancelPendingAvatar}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {avatarUrl && !pendingAvatarUrl && (
+        <>
+          <button className={styles.menuItem} onClick={() => setShowAlignControls((prev) => !prev)}>
+            <Camera size={15} />
+            {showAlignControls ? 'Hide alignment' : 'Align photo'}
+          </button>
+          {showAlignControls && (
+            <div className={styles.alignPanel}>
+              <label className={styles.alignLabel}>
+                <span>Horizontal</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={x}
+                  onChange={(event) => updateAvatarPosition('x', Number(event.target.value))}
+                />
+              </label>
+              <label className={styles.alignLabel}>
+                <span>Vertical</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={y}
+                  onChange={(event) => updateAvatarPosition('y', Number(event.target.value))}
+                />
+              </label>
+            </div>
+          )}
+          <button className={styles.menuItem} onClick={() => dispatch(setAvatarUrl(null))}>
+            <XIcon size={15} />
+            Remove Photo
+          </button>
+        </>
       )}
 
       {user.role === 'doctor' && (

@@ -6,6 +6,7 @@ import type { AuthUser, LoginPayload, RegisterPayload } from '../../types';
 interface AuthState {
   user: AuthUser | null;
   avatarUrl: string | null;
+  avatarPosition: string;
   loading: boolean;
   error: string | null;
   initialized: boolean;
@@ -14,6 +15,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   avatarUrl: localStorage.getItem('avatarUrl') ?? null,
+  avatarPosition: localStorage.getItem('avatarPosition') ?? '50% 50%',
   loading: false,
   error: null,
   initialized: false,
@@ -80,6 +82,10 @@ const authSlice = createSlice({
         localStorage.removeItem('avatarUrl');
       }
     },
+    setAvatarPosition(state, action: PayloadAction<string>) {
+      state.avatarPosition = action.payload;
+      localStorage.setItem('avatarPosition', action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -116,5 +122,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthError, setAvatarUrl } = authSlice.actions;
+export const { logout, clearAuthError, setAvatarUrl, setAvatarPosition } = authSlice.actions;
 export default authSlice.reducer;

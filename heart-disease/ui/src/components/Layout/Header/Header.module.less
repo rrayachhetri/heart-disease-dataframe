@@ -650,6 +650,73 @@
   }
 }
 
+.alignPanel {
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+  padding: @space-2;
+  border-radius: @radius-md;
+  background: @bg-secondary;
+  border: 1px solid @border-light;
+}
+
+.alignPreviewWrap {
+  width: 100%;
+  height: 120px;
+  border-radius: @radius-lg;
+  overflow: hidden;
+  border: 1px solid @border-light;
+  background: linear-gradient(135deg, rgba(25, 99, 99, 0.05), rgba(111, 214, 197, 0.1));
+}
+
+.alignPreviewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.alignLabel {
+  display: flex;
+  flex-direction: column;
+  gap: @space-1;
+  font-size: @font-size-xs;
+  color: @text-secondary;
+  font-weight: 600;
+
+  input[type='range'] {
+    width: 100%;
+    accent-color: @primary;
+  }
+}
+
+.alignActions {
+  display: flex;
+  gap: @space-2;
+}
+
+.alignApplyBtn,
+.alignCancelBtn {
+  flex: 1;
+  border: none;
+  border-radius: @radius-md;
+  padding: @space-2 @space-3;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.alignApplyBtn {
+  background: @primary;
+  color: @text-inverse;
+}
+
+.alignCancelBtn {
+  background: @bg-card;
+  color: @text-secondary;
+  border: 1px solid @border-color;
+}
+
 // ── Notifications section (inside user dropdown) ───────────────────────────────
 
 .notifSection {
