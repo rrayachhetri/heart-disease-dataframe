@@ -103,11 +103,11 @@ export default function UserMenuDropdown({
         >
           <div className={styles.profileAvatar}>
             {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="avatar"
+              <div
+                role="img"
+                aria-label="avatar"
                 className={styles.avatarImg}
-                style={{ objectPosition: avatarPosition }}
+                style={{ backgroundImage: `url(${avatarUrl})`, backgroundPosition: avatarPosition }}
               />
             ) : (
               initials
@@ -137,16 +137,17 @@ export default function UserMenuDropdown({
       {pendingAvatarUrl && (
         <div className={styles.alignPanel}>
           <div className={styles.alignPreviewWrap}>
-            <img
-              src={pendingAvatarUrl}
-              alt="Pending avatar preview"
+            <div
+              role="img"
+              aria-label="Pending avatar preview"
               className={styles.alignPreviewImg}
-              style={{ objectPosition: `${x}% ${y}%` }}
+              style={{ backgroundImage: `url(${pendingAvatarUrl})`, backgroundPosition: `${x}% ${y}%` }}
             />
           </div>
           <label className={styles.alignLabel}>
             <span>Horizontal</span>
             <input
+              aria-label="Horizontal avatar alignment"
               type="range"
               min="0"
               max="100"
@@ -157,6 +158,7 @@ export default function UserMenuDropdown({
           <label className={styles.alignLabel}>
             <span>Vertical</span>
             <input
+              aria-label="Vertical avatar alignment"
               type="range"
               min="0"
               max="100"
@@ -186,6 +188,7 @@ export default function UserMenuDropdown({
               <label className={styles.alignLabel}>
                 <span>Horizontal</span>
                 <input
+                  aria-label="Horizontal avatar alignment"
                   type="range"
                   min="0"
                   max="100"
@@ -196,6 +199,7 @@ export default function UserMenuDropdown({
               <label className={styles.alignLabel}>
                 <span>Vertical</span>
                 <input
+                  aria-label="Vertical avatar alignment"
                   type="range"
                   min="0"
                   max="100"

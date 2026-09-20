@@ -1,13 +1,17 @@
 name: Deploy application
 
 on:
+  workflow_run:
+    workflows:
+      - CI
+      - SonarQube
+    types:
+      - completed
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     name: Deploy to Azure
     runs-on: ubuntu-latest
     environment: production

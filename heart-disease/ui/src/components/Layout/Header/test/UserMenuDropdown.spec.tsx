@@ -1,10 +1,10 @@
-﻿import { screen } from '@testing-library/react';
+﻿import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import UserMenuDropdown from '../UserMenuDropdown';
 import { renderWithProviders } from '../../../../test/renderWithProviders';
 
 describe('UserMenuDropdown', () => {
-  it('shows a pending avatar alignment preview before the image is applied', () => {
+  it('shows the pending avatar preview and updates crop position when the slider changes', () => {
     renderWithProviders(
       <UserMenuDropdown
         fileInputRef={{ current: null }}
@@ -40,9 +40,19 @@ describe('UserMenuDropdown', () => {
       }
     );
 
+    const preview = screen.getByRole('img', { name: 'Pending avatar preview' });
     expect(screen.getByText('Apply photo')).toBeInTheDocument();
     expect(screen.getByText('Horizontal')).toBeInTheDocument();
     expect(screen.getByText('Vertical')).toBeInTheDocument();
+    expect(preview.style.backgroundPosition).toBe('50% 50%');
+
+    fireEvent.change(screen.getByLabelText('Horizontal avatar alignment'), { target: { value: '75' } });
+
+    expect(preview.style.backgroundPosition).toBe('75% 50%');
+
+    fireEvent.change(screen.getByLabelText('Vertical avatar alignment'), { target: { value: '20' } });
+
+    expect(preview.style.backgroundPosition).toBe('75% 20%');
   });
 });
 

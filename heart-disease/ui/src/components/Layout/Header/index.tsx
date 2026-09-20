@@ -200,11 +200,11 @@ export default function Header({ onMenuClick, userMenuOpen, onUserMenuToggle, on
             >
               <div className={styles.avatar}>
                 {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="avatar"
+                  <div
+                    role="img"
+                    aria-label="avatar"
                     className={styles.avatarImg}
-                    style={{ objectPosition: avatarPosition }}
+                    style={{ backgroundImage: `url(${avatarUrl})`, backgroundPosition: avatarPosition }}
                   />
                 ) : (
                   initials
