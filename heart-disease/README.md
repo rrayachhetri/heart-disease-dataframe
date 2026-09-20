@@ -168,6 +168,52 @@ Open **http://localhost:3000** — you will be redirected to `/register` to crea
 
 ---
 
+## Testing (TDD)
+
+This repo now supports frontend component/page tests and backend API tests.
+
+### Frontend (Vitest + Testing Library)
+
+```powershell
+Push-Location .\ui
+npm run test
+npm run test:watch
+npm run test:coverage
+Pop-Location
+```
+
+### Backend API (pytest)
+
+```powershell
+# Run from the repository root with the virtual environment activated.
+pip install -r .\requirements-dev.txt
+python -m pytest
+```
+
+### Run all tests
+
+From the repository root in PowerShell:
+
+```powershell
+.\run_all_tests.bat
+```
+
+The combined script runs the backend `python -m pytest` suite first and then the frontend `npm run test` suite. PowerShell requires the `.`\ prefix when executing a batch file from the current directory.
+
+### Test file conventions
+
+- Frontend component/page tests use per-component folders with `Component.spec.tsx` naming.
+- Backend API tests use per-route folders with `*_spec.py` naming.
+
+Examples in this repo:
+
+- `ui/src/components/Form/FormField/test/FormField.spec.tsx`
+- `ui/src/pages/Auth/LoginPage/test/LoginPage.spec.tsx`
+- `tests/api/auth/test/auth_spec.py`
+- `tests/api/health/test/health_spec.py`
+
+---
+
 ## Authentication
 
 Phase 1 introduces full JWT-based authentication.

@@ -39,6 +39,7 @@ Thumbs.db
 
 # Misc
 *.sqlite3
+test_cardiosense.db
 
 # Vite cache
 .vite/
