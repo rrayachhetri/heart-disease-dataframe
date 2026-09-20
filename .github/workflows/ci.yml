@@ -26,8 +26,8 @@ jobs:
         working-directory: heart-disease
         run: |
           python -m pip install --upgrade pip --only-binary=:all:
-          pip install --only-binary=:all: -r requirements-dev.txt
-          pip install --only-binary=:all: -r requirements.txt
+          pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt
+          pip install --require-hashes --only-binary=:all: -r requirements.lock.txt
 
       - name: Run backend pytest suite
         working-directory: heart-disease
