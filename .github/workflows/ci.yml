@@ -23,12 +23,14 @@ jobs:
           cache: 'pip'
 
       - name: Install backend dependencies
+        working-directory: heart-disease
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
           pip install -r requirements.txt
 
       - name: Run backend pytest suite
+        working-directory: heart-disease
         run: python -m pytest --maxfail=1 --disable-warnings
 
   frontend-tests:
@@ -44,18 +46,18 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ui/package-lock.json
+          cache-dependency-path: heart-disease/ui/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: ui
+        working-directory: heart-disease/ui
         run: npm ci
 
       - name: Run frontend tests
-        working-directory: ui
+        working-directory: heart-disease/ui
         run: npm run test
 
       - name: Build frontend
-        working-directory: ui
+        working-directory: heart-disease/ui
         run: npm run build
 
   quality-gate:
@@ -73,3 +75,4 @@ jobs:
         run: |
           test -f sonar-project.properties
           test -d .github/workflows
+          test -d heart-disease/ui

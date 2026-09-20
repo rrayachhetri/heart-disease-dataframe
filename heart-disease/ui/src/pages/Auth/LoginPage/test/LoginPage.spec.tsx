@@ -20,6 +20,7 @@ describe('LoginPage', () => {
         auth: {
           user: null,
           avatarUrl: null,
+          avatarPosition: '50% 50%',
           loading: false,
           error: 'Invalid credentials',
           initialized: true,
