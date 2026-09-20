@@ -24,6 +24,7 @@ export function useNotification() {
       type: 'success' | 'warning' | 'info' | 'error';
       title: string;
       message: string;
+      targetRoute?: string;
     }) => {
       // In-app notification
       dispatch(addNotification(opts));
