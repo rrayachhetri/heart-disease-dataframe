@@ -1,49 +1,26 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
 import styles from './HistoryPage.module.less';
 
 export default function ModalSection({
   icon,
   title,
   children,
-  defaultOpen = true,
+  sectionId,
 }: {
   icon: React.ReactNode;
   title: string;
   children: React.ReactNode;
-  defaultOpen?: boolean;
+  sectionId?: string;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const resolvedSectionId = sectionId ?? undefined;
   return (
-    <div className={styles.modalSection}>
-      <button className={styles.modalSectionHeader} onClick={() => setOpen((v) => !v)}>
+    <section className={styles.modalSection} id={resolvedSectionId}>
+      <div className={styles.modalSectionHeader}>
         <span className={styles.modalSectionHeaderLeft}>
           {icon}
-          <span className={styles.modalSectionTitle}>{title}</span>
+          <h4 className={styles.modalSectionTitle}>{title}</h4>
         </span>
-        <motion.span
-          animate={{ rotate: open ? 0 : -90 }}
-          transition={{ duration: 0.2 }}
-          className={styles.modalChevron}
-        >
-          <ChevronDown size={14} />
-        </motion.span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div className={styles.modalSectionBody}>{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      </div>
+      <div className={styles.modalSectionBody}>{children}</div>
+    </section>
   );
 }

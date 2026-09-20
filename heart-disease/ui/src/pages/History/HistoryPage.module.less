@@ -204,6 +204,12 @@
   }
 }
 
+.modalSectionNavActive {
+  border-color: #2d6a6a !important;
+  background: rgba(122, 232, 227, 0.24) !important;
+  color: #1a3a3a !important;
+}
+
 // ── Detail Modal ──────────────────────────────────────────────────────────────
 
 .modalOverlay {
@@ -212,16 +218,15 @@
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 500;
   padding: @space-4;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
   @media (max-width: @breakpoint-md) {
     padding: @space-2;
-    align-items: flex-start; // Allow modal to start from top on mobile
-    overflow-y: auto; // Enable scrolling on overlay for mobile
-    -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
   }
 }
 
@@ -238,20 +243,27 @@
   flex-direction: column;
   gap: 0;
   padding: @space-6;
+  box-sizing: border-box;
+  scroll-padding-top: 56px;
+  margin: 0 0 @space-4;
 
   @media (max-width: @breakpoint-md) {
     max-width: none;
-    width: calc(100vw - @space-4); // Full width minus small margins
-    max-height: none; // Remove height restriction on mobile
-    min-height: auto;
+    width: min(680px, calc(100% - @space-4));
+    max-height: calc(100vh - @space-4);
+    min-height: 0;
     margin: @space-4 0; // Vertical margin for top/bottom spacing
     border-radius: @radius-xl;
     padding: @space-4;
-    overflow-y: visible; // Let content flow naturally on mobile
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
   }
 
   @media (max-width: @breakpoint-sm) {
-    width: calc(100vw - @space-3);
+    width: calc(100% - @space-2);
+    max-height: calc(100vh - @space-4);
     margin: @space-2 0;
     padding: @space-3;
     border-radius: @radius-lg;
@@ -386,6 +398,79 @@
   }
 }
 
+.modalSectionNav {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  gap: @space-2;
+  margin: 0 0 @space-4;
+  padding: @space-2 0;
+  background: #f0fffe;
+  align-items: center;
+  height: auto !important;
+  min-height: 52px;
+  box-sizing: border-box;
+  overflow: visible;
+  scrollbar-width: none;
+  scroll-margin-top: @space-2;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: @space-2 @space-3;
+    border: 1px solid @border-color;
+    border-radius: @radius-full;
+    background: @bg-card;
+    color: @text-secondary;
+    font: inherit;
+    font-size: @font-size-xs;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background @transition-fast, border-color @transition-fast, color @transition-fast;
+
+    &:hover,
+    &:focus-visible {
+      border-color: #2d6a6a;
+      background: rgba(122, 232, 227, 0.18);
+      color: #1a3a3a;
+      outline: none;
+    }
+  }
+}
+
+.modalSectionNavIcon {
+  flex: 0 0 auto;
+  margin-right: @space-2;
+  vertical-align: middle;
+}
+
+@media (max-width: @breakpoint-sm) {
+  .modalSectionNav {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: 36px;
+    row-gap: @space-2;
+    min-height: 140px;
+    height: auto !important;
+    overflow: visible;
+
+    button {
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+    }
+  }
+}
+
 .modalHeroGauge {
   flex-shrink: 0;
   display: flex;
@@ -447,9 +532,10 @@
 .modalSection {
   border: 1px solid @border-color;
   border-radius: @radius-xl;
-  overflow: hidden;
+  overflow: visible;
   margin-bottom: @space-3;
   background: @bg-card;
+  scroll-margin-top: 54px;
 
   &:last-child {
     margin-bottom: 0;
@@ -469,14 +555,9 @@
   padding: @space-4 @space-5;
   background: transparent;
   border: none;
-  cursor: pointer;
   text-align: left;
   gap: @space-3;
-  transition: background @transition-fast;
-
-  &:hover {
-    background: @bg-secondary;
-  }
+  min-height: 48px;
 
   @media (max-width: @breakpoint-md) {
     padding: @space-3 @space-4;
@@ -489,9 +570,15 @@
   align-items: center;
   gap: @space-2;
   flex: 1;
+
+  > svg {
+    flex: 0 0 auto;
+  }
 }
 
 .modalSectionTitle {
+  margin: 0;
+  line-height: 1.3;
   font-size: @font-size-sm;
   font-weight: 700;
   color: @text-primary;
@@ -519,6 +606,18 @@
   color: @text-tertiary;
   font-style: italic;
   margin: 0 0 @space-3;
+}
+
+.modalEmptyState {
+  margin: 0;
+  padding: @space-5;
+  border: 1px dashed @border-color;
+  border-radius: @radius-lg;
+  background: @bg-secondary;
+  color: @text-secondary;
+  font-size: @font-size-sm;
+  line-height: 1.55;
+  text-align: center;
 }
 
 // ── Clinical Parameters grid ──────────────────────────────────────────────────

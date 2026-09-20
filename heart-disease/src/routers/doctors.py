@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from src.db.database import get_db
 from src.db.models import Doctor, User
 from src.auth.routes import get_current_user
+from src.services.insurance import match_insurance, valid_npi
 
 router = APIRouter(prefix="/doctors", tags=["doctors"])
 
@@ -44,6 +45,19 @@ class DoctorResponse(BaseModel):
     rating: float
 
     model_config = {"from_attributes": True}
+
+
+class InsuranceVerificationResponse(BaseModel):
+    doctor_id: str
+    insurance: str
+    in_network: bool
+    matched_plan: Optional[str]
+    verification_source: str
+    note: str
+
+
+class DoctorRecommendationResponse(DoctorResponse):
+    insurance_match: InsuranceVerificationResponse
 
 
 def _to_response(doc: Doctor) -> DoctorResponse:
@@ -93,9 +107,12 @@ def update_my_profile(
     if "accepted_insurance" in update_data:
         update_data["accepted_insurance"] = json.dumps(update_data["accepted_insurance"])
 
-    # Phase 1 stub: if NPI provided, mark as verified (Phase 2 will call real NPI registry)
     if "npi_number" in update_data and update_data["npi_number"]:
-        update_data["is_npi_verified"] = True  # stub — replace with real API call
+        if not valid_npi(update_data["npi_number"]):
+            raise HTTPException(status_code=422, detail="NPI must contain exactly 10 digits")
+        update_data["is_npi_verified"] = True
+    elif "npi_number" in update_data:
+        update_data["is_npi_verified"] = False
 
     for field, value in update_data.items():
         setattr(doc, field, value)
@@ -114,19 +131,83 @@ def list_doctors(
 ):
     """
     List doctors, optionally filtered by specialty and insurance.
-    Phase 1: returns all verified doctors matching filters.
-    Phase 2: will integrate real in-network insurance verification.
     """
     query = db.query(Doctor)
     if accepting_only:
         query = query.filter(Doctor.is_accepting_patients.is_(True))
     if specialty:
         query = query.filter(Doctor.specialty.ilike(f"%{specialty}%"))
-    if insurance:
-        # Simple substring match on JSON field — Phase 2 will use proper indexing
-        query = query.filter(Doctor.accepted_insurance.contains(insurance))
 
-    return [_to_response(d) for d in query.all()]
+    doctors = query.all()
+    if insurance:
+        doctors = [
+            doctor for doctor in doctors
+            if match_insurance(insurance, doctor.accepted_insurance_list).verified
+        ]
+
+    return [_to_response(d) for d in doctors]
+
+
+@router.get("/recommendations", response_model=List[DoctorRecommendationResponse])
+def recommend_doctors(
+    insurance: str,
+    specialty: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    """Return accepting doctors whose declared payer network matches exactly."""
+    if not insurance.strip():
+        raise HTTPException(status_code=422, detail="insurance is required")
+
+    query = db.query(Doctor).filter(Doctor.is_accepting_patients.is_(True))
+    if specialty:
+        query = query.filter(Doctor.specialty.ilike(f"%{specialty}%"))
+
+    recommendations = []
+    for doctor in query.all():
+        match = match_insurance(insurance, doctor.accepted_insurance_list)
+        if match.verified:
+            recommendations.append(
+                DoctorRecommendationResponse(
+                    **_to_response(doctor).model_dump(),
+                    insurance_match=InsuranceVerificationResponse(
+                        doctor_id=doctor.id,
+                        insurance=insurance,
+                        in_network=True,
+                        matched_plan=match.matched_plan,
+                        verification_source=match.source,
+                        note="Matched against the insurance plans declared in the doctor profile.",
+                    ),
+                )
+            )
+    return recommendations
+
+
+@router.get("/{doctor_id}/insurance", response_model=InsuranceVerificationResponse)
+def verify_doctor_insurance(
+    doctor_id: str,
+    insurance: str,
+    db: Session = Depends(get_db),
+):
+    """Check whether a payer matches one doctor's declared accepted plans."""
+    doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    if not insurance.strip():
+        raise HTTPException(status_code=422, detail="insurance is required")
+
+    match = match_insurance(insurance, doctor.accepted_insurance_list)
+    return InsuranceVerificationResponse(
+        doctor_id=doctor.id,
+        insurance=insurance,
+        in_network=match.verified,
+        matched_plan=match.matched_plan,
+        verification_source=match.source,
+        note=(
+            "Matched against the insurance plans declared in the doctor profile."
+            if match.verified
+            else "No exact declared-plan match was found; confirm coverage with the payer before booking."
+        ),
+    )
 
 
 @router.get("/{doctor_id}", response_model=DoctorResponse)

@@ -443,7 +443,9 @@ Returns per-feature percentile ranks and plain-English interpretations across al
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
 | `GET` | `/api/doctors` | List doctors (filter by specialty, insurance) | Public |
+| `GET` | `/api/doctors/recommendations` | Recommend accepting doctors matching a declared insurance plan | Public |
 | `GET` | `/api/doctors/{id}` | Get doctor by ID | Public |
+| `GET` | `/api/doctors/{id}/insurance` | Verify a payer against one doctor's declared plans | Public |
 | `GET` | `/api/doctors/me` | Get own doctor profile | 🔒 Doctor role |
 | `PUT` | `/api/doctors/me` | Update own doctor profile | 🔒 Doctor role |
 
@@ -455,6 +457,13 @@ Returns per-feature percentile ranks and plain-English interpretations across al
 | `insurance` | `BlueCross` | Filter by accepted insurance plan |
 | `accepting_only` | `true` | Only show doctors accepting new patients (default: `true`) |
 
+Phase 2 normalizes payer names for matching (`Blue-Cross`, `blue cross`, and
+`Blue Cross` match) and validates NPI values as exactly 10 digits. Insurance
+verification currently uses the plans declared in each doctor profile and
+returns the verification source explicitly. Patients should confirm benefits
+with their insurer before booking; a payer-directory integration can replace
+this service without changing the API response shape.
+
 **Example — Update doctor profile:**
 
 ```powershell
@@ -464,7 +473,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
   -Body '{"npi_number":"1234567890","specialty":"Cardiology","consultation_fee":95,"accepted_insurance":["BlueCross","Aetna"]}'
 ```
 
-> **Phase 1 Note:** Providing an NPI number auto-marks the doctor as verified. Phase 2 will integrate the real [NPPES NPI Registry API](https://npiregistry.cms.hhs.gov/api-page).
+> NPI format verification is currently local (exactly 10 digits). A future NPPES integration can add registry-level identity verification.
 
 ---
 

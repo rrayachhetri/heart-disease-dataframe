@@ -22,6 +22,7 @@ export const TEXT = {
     doctorProfile: 'Doctor Profile',
     myProfile: 'My Profile',
     modelInsights: 'Model Insights',
+    findDoctors: 'Find Doctors',
   },
 
   header: {
@@ -244,7 +245,9 @@ export const TEXT = {
     sectionSymptoms: 'Symptoms \u0026 Pain',
     sectionVitals: 'Vitals \u0026 Lab Results',
     sectionCardio: 'Cardiovascular Data',
-    validationError: 'Please fix the errors in the form.',
+    validationTitle: 'A few clinical details need attention',
+    validationError: 'Review the highlighted fields before running the assessment.',
+    submissionErrorTitle: 'Assessment could not be completed',
     resetBtn: 'Reset Form',
     submitLoading: 'Analyzing...',
     submitLabel: 'Predict Risk',
@@ -277,6 +280,12 @@ export const TEXT = {
     riskBadgeLow: 'Low Risk',
     riskBadgeModerate: 'Moderate Risk',
     riskBadgeHigh: 'High Risk',
+    doctorReferralTitle: 'Review your result with a doctor',
+    doctorReferralHigh:
+      'Your result suggests follow-up may be important. Find an accepting provider who may be in your insurance network.',
+    doctorReferralLow:
+      'A clinician can put this result in context. Find an accepting provider who may be in your insurance network.',
+    findDoctorBtn: 'Find Doctors',
     emptyHeading: 'No prediction result',
     emptyText: 'Submit a prediction first to see results here.',
     emptyBtn: 'Go to Prediction',

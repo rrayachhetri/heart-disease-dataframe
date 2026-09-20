@@ -12,6 +12,7 @@ import PredictPage from './pages/Predict';
 import ResultPage from './pages/Result';
 import HistoryPage from './pages/History';
 import DoctorProfilePage from './pages/DoctorProfile';
+import DoctorsPage from './pages/Doctors';
 import ModelInsightsPage from './pages/ModelInsights';
 import SessionTimeoutPage from './pages/SessionTimeout';
 import SystemUnavailablePage from './pages/SystemUnavailable';
@@ -63,6 +64,7 @@ export default function App() {
                   <Route path="/history" element={<HistoryPage />} />
                   <Route path="/model-insights" element={<ModelInsightsPage />} />
                   <Route path="/doctor/profile" element={<DoctorProfilePage />} />
+                  <Route path="/doctors" element={<DoctorsPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Layout>

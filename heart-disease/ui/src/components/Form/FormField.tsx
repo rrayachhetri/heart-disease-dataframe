@@ -1,4 +1,5 @@
 import { type InputHTMLAttributes } from 'react';
+import { AlertCircle } from 'lucide-react';
 import styles from './FormField.module.less';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
@@ -25,7 +26,12 @@ export default function FormField({
         {icon && <span className={styles.icon}>{icon}</span>}
         <input className={styles.input} {...inputProps} />
       </div>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          <AlertCircle size={13} aria-hidden="true" />
+          <span>{error}</span>
+        </p>
+      )}
     </div>
   );
 }

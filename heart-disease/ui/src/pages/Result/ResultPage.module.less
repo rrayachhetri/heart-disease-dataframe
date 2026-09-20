@@ -95,6 +95,88 @@
   letter-spacing: 0.06em;
 }
 
+.doctorReferral {
+  display: flex;
+  align-items: center;
+  gap: @space-4;
+  padding: @space-5 @space-6;
+  border: 1px solid rgba(8, 145, 178, 0.22);
+  border-radius: @radius-xl;
+  background: linear-gradient(120deg, #ecfeff 0%, #f0fdf4 100%);
+}
+
+.doctorReferralHigh {
+  border-color: rgba(217, 119, 6, 0.28);
+  background: linear-gradient(120deg, #fff7ed 0%, #fffbeb 100%);
+}
+
+.doctorReferralIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: @radius-lg;
+  background: rgba(8, 145, 178, 0.12);
+  color: #087f8c;
+
+  .doctorReferralHigh & {
+    background: rgba(217, 119, 6, 0.12);
+    color: @warning;
+  }
+}
+
+.doctorReferralCopy {
+  min-width: 0;
+  flex: 1;
+
+  h3 {
+    margin: 0;
+    color: @text-primary;
+    font-size: @font-size-base;
+  }
+
+  p {
+    margin: @space-1 0 0;
+    font-size: @font-size-sm;
+    line-height: 1.5;
+  }
+}
+
+.doctorReferralButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: @space-2;
+  min-height: 42px;
+  padding: @space-3 @space-4;
+  border: 0;
+  border-radius: @radius-md;
+  background: #2d6a6a;
+  color: #fff;
+  font: inherit;
+  font-size: @font-size-sm;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.doctorReferralButton:focus-visible {
+  outline: 3px solid rgba(8, 145, 178, 0.32);
+  outline-offset: 2px;
+}
+
+@media (max-width: @breakpoint-sm) {
+  .doctorReferral {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .doctorReferralButton {
+    width: 100%;
+  }
+}
+
 // ── Top Grid ──────────────────────────────────────────────────────────────────
 .topGrid {
   display: grid;

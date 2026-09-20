@@ -13,6 +13,7 @@ import {
   Info,
   History,
   Activity,
+  Stethoscope,
 } from 'lucide-react';
 import type { TopFactor, PopulationPercentile } from '../../types';
 import RiskGauge from '../../components/Dashboard/RiskGauge';
@@ -127,6 +128,30 @@ export default function ResultPage() {
             {isHigh ? <AlertTriangle size={28} /> : <ShieldCheck size={28} />}
           </motion.div>
           <div>
+
+          <motion.section
+            className={`${styles.doctorReferral} ${isHigh ? styles.doctorReferralHigh : ''}`}
+            aria-labelledby="doctor-referral-title"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28, duration: 0.35 }}
+          >
+            <div className={styles.doctorReferralIcon}>
+              <Stethoscope size={22} aria-hidden="true" />
+            </div>
+            <div className={styles.doctorReferralCopy}>
+              <h3 id="doctor-referral-title">{t.doctorReferralTitle}</h3>
+              <p>{isHigh ? t.doctorReferralHigh : t.doctorReferralLow}</p>
+            </div>
+            <button
+              type="button"
+              className={styles.doctorReferralButton}
+              onClick={() => navigate('/doctors')}
+            >
+              <Stethoscope size={16} aria-hidden="true" />
+              {t.findDoctorBtn}
+            </button>
+          </motion.section>
             <h2 className={styles.heroTitle}>
               {isHigh ? t.highRiskTitle : t.lowRiskTitle}
             </h2>

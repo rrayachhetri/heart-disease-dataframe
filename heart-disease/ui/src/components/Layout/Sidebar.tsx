@@ -10,6 +10,7 @@ import {
   Stethoscope,
   BarChart3,
   X,
+  Search,
 } from 'lucide-react';
 import { useAppSelector } from '../../store/hooks';
 import { getTextContent } from '../../content/text';
@@ -24,6 +25,7 @@ const patientNavItems = [
   { path: '/predict', label: tNav.newPrediction, icon: HeartPulse },
   { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
+  { path: '/doctors', label: tNav.findDoctors, icon: Search },
 ];
 
 const doctorNavItems = [
@@ -31,6 +33,7 @@ const doctorNavItems = [
   { path: '/predict', label: tNav.newPrediction, icon: HeartPulse },
   { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
+  { path: '/doctors', label: tNav.findDoctors, icon: Search },
   { path: '/doctor/profile', label: tNav.myProfile, icon: Stethoscope },
 ];
 

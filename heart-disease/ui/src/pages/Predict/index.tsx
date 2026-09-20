@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Heart, Activity, ArrowRight, Loader2 } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { User, Heart, Activity, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { submitPrediction } from '../../store/slices/predictionSlice';
 import { getTextContent } from '../../content/text';
@@ -51,6 +50,7 @@ export default function PredictPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>(
     {}
   );
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.prediction.loading);
@@ -91,8 +91,8 @@ export default function PredictPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmissionError(null);
     if (!validate()) {
-      toast.error(t.validationError);
       return;
     }
 
@@ -138,16 +138,16 @@ export default function PredictPage() {
         message: isHigh ? t.notificationHighMsg(pct) : t.notificationLowMsg(pct),
       });
 
-      toast.success(t.submitSuccess);
       navigate('/result');
     } catch {
-      toast.error(t.submitError);
+      setSubmissionError(t.submitError);
     }
   };
 
   const handleReset = () => {
     setForm(INITIAL);
     setErrors({});
+    setSubmissionError(null);
   };
 
   return (
@@ -156,6 +156,33 @@ export default function PredictPage() {
         <h2>{t.pageTitle}</h2>
         <p>{t.pageSubtitle}</p>
       </div>
+
+      {Object.keys(errors).length > 0 && (
+        <div className={styles.validationSummary} role="alert" aria-live="polite">
+          <div className={styles.validationIcon}>
+            <AlertCircle size={19} aria-hidden="true" />
+          </div>
+          <div>
+            <strong>{t.validationTitle}</strong>
+            <p>{t.validationError}</p>
+          </div>
+          <span className={styles.validationCount}>
+            {Object.keys(errors).length} {Object.keys(errors).length === 1 ? 'field' : 'fields'}
+          </span>
+        </div>
+      )}
+
+      {submissionError && (
+        <div className={`${styles.validationSummary} ${styles.submissionError}`} role="alert" aria-live="polite">
+          <div className={styles.validationIcon}>
+            <AlertCircle size={19} aria-hidden="true" />
+          </div>
+          <div>
+            <strong>{t.submissionErrorTitle}</strong>
+            <p>{submissionError}</p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         {/* Personal Info */}

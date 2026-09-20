@@ -66,6 +66,11 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
   const [expandedFactor, setExpandedFactor] = useState<string | null>(null);
   const [hiddenCohorts, setHiddenCohorts] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(false);
+  const [activeSection, setActiveSection] = useState<'clinical' | 'why' | 'compare'>('clinical');
+
+  const selectSection = (section: 'clinical' | 'why' | 'compare') => {
+    setActiveSection(section);
+  };
 
   const toggleCohort = (key: string) =>
     setHiddenCohorts((prev) => {
@@ -98,6 +103,9 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
     >
       <motion.div
         className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assessment-details-title"
         initial={{ opacity: 0, scale: 0.93, y: 28 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.93, y: 28 }}
@@ -118,7 +126,7 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
                 : <CheckCircle size={20} color="#059669" />}
             </motion.div>
             <div>
-              <h3 className={styles.modalTitle}>{tH.modalTitle}</h3>
+              <h3 id="assessment-details-title" className={styles.modalTitle}>{tH.modalTitle}</h3>
               <p className={styles.modalDate}>{formatDate(record.timestamp)}</p>
             </div>
           </div>
@@ -205,8 +213,23 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
           </div>
         </motion.div>
 
+        <nav className={styles.modalSectionNav} aria-label="Assessment sections">
+          <button type="button" className={activeSection === 'clinical' ? styles.modalSectionNavActive : ''} aria-pressed={activeSection === 'clinical'} onClick={() => selectSection('clinical')}>
+            <Activity className={styles.modalSectionNavIcon} size={14} aria-hidden="true" />
+            Clinical Parameters
+          </button>
+          <button type="button" className={activeSection === 'why' ? styles.modalSectionNavActive : ''} aria-pressed={activeSection === 'why'} onClick={() => selectSection('why')}>
+            <Brain className={styles.modalSectionNavIcon} size={14} aria-hidden="true" />
+            Why This Score?
+          </button>
+          <button type="button" className={activeSection === 'compare' ? styles.modalSectionNavActive : ''} aria-pressed={activeSection === 'compare'} onClick={() => selectSection('compare')}>
+            <Globe className={styles.modalSectionNavIcon} size={14} aria-hidden="true" />
+            How Do You Compare?
+          </button>
+        </nav>
+
         {/* ── Clinical Parameters ── */}
-        <ModalSection icon={<Activity size={13} />} title={tH.clinicalParams}>
+        {activeSection === 'clinical' && <ModalSection sectionId="clinical-parameters-section" icon={<Activity size={13} />} title={tH.clinicalParams}>
           <div className={styles.modalGrid}>
             {(Object.entries(record.patientData) as [keyof PatientData, number][]).map(
               ([key, value], i) => (
@@ -224,14 +247,18 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
               )
             )}
           </div>
-        </ModalSection>
+        </ModalSection>}
 
         {/* ── Why This Score? ── */}
-        {topFactors.length > 0 && (
-          <ModalSection icon={<Brain size={13} />} title={tH.whyThisScore}>
-            <p className={styles.modalSectionHint}>{tH.whyHint}</p>
-            <div className={styles.factorList}>
-              {topFactors.map((f, idx) => {
+        {activeSection === 'why' && (
+          <ModalSection sectionId="why-score-section" icon={<Brain size={13} />} title={tH.whyThisScore}>
+            {topFactors.length === 0 ? (
+              <p className={styles.modalEmptyState}>No feature explanation details are available for this assessment.</p>
+            ) : (
+              <>
+                <p className={styles.modalSectionHint}>{tH.whyHint}</p>
+                <div className={styles.factorList}>
+                  {topFactors.map((f, idx) => {
                 const barPct = maxAbs > 0 ? (Math.abs(f.contribution) / maxAbs) * 100 : 0;
                 const isRisk = f.direction === 'increases_risk';
                 const deltaPct = (f.contribution * 100).toFixed(1);
@@ -292,15 +319,21 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
                     </AnimatePresence>
                   </motion.div>
                 );
-              })}
-            </div>
+                  })}
+                </div>
+              </>
+            )}
           </ModalSection>
         )}
 
         {/* ── How Do You Compare? ── */}
-        {benchmarkItems.length > 0 && (
-          <ModalSection icon={<Globe size={13} />} title={tH.compareSection} defaultOpen={false}>
-            <div className={styles.cohortLegend}>
+        {activeSection === 'compare' && (
+          <ModalSection sectionId="comparison-section" icon={<Globe size={13} />} title={tH.compareSection}>
+            {benchmarkItems.length === 0 ? (
+              <p className={styles.modalEmptyState}>Population comparison details are not available for this assessment.</p>
+            ) : (
+              <>
+                <div className={styles.cohortLegend}>
               {cohortKeys.map((k) => (
                 <motion.button
                   key={k}
@@ -314,8 +347,8 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
                   {COHORT_LABELS[k]}
                 </motion.button>
               ))}
-            </div>
-            <div className={styles.benchmarkList}>
+              </div>
+              <div className={styles.benchmarkList}>
               {benchmarkItems.map((item, idx) => (
                 <motion.div
                   key={item.feature}
@@ -361,7 +394,9 @@ export default function DetailModal({ record, onClose }: { record: PredictionRec
                   </div>
                 </motion.div>
               ))}
-            </div>
+                </div>
+              </>
+            )}
           </ModalSection>
         )}
       </motion.div>
