@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, KeyRound, Lock, Eye, EyeOff } from 'lucide-react';
+import { Heart, KeyRound, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { resetPassword } from '../../api/authApi';
 import { getTextContent } from '../../content/text';
@@ -48,8 +48,18 @@ export default function ResetPasswordPage() {
         <h1 className={styles.heading}>{t.heading}</h1>
         <p className={styles.subheading}>{t.subheading}</p>
 
-        {error && <div className={styles.errorBanner}>{error}</div>}
-        {success && <div className={styles.successBanner}>{t.successMessage}</div>}
+        {error && (
+          <div className={styles.errorBanner} role="alert" aria-live="polite">
+            <AlertCircle size={16} className={styles.bannerIcon} />
+            <span className={styles.bannerText}>{error}</span>
+          </div>
+        )}
+        {success && (
+          <div className={styles.successBanner} role="status" aria-live="polite">
+            <CheckCircle2 size={16} className={styles.bannerIcon} />
+            <span className={styles.bannerText}>{t.successMessage}</span>
+          </div>
+        )}
 
         {!success && (
           <form onSubmit={handleSubmit} className={styles.form}>

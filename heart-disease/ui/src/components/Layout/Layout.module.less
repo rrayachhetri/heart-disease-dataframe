@@ -42,8 +42,17 @@
   flex: 1;
   padding: @space-8 0; // Remove horizontal padding, keep vertical
   margin-top: 36px;     // push content area below the fixed banner (36px tall)
-  overflow-y: auto;     // content scrolls here; top edge never rises above banner
-  animation: fadeIn 0.3s ease;
+  overflow-y: scroll;   // keep scrollbar space reserved to avoid layout flicker
+  overflow-x: clip;
+  scrollbar-gutter: stable both-edges;
+    scrollbar-width: none; // Firefox: hide scrollbar chrome, keep wheel/trackpad scroll
+    -ms-overflow-style: none; // Internet Explorer and Edge
+
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
 }
 
 .overlay {
@@ -52,17 +61,6 @@
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(2px);
   z-index: 99;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media (max-width: @breakpoint-md) {

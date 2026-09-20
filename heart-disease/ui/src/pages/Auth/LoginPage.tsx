@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Heart, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { loginUser, clearAuthError } from '../../store/slices/authSlice';
@@ -42,7 +42,12 @@ export default function LoginPage() {
         <h1 className={styles.heading}>{t.heading}</h1>
         <p className={styles.subheading}>{t.subheading}</p>
 
-        {error && <div className={styles.errorBanner}>{error}</div>}
+        {error && (
+          <div className={styles.errorBanner} role="alert" aria-live="polite">
+            <AlertCircle size={16} className={styles.bannerIcon} />
+            <span className={styles.bannerText}>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>

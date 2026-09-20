@@ -16,12 +16,30 @@ export default function ModelInsightsPage() {
   const loading = !loaded;
 
   useEffect(() => {
-    Promise.allSettled([
-      fetchModelInfo().then(setModelInfo),
-      fetchDatasetComparison().then((r) =>
-        setDatasetSummaries(r.datasets.filter((d) => d.name !== 'combined')),
-      ),
-    ]).finally(() => setLoaded(true));
+    let active = true;
+
+    (async () => {
+      const [modelRes, datasetRes] = await Promise.allSettled([
+        fetchModelInfo(),
+        fetchDatasetComparison(),
+      ]);
+
+      if (!active) return;
+
+      if (modelRes.status === 'fulfilled') {
+        setModelInfo(modelRes.value);
+      }
+
+      if (datasetRes.status === 'fulfilled') {
+        setDatasetSummaries(datasetRes.value.datasets.filter((d) => d.name !== 'combined'));
+      }
+
+      setLoaded(true);
+    })();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -52,8 +70,8 @@ export default function ModelInsightsPage() {
         </div>
       )}
 
-      {datasetSummaries.length > 0 && <CohortExplorer datasets={datasetSummaries} />}
-      {modelInfo && <ModelPerformanceCard modelInfo={modelInfo} />}
+      {loaded && datasetSummaries.length > 0 && <CohortExplorer datasets={datasetSummaries} />}
+      {loaded && modelInfo && <ModelPerformanceCard modelInfo={modelInfo} />}
 
       {loaded && !modelInfo && datasetSummaries.length === 0 && (
         <p role="status" aria-live="polite">{t.loading}</p>

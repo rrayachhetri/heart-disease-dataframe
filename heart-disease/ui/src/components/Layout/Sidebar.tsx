@@ -45,10 +45,11 @@ interface Props {
 export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose, onNavClick }: Props) {
   const user = useAppSelector((s) => s.auth.user);
   const navItems = user?.role === 'doctor' ? doctorNavItems : patientNavItems;
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const showText = !isMobile && (!collapsed || mobileOpen);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
@@ -65,7 +66,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
     >
       <div className={styles.logo}>
         <Activity className={styles.logoIcon} size={28} />
-        {(!collapsed || mobileOpen) && <span className={styles.logoText}>{tApp.name}</span>}
+        {showText && <span className={styles.logoText}>{tApp.name}</span>}
         
         {/* Mobile close button */}
         {isMobile && (
@@ -73,6 +74,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
             className={styles.mobileClose}
             onClick={onMobileClose}
             aria-label={tSide.closeSidebarAria}
+            tabIndex={mobileOpen ? undefined : -1}
           >
             <X size={16} />
           </button>
@@ -88,11 +90,13 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
             className={({ isActive }) =>
               `${styles.navItem}${isActive ? ` ${styles.active}` : ''}`
             }
-            title={collapsed && !mobileOpen ? label : undefined}
+            title={!showText ? label : undefined}
+            aria-label={label}
+            tabIndex={isMobile && !mobileOpen ? -1 : undefined}
             onClick={onNavClick}
           >
             <Icon size={20} />
-            {(!collapsed || mobileOpen) && <span>{label}</span>}
+            {showText && <span>{label}</span>}
           </NavLink>
         ))}
       </nav>

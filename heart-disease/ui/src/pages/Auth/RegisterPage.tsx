@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Mail, Lock, User, Stethoscope, Eye, EyeOff } from 'lucide-react';
+import { Heart, Mail, Lock, User, Stethoscope, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { registerUser, loginUser, clearAuthError } from '../../store/slices/authSlice';
@@ -53,7 +53,12 @@ export default function RegisterPage() {
         <h1 className={styles.heading}>{t.heading}</h1>
         <p className={styles.subheading}>{t.subheading}</p>
 
-        {error && <div className={styles.errorBanner}>{error}</div>}
+        {error && (
+          <div className={styles.errorBanner} role="alert" aria-live="polite">
+            <AlertCircle size={16} className={styles.bannerIcon} />
+            <span className={styles.bannerText}>{error}</span>
+          </div>
+        )}
 
         {/* Role selector */}
         <div className={styles.roleToggle}>

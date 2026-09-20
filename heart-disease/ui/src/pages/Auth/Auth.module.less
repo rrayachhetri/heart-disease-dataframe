@@ -46,14 +46,26 @@
 }
 
 .errorBanner {
-  background: @danger-50;
-  border: 1px solid @danger-light;
-  color: @danger;
-  border-radius: @radius-md;
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  background: linear-gradient(120deg, #fff1f2 0%, #fef2f2 100%);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-left: 4px solid @danger;
+  color: #991b1b;
+  border-radius: @radius-lg;
   padding: @space-3 @space-4;
   font-size: @font-size-sm;
   margin-bottom: @space-6;
-  text-align: center;
+}
+
+.bannerIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.bannerText {
+  line-height: 1.45;
 }
 
 // Role toggle
@@ -208,10 +220,15 @@
 }
 
 .successBanner {
-  background: rgba(74, 222, 128, 0.15);
+  display: flex;
+  align-items: flex-start;
+  gap: @space-3;
+  background: linear-gradient(120deg, #ecfdf5 0%, #f0fdf4 100%);
+  border: 1px solid rgba(5, 150, 105, 0.28);
+  border-left: 4px solid @success;
   color: #166534;
-  border-radius: @radius-md;
-  padding: @space-3;
+  border-radius: @radius-lg;
+  padding: @space-3 @space-4;
   font-size: @font-size-sm;
   margin-bottom: @space-4;
 }

@@ -43,7 +43,8 @@
   position: relative; // Added for proper close button positioning
 
   @media (max-width: 768px) {
-    padding: 0 1rem 0 1.25rem; // Reduce right padding on mobile to make room for close button
+    justify-content: center;
+    padding: 0;
   }
 }
 
@@ -179,10 +180,21 @@
 @media (max-width: @breakpoint-md) {
   .sidebar {
     transform: translateX(-100%);
-    width: min(260px, calc(100vw - 40px)); // Increased width for better spacing - more room for title and close button
+    width: 72px;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
     z-index: 100; // Below banner (101) but above overlay (99)
-    transition: transform 300ms cubic-bezier(0.25, 0.8, 0.25, 1), width 250ms ease; // Smooth slide animation
+    transition: transform 180ms cubic-bezier(0.25, 0.8, 0.25, 1), width 250ms ease; // Smooth slide animation
+  }
+
+  .nav {
+    padding: calc(1rem + 36px) 0.5rem 1rem;
+    align-items: center;
+  }
+
+  .navItem {
+    justify-content: center;
+    width: 48px;
+    padding: 0.75rem;
   }
 
   .mobileOpen {
@@ -192,7 +204,7 @@
   .mobileClose {
     display: flex;
     position: absolute;
-    right: 1rem;
+    right: 0.25rem;
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
@@ -203,7 +215,11 @@
   }
 
   .collapsed {
-    width: min(260px, calc(100vw - 40px)); // Same increased width whether "collapsed" or not on mobile
+    width: 72px;
     transform: translateX(-100%);
+  }
+
+  .collapsed.mobileOpen {
+    transform: translateX(0) !important;
   }
 }

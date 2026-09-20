@@ -13,6 +13,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  height: 100%;
 }
 
 body {
@@ -20,6 +21,8 @@ body {
   background-color: @bg-primary;
   color: @text-primary;
   line-height: 1.6;
+  height: 100%;
+  overflow: hidden;
   overflow-x: hidden;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   font-variation-settings: normal;
@@ -27,7 +30,8 @@ body {
 }
 
 #root {
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
 // Enhanced typography hierarchy
@@ -109,4 +113,61 @@ input,
 select,
 button {
   font-family: inherit;
+}
+
+// CardioSense toast styling (React-Toastify)
+.cs-toast-container {
+  width: min(92vw, 380px);
+}
+
+.cs-toast {
+  border-radius: @radius-lg;
+  border: 1px solid @border-color;
+  background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: @shadow-lg;
+  color: @text-primary;
+  min-height: 64px;
+}
+
+.cs-toast-body {
+  font-family: @font-family;
+  font-size: @font-size-sm;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  padding-right: @space-2;
+}
+
+.cs-toast-progress {
+  height: 4px;
+  border-radius: 0 0 @radius-lg @radius-lg;
+  background: linear-gradient(90deg, #2d6a6a 0%, #0891b2 100%);
+}
+
+.cs-toast .Toastify__close-button {
+  color: @text-secondary;
+  opacity: 0.9;
+}
+
+.cs-toast .Toastify__toast-icon {
+  margin-inline-end: @space-3;
+}
+
+.cs-toast--success {
+  border-color: rgba(5, 150, 105, 0.35);
+  box-shadow: 0 10px 20px -12px rgba(5, 150, 105, 0.45);
+}
+
+.cs-toast--warning {
+  border-color: rgba(217, 119, 6, 0.4);
+  box-shadow: 0 10px 20px -12px rgba(217, 119, 6, 0.45);
+}
+
+.cs-toast--error {
+  border-color: rgba(220, 38, 38, 0.4);
+  box-shadow: 0 10px 20px -12px rgba(220, 38, 38, 0.45);
+}
+
+.cs-toast--info {
+  border-color: rgba(8, 145, 178, 0.4);
+  box-shadow: 0 10px 20px -12px rgba(8, 145, 178, 0.45);
 }

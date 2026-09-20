@@ -81,6 +81,12 @@ export default function App() {
         draggable
         pauseOnHover
         theme="light"
+        className="cs-toast-container"
+        toastClassName={(context) =>
+          `cs-toast cs-toast--${context?.type ?? 'default'}`
+        }
+        bodyClassName="cs-toast-body"
+        progressClassName="cs-toast-progress"
       />
     </>
   );
