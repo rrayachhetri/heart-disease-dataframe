@@ -73,6 +73,7 @@ export interface AppNotification {
   message: string;
   timestamp: number;
   read: boolean;
+  targetRoute?: string;
 }
 
 // ── Model info ────────────────────────────────────────────────────────────────

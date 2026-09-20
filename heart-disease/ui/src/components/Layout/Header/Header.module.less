@@ -683,8 +683,23 @@
   }
 
   .notifItem {
+    display: flex;
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     padding: @space-2 @space-2;
     border-bottom: 1px solid @border-light;
+
+    &:hover,
+    &:focus-visible {
+      background: @bg-secondary;
+      outline: none;
+    }
 
     &:last-child { border-bottom: none; }
   }

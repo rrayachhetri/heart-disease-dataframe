@@ -136,6 +136,7 @@ export default function PredictPage() {
         type: isHigh ? 'warning' : 'success',
         title: isHigh ? t.notificationHighTitle : t.notificationLowTitle,
         message: isHigh ? t.notificationHighMsg(pct) : t.notificationLowMsg(pct),
+        targetRoute: '/result',
       });
 
       navigate('/result');

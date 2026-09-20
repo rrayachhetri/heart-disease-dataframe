@@ -25,6 +25,10 @@ function formatTime(ts: number): string {
   return new Date(ts).toLocaleDateString();
 }
 
+function notificationRoute(targetRoute?: string): string {
+  return targetRoute || '/history';
+}
+
 export default function UserMenuDropdown({ fileInputRef, onClose }: Props) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -127,10 +131,16 @@ export default function UserMenuDropdown({ fileInputRef, onClose }: Props) {
             </div>
           ) : (
             notifications.slice(0, 5).map((n) => (
-              <div
+              <button
                 key={n.id}
                 className={`${styles.notifItem} ${n.read ? styles.notifRead : ''}`}
-                onClick={() => dispatch(markAsRead(n.id))}
+                type="button"
+                onClick={() => {
+                  dispatch(markAsRead(n.id));
+                  navigate(notificationRoute(n.targetRoute));
+                  onClose();
+                }}
+                aria-label={`Open notification: ${n.title}`}
               >
                 <span className={styles.notifDot} style={{ background: TYPE_COLOR[n.type] }} />
                 <div className={styles.notifContent}>
@@ -138,7 +148,7 @@ export default function UserMenuDropdown({ fileInputRef, onClose }: Props) {
                   <p className={styles.notifItemMsg}>{n.message}</p>
                   <span className={styles.notifTime}>{formatTime(n.timestamp)}</span>
                 </div>
-              </div>
+              </button>
             ))
           )}
         </div>
