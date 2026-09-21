@@ -5,14 +5,6 @@ export function getAccessToken(): string | null {
   return localStorage.getItem('access_token');
 }
 
-/** Returns headers with Authorization if a token is present. */
-export function authHeaders(): HeadersInit {
-  const token = getAccessToken();
-  return token
-    ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-    : { 'Content-Type': 'application/json' };
-}
-
 /** Persist a token pair from the login/refresh response. */
 export function saveTokens(access: string, refresh: string): void {
   localStorage.setItem('access_token', access);

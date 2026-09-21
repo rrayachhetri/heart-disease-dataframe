@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+
+
 def _doctor_payload(email: str = 'doctor@example.com') -> dict:
     return {
         'email': email,
@@ -14,6 +17,18 @@ def _doctor_token(client, email: str = 'doctor@example.com') -> str:
         '/api/auth/login',
         json={'email': email, 'password': 'StrongPass123'},
     )
+    return login.json()['access_token']
+
+
+def _patient_token(client, email: str = 'patient@example.com') -> str:
+    client.post('/api/auth/register', json={
+        'email': email,
+        'password': 'StrongPass123',
+        'role': 'patient',
+        'first_name': 'Pat',
+        'last_name': 'Patient',
+    })
+    login = client.post('/api/auth/login', json={'email': email, 'password': 'StrongPass123'})
     return login.json()['access_token']
 
 
@@ -73,3 +88,40 @@ def test_recommendations_match_payer_case_and_format(client):
     assert verification.status_code == 200
     assert verification.json()['in_network'] is False
     assert verification.json()['matched_plan'] is None
+
+
+def test_patient_can_book_available_in_network_doctor_slot_once(client):
+    doctor_token = _doctor_token(client, 'booking-doctor@example.com')
+    doctor_headers = {'Authorization': f'Bearer {doctor_token}'}
+    profile = client.put(
+        '/api/doctors/me',
+        headers=doctor_headers,
+        json={'accepted_insurance': ['Blue Cross']},
+    )
+    doctor_id = profile.json()['id']
+    starts_at = datetime.utcnow() + timedelta(days=2)
+    slot = client.post(
+        '/api/doctors/me/slots',
+        headers=doctor_headers,
+        json={
+            'starts_at': starts_at.isoformat(),
+            'ends_at': (starts_at + timedelta(minutes=30)).isoformat(),
+        },
+    )
+    assert slot.status_code == 201
+
+    patient_headers = {'Authorization': f'Bearer {_patient_token(client)}'}
+    booking = client.post(
+        f'/api/doctors/{doctor_id}/bookings',
+        headers=patient_headers,
+        json={'slot_id': slot.json()['id'], 'insurance': 'blue-cross'},
+    )
+    assert booking.status_code == 201
+    assert booking.json()['status'] == 'confirmed'
+
+    duplicate = client.post(
+        f'/api/doctors/{doctor_id}/bookings',
+        headers=patient_headers,
+        json={'slot_id': slot.json()['id'], 'insurance': 'Blue Cross'},
+    )
+    assert duplicate.status_code == 409

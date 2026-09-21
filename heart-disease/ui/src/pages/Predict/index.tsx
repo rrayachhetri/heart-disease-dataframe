@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Heart, Activity, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { submitPrediction } from '../../store/slices/predictionSlice';
+import { submitPrediction } from '../../sideeffects/slices/predictionSlice';
 import { getTextContent } from '../../content/text';
 import { useNotification } from '../../hooks/useNotification';
 import FormField from '../../components/Form/FormField';

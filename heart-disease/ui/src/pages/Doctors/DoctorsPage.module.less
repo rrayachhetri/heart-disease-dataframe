@@ -19,7 +19,7 @@ h2 { margin: 0; font-size: @font-size-2xl; }
 
 .searchPanel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
   align-items: end;
   gap: @space-4;
   padding: @space-5;
@@ -34,7 +34,47 @@ h2 { margin: 0; font-size: @font-size-2xl; }
 .field label span { color: @text-tertiary; font-weight: 400; }
 .field input { width: 100%; padding: @space-3 @space-4; border: 1px solid @border-color; border-radius: @radius-md; font: inherit; color: @text-primary; }
 .field input:focus { outline: 3px solid rgba(8, 145, 178, 0.2); border-color: @secondary; }
-.searchButton { display: inline-flex; align-items: center; justify-content: center; gap: @space-2; min-height: 46px; padding: @space-3 @space-5; border: 0; border-radius: @radius-md; background: #2d6a6a; color: white; font-weight: 700; cursor: pointer; }
+.fieldInputError { border-color: @danger !important; }
+.fieldInputError:focus { outline-color: rgba(220, 38, 38, 0.2) !important; }
+
+.validationSummary {
+  display: flex;
+  align-items: center;
+  gap: @space-3;
+  margin-bottom: @space-5;
+  padding: @space-4 @space-5;
+  border: 1px solid rgba(220, 38, 38, 0.24);
+  border-left: 4px solid @danger;
+  border-radius: @radius-lg;
+  background: linear-gradient(120deg, #fff1f2 0%, #fff7ed 100%);
+  box-shadow: 0 8px 20px -16px rgba(220, 38, 38, 0.65);
+
+  strong {
+    display: block;
+    color: #7f1d1d;
+    font-size: @font-size-sm;
+  }
+
+  p {
+    margin: 2px 0 0;
+    color: #991b1b;
+    font-size: @font-size-xs;
+  }
+}
+
+.validationIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: @radius-full;
+  background: rgba(220, 38, 38, 0.12);
+  color: @danger;
+}
+
+.searchButton { display: inline-flex; align-items: center; justify-content: center; gap: @space-2; min-height: 46px; padding: @space-3 @space-5; border: 0; border-radius: @radius-md; background: linear-gradient(135deg, #7ae8e3, #1a3a3a); color: @text-inverse; font-weight: 600; cursor: pointer; transition: opacity @transition-fast; }
+.searchButton:hover:not(:disabled) { opacity: 0.9; }
 .searchButton:disabled { opacity: 0.65; cursor: wait; }
 
 .disclaimer { display: flex; align-items: flex-start; gap: @space-2; margin: @space-4 0 @space-6; font-size: @font-size-xs; color: @text-secondary; }
@@ -53,6 +93,34 @@ h2 { margin: 0; font-size: @font-size-2xl; }
 .bio { min-height: 48px; margin: @space-4 0; font-size: @font-size-sm; }
 .cardFooter { display: flex; justify-content: space-between; gap: @space-3; padding-top: @space-3; border-top: 1px solid @border-light; font-size: @font-size-xs; }
 .cardFooter strong { color: @success; text-align: right; }
+.bookingButton { display: inline-flex; align-items: center; justify-content: center; gap: @space-2; width: 100%; margin-top: @space-4; padding: @space-3; border: 1px solid #1a3a3a; border-radius: @radius-md; background: transparent; color: #1a3a3a; font: inherit; font-size: @font-size-sm; font-weight: 600; cursor: pointer; }
+.bookingButton:hover { background: #e5f4f3; }
+.registeredBadge { display: inline-flex; align-items: center; gap: @space-1; margin-top: @space-3; padding: @space-1 @space-2; border-radius: @radius-full; background: @success-50; color: @success; font-size: @font-size-xs; font-weight: 700; width: fit-content; }
+.modalBackdrop { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: @space-4; background: rgba(15, 23, 42, 0.48); }
+.bookingModal { width: min(480px, 100%); max-height: min(620px, calc(100vh - @space-8)); overflow: auto; padding: @space-5; border: 1px solid @border-color; border-radius: @radius-lg; background: @bg-card; box-shadow: @shadow-xl; }
+.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: @space-3; border-bottom: 1px solid @border-light; padding-bottom: @space-3; }
+.modalHeader h3, .modalHeader p { margin: 0; }
+.modalHeader p { margin-top: @space-1; color: @text-secondary; font-size: @font-size-sm; }
+.closeButton { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: @radius-md; background: transparent; color: @text-secondary; cursor: pointer; }
+.closeButton:hover { background: @bg-secondary; color: @text-primary; }
+.slotList { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: @space-2; margin-top: @space-4; }
+.slotButton { padding: @space-3; border: 1px solid @border-color; border-radius: @radius-md; background: @bg-card; color: @text-primary; font: inherit; font-size: @font-size-sm; cursor: pointer; transition: background @transition-fast, border-color @transition-fast; }
+.slotButton:hover { border-color: @success; background: @success-50; }
+.slotButton:disabled { cursor: not-allowed; }
+.slotButtonError { border-color: @danger; background: @danger-50; color: @danger; }
+.slotStatus, .bookingSuccess, .bookingError { margin: @space-4 0 0; padding: @space-3; border-radius: @radius-md; font-size: @font-size-sm; }
+.slotStatus { background: @bg-secondary; color: @text-secondary; }
+.bookingSuccess { background: @success-50; color: @success; }
+.bookingError { background: @danger-50; color: @danger; }
+
+.requestForm { display: flex; flex-direction: column; gap: @space-4; margin-top: @space-4; }
+.requestForm label { display: flex; flex-direction: column; gap: @space-2; color: @text-primary; font-size: @font-size-sm; font-weight: 600; }
+.requestForm label span { color: @text-tertiary; font-weight: 400; }
+.requestForm input, .requestForm textarea { padding: @space-3; border: 1px solid @border-color; border-radius: @radius-md; font: inherit; color: @text-primary; }
+.addSlotBtn { min-height: 42px; padding: @space-3 @space-4; border: 0; border-radius: @radius-md; background: linear-gradient(135deg, #7ae8e3, #1a3a3a); color: @text-inverse; font-weight: 600; cursor: pointer; transition: opacity @transition-fast, background @transition-fast; }
+.addSlotBtn:hover:not(:disabled) { opacity: 0.9; }
+.addSlotBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.addSlotBtnError { background: @danger; }
 
 @media (max-width: @breakpoint-md) {
   .searchPanel { grid-template-columns: 1fr 1fr; }

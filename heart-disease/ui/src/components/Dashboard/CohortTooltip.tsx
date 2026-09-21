@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import styles from './CohortTooltip.module.less';
-import type { DatasetSummary } from '../../api/predictApi';
+import type { DatasetSummary } from '../../sideeffects/api/predictApi';
 
 interface Props {
   cohort: DatasetSummary | null;

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { predictHeartDisease } from '../../api/predictApi';
+import { predictHeartDisease } from '../api/predictApi';
 import type { PatientData, PredictionResult, PredictionRecord } from '../../types';
 
 interface PredictionState {

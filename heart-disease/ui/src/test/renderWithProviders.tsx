@@ -4,11 +4,12 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactElement } from 'react';
 
-import authReducer from '../store/slices/authSlice';
-import predictionReducer from '../store/slices/predictionSlice';
+import authReducer from '../sideeffects/slices/authSlice';
+import predictionReducer from '../sideeffects/slices/predictionSlice';
 import notificationReducer from '../store/slices/notificationSlice';
 import sessionReducer from '../store/slices/sessionSlice';
 import systemReducer from '../store/slices/systemSlice';
+import { api } from '../sideeffects/api/apiSlice';
 import type { RootState } from '../store';
 
 const reducer = {
@@ -17,11 +18,13 @@ const reducer = {
   notifications: notificationReducer,
   session: sessionReducer,
   system: systemReducer,
+  [api.reducerPath]: api.reducer,
 };
 
 export function setupStore(preloadedState?: Partial<RootState>) {
   return configureStore({
     reducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
     preloadedState: preloadedState as RootState,
   });
 }

@@ -2,7 +2,7 @@ import { Bell, LogOut, User, Shield, CheckCheck, Trash2, Camera, X as XIcon } fr
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { logout, setAvatarPosition, setAvatarUrl } from '../../../store/slices/authSlice';
+import { logout, setAvatarPosition, setAvatarUrl } from '../../../sideeffects/slices/authSlice';
 import { markAllAsRead, clearNotifications, markAsRead } from '../../../store/slices/notificationSlice';
 import styles from './Header.module.less';
 

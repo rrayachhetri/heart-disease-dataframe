@@ -1,0 +1,164 @@
+@import '../../styles/variables.less';
+
+.wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  width: 100%;
+  min-height: 42px;
+  padding: @space-2 @space-3;
+  border: 1px solid @border-color;
+  border-radius: @radius-md;
+  background: @bg-card;
+  color: @text-primary;
+  font: inherit;
+  font-size: @font-size-sm;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color @transition-fast;
+
+  &:hover {
+    border-color: #7ae8e3;
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: #7ae8e3;
+    box-shadow: 0 0 0 3px rgba(122, 232, 227, 0.35);
+  }
+}
+
+.placeholder {
+  color: @text-tertiary;
+}
+
+.panel {
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: @space-2;
+  padding: @space-4;
+  background: @bg-card;
+  border: 1px solid @border-color;
+  border-radius: @radius-lg;
+  box-shadow: @shadow-lg;
+  font-family: @font-family;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: @space-1;
+  font-size: @font-size-sm;
+  font-weight: 600;
+  color: @text-primary;
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: @radius-md;
+    background: transparent;
+    color: @text-secondary;
+    cursor: pointer;
+
+    &:hover {
+      background: @bg-secondary;
+      color: @text-primary;
+    }
+  }
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.weekdays span {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  font-size: @font-size-xs;
+  font-weight: 600;
+  color: @text-tertiary;
+}
+
+.day {
+  display: grid;
+  place-items: center;
+  height: 32px;
+  border: 0;
+  border-radius: @radius-md;
+  background: transparent;
+  color: @text-primary;
+  font: inherit;
+  font-size: @font-size-xs;
+  cursor: pointer;
+  transition: background @transition-fast;
+
+  &:hover:not(:disabled) {
+    background: rgba(122, 232, 227, 0.25);
+  }
+
+  &:disabled {
+    color: @text-tertiary;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.daySelected {
+  background: linear-gradient(135deg, #7ae8e3, #1a3a3a);
+  color: @text-inverse;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7ae8e3, #1a3a3a);
+    opacity: 0.9;
+  }
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  gap: @space-2;
+  margin-top: @space-2;
+  padding-top: @space-3;
+  border-top: 1px solid @border-light;
+  color: @text-secondary;
+
+  input[type='time'] {
+    flex: 1;
+    padding: @space-2;
+    border: 1px solid @border-color;
+    border-radius: @radius-md;
+    font: inherit;
+    color: @text-primary;
+  }
+}
+
+.doneBtn {
+  margin-top: @space-2;
+  padding: @space-2;
+  border: 0;
+  border-radius: @radius-md;
+  background: linear-gradient(135deg, #7ae8e3, #1a3a3a);
+  color: @text-inverse;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity @transition-fast;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}

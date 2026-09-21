@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
 import { tick, recordActivity, resetSession } from '../../store/slices/sessionSlice';
-import { logout } from '../../store/slices/authSlice';
+import { logout } from '../../sideeffects/slices/authSlice';
 
 const ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
 

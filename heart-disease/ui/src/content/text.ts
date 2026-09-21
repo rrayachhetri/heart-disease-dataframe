@@ -337,7 +337,7 @@ export const TEXT = {
     bioPlaceholder: 'Brief professional background\u2026',
     acceptingPatients: 'Accepting new patients',
     savingLabel: 'Saving\u2026',
-    savedLabel: '\u2713 Saved!',
+    savedLabel: '\u2713 Saved',
     saveLabel: 'Save profile',
     doctorOnly: 'This page is only available to doctors.',
     saveError: (status: number) => `Save failed (${status}). Please try again.`,

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Mail, Lock, User, Stethoscope, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { registerUser, loginUser, clearAuthError } from '../../store/slices/authSlice';
+import { registerUser, loginUser, clearAuthError } from '../../sideeffects/slices/authSlice';
 import { getTextContent } from '../../content/text';
 import type { UserRole } from '../../types';
 import styles from './Auth.module.less';

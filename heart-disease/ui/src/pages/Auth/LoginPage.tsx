@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loginUser, clearAuthError } from '../../store/slices/authSlice';
+import { loginUser, clearAuthError } from '../../sideeffects/slices/authSlice';
 import { getTextContent } from '../../content/text';
 import styles from './Auth.module.less';
 

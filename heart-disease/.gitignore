@@ -34,6 +34,15 @@ mlruns/
 # Notebooks
 .ipynb_checkpoints
 
+# Playwright E2E test artifacts
+ui/test-results/
+ui/playwright-report/
+ui/blob-report/
+
+# Leftover local debug artifacts (JWT tokens, etc. — never commit)
+ui/token.txt
+*.token.txt
+
 # OS
 .DS_Store
 Thumbs.db

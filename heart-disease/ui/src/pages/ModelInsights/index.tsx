@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Activity, Cpu, Timer, Workflow } from 'lucide-react';
-import type { ModelInfo } from '../../types';
-import { fetchModelInfo, fetchDatasetComparison, type DatasetSummary } from '../../api/predictApi';
+import { useGetModelInfoQuery, useGetDatasetComparisonQuery } from '../../sideeffects/api/predictEndpoints';
 import CohortExplorer from '../Dashboard/CohortExplorer';
 import ModelPerformanceCard from '../Dashboard/ModelPerformanceCard';
 import { getTextContent } from '../../content/text';
@@ -11,39 +10,14 @@ import styles from './ModelInsightsPage.module.less';
 const t = getTextContent('modelInsights');
 
 export default function ModelInsightsPage() {
-  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
-  const [datasetSummaries, setDatasetSummaries] = useState<DatasetSummary[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const { data: modelInfo, isFetching: modelInfoLoading } = useGetModelInfoQuery();
+  const { data: datasetComparison, isFetching: datasetLoading } = useGetDatasetComparisonQuery();
   const [lastProcessingMs, setLastProcessingMs] = useState<number | null>(null);
   const [lastMetrics, setLastMetrics] = useState<Record<string, number>>({});
-  const loading = !loaded;
 
-  useEffect(() => {
-    let active = true;
-
-    (async () => {
-      const [modelRes, datasetRes] = await Promise.allSettled([
-        fetchModelInfo(),
-        fetchDatasetComparison(),
-      ]);
-
-      if (!active) return;
-
-      if (modelRes.status === 'fulfilled') {
-        setModelInfo(modelRes.value);
-      }
-
-      if (datasetRes.status === 'fulfilled') {
-        setDatasetSummaries(datasetRes.value.datasets.filter((d) => d.name !== 'combined'));
-      }
-
-      setLoaded(true);
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const datasetSummaries = (datasetComparison?.datasets ?? []).filter((d) => d.name !== 'combined');
+  const loading = modelInfoLoading || datasetLoading;
+  const loaded = !loading;
 
   useEffect(() => {
     const saved = localStorage.getItem('lastPredictionTelemetry');

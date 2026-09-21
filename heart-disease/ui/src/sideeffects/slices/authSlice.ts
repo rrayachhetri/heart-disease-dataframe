@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { login as apiLogin, register as apiRegister, getMe } from '../../api/authApi';
-import { clearTokens } from '../../api/config';
+import { login as apiLogin, register as apiRegister, getMe } from '../api/authApi';
+import { clearTokens } from '../api/config';
 import type { AuthUser, LoginPayload, RegisterPayload } from '../../types';
 
 interface AuthState {
