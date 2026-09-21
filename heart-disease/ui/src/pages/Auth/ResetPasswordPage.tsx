@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Heart, KeyRound, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { resetPassword } from '../../api/authApi';
+import { resetPassword } from '../../sideeffects/api/authApi';
 import { getTextContent } from '../../content/text';
 import styles from './Auth.module.less';
 

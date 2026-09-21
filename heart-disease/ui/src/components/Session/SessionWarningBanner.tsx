@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, RefreshCw, LogOut } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { extend, expire } from '../../store/slices/sessionSlice';
-import { logout } from '../../store/slices/authSlice';
+import { logout } from '../../sideeffects/slices/authSlice';
 import { getTextContent } from '../../content/text';
 import styles from './SessionWarningBanner.module.less';
 

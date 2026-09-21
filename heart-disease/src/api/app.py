@@ -8,6 +8,7 @@ from src.db.database import init_db
 from src.auth.routes import router as auth_router
 from src.routers.predictions import router as predictions_router
 from src.routers.doctors import router as doctors_router
+from src.routers.local_doctors import router as local_doctors_router
 from src.routers.analytics import router as analytics_router
 from src.config.paths import MODEL_DIR
 
@@ -102,6 +103,7 @@ def startup_event():
 app.include_router(auth_router, prefix="/api")
 app.include_router(predictions_router, prefix="/api")
 app.include_router(doctors_router, prefix="/api")
+app.include_router(local_doctors_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
 
 

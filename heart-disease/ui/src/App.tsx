@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/Auth/LoginPage';
@@ -72,24 +71,6 @@ export default function App() {
           }
         />
       </Routes>
-
-      <ToastContainer
-        position="top-right"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        className="cs-toast-container"
-        toastClassName={(context) =>
-          `cs-toast cs-toast--${context?.type ?? 'default'}`
-        }
-        bodyClassName="cs-toast-body"
-        progressClassName="cs-toast-progress"
-      />
     </>
   );
 }

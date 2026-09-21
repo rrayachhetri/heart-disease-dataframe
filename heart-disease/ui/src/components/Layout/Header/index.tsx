@@ -2,7 +2,7 @@ import { ChevronDown, X as XIcon, Search, Menu } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { setAvatarPosition, setAvatarUrl } from '../../../store/slices/authSlice';
+import { setAvatarPosition, setAvatarUrl } from '../../../sideeffects/slices/authSlice';
 import { getTextContent } from '../../../content/text';
 import type { PredictionRecord } from '../../../types';
 import UserMenuDropdown from './UserMenuDropdown';

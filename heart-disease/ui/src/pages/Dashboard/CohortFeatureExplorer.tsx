@@ -8,7 +8,7 @@ import {
   Tooltip,
   Cell,
 } from 'recharts';
-import type { DatasetSummary } from '../../api/predictApi';
+import type { DatasetSummary } from '../../sideeffects/api/predictApi';
 import StatTooltip from '../../components/Dashboard/StatTooltip';
 import styles from './DashboardPage.module.less';
 

@@ -4,7 +4,7 @@ import { getTextContent } from '../../content/text';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, ClipboardList, Eye } from 'lucide-react';
 import type { PredictionRecord } from '../../types';
-import { clearHistory, removeFromHistory } from '../../store/slices/predictionSlice';
+import { clearHistory, removeFromHistory } from '../../sideeffects/slices/predictionSlice';
 import { useNavigate } from 'react-router-dom';
 import DetailModal from './DetailModal';
 import styles from './HistoryPage.module.less';

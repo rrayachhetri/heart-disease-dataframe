@@ -1,6 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useAppSelector } from '../../store/hooks';
-import { fetchModelInfo } from '../../api/predictApi';
+import { useGetModelInfoQuery } from '../../sideeffects/api/predictEndpoints';
 import styles from './QuoteBanner.module.less';
 import type { PredictionRecord, ModelInfo } from '../../types';
 
@@ -147,13 +147,7 @@ interface Props {
 export default function QuoteBanner({ collapsed = false }: Props) {
   const user = useAppSelector((s) => s.auth.user);
   const history = useAppSelector((s) => s.prediction.history);
-  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
-
-  useEffect(() => {
-    fetchModelInfo()
-      .then(setModelInfo)
-      .catch(() => { /* silent — fallback to tips only */ });
-  }, []);
+  const { data: modelInfo } = useGetModelInfoQuery();
 
   const track = useMemo(() => {
     const personal = buildPersonalised(user?.first_name ?? null, history);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Mail, User, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { forgotPassword } from '../../api/authApi';
+import { forgotPassword } from '../../sideeffects/api/authApi';
 import { getTextContent } from '../../content/text';
 import styles from './Auth.module.less';
 

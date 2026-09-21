@@ -7,6 +7,7 @@ psutil>=6.0
 fastapi>=0.85
 uvicorn>=0.18
 python-dotenv>=0.21
+httpx>=0.27
 # Phase 1 — Auth & Database
 sqlalchemy>=2.0
 alembic>=1.13

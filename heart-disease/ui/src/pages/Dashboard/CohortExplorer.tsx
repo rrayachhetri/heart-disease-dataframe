@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Database } from 'lucide-react';
 import { getTextContent } from '../../content/text';
-import type { DatasetSummary } from '../../api/predictApi';
+import type { DatasetSummary } from '../../sideeffects/api/predictApi';
 import CohortTooltip from '../../components/Dashboard/CohortTooltip';
 import CohortFeatureExplorer from './CohortFeatureExplorer';
 import styles from './DashboardPage.module.less';

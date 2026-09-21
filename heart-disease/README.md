@@ -1,39 +1,55 @@
-# CardioSense — Heart Disease Risk Platform
+# CardioSense — Heart Disease Risk & Care Platform
 
 > ⚠️ **Medical Disclaimer:** CardioSense is an educational and research tool. It is **not** a certified medical device and must not be used as a substitute for professional medical advice, diagnosis, or treatment.
 
 ---
 
+## Why CardioSense?
+
+Heart disease is the world's leading cause of death, yet many people never get a simple risk assessment until something goes wrong. CardioSense exists to close that gap by making three things easy and free:
+
+1. **Understand your risk today.** Answer a short, plain-language health questionnaire and get an instant, explainable risk assessment — not just a score, but *why* (which factors are driving it) and *how you compare* to real clinical research populations.
+2. **Know what to do next.** Every result comes with the specific factors pushing your risk up or down, so you and your doctor can have a focused conversation instead of guessing.
+3. **Actually get connected to care.** Search for doctors who accept your insurance — both providers registered directly on CardioSense and real physicians pulled live from the U.S. National Provider Identifier (NPI) registry — verify your insurance is in-network, and self-schedule an appointment, all in one flow.
+
+CardioSense is built as an open, inspectable reference implementation: the ML model, the risk explanations, and the doctor-matching logic are all readable source code, not a black box — so anyone (patients, clinicians, students, or engineers) can see exactly how a risk score was produced.
+
 ## Overview
 
-CardioSense is a full-stack heart disease risk prediction platform built on an ensemble ML model trained on **all 4 UCI Heart Disease datasets** (Cleveland, Hungarian, Switzerland, VA — 920 combined patients). It predicts cardiovascular risk from 13 clinical features, explains which factors drove each score, benchmarks every prediction against multiple research populations, and connects patients with relevant, in-network doctors for consultations.
+CardioSense is a full-stack heart disease risk prediction and care-navigation platform. Under the hood, an ensemble ML model trained on **all 4 UCI Heart Disease datasets** (Cleveland, Hungarian, Switzerland, VA — 920 combined patients) predicts cardiovascular risk from 13 clinical features, explains which factors drove each score, and benchmarks every prediction against multiple real research populations. On top of that, a patient/doctor platform lets patients find in-network doctors — both providers registered on CardioSense and real physicians from the public NPI registry — and self-schedule appointments directly.
 
 ### Current Capabilities
 
 | Capability | Status |
 |---|---|
 | ML Risk Prediction (VotingClassifier — RF-300 + GBM-200 + LR, CV AUC 0.886) | ✅ |
-| **Multi-dataset training (Cleveland + Hungarian + Switzerland + VA, 920 patients)** | ✅ **New** |
-| **Median imputation for missing values (`?`, `-9`) across all datasets** | ✅ **New** |
+| Multi-dataset training (Cleveland + Hungarian + Switzerland + VA, 920 patients) | ✅ |
+| Median imputation for missing values (`?`, `-9`) across all datasets | ✅ |
 | Per-prediction explainability (baseline-perturbation, top 6 factors) | ✅ |
-| **Population-percentile benchmark — every prediction ranked across all 4 cohorts** | ✅ **New** |
-| **Dataset comparison endpoint (`GET /api/analytics/datasets`)** | ✅ **New** |
-| **Population benchmark endpoint (`POST /api/analytics/population-benchmark`)** | ✅ **New** |
-| **Dashboard — Dataset Cohorts card (disease rates, record counts, feature stats)** | ✅ **New** |
-| **Result page — "How Do You Compare?" percentile bars across all 4 cohorts** | ✅ **New** |
+| Population-percentile benchmark — every prediction ranked across all 4 cohorts | ✅ |
+| Dataset comparison endpoint (`GET /api/analytics/datasets`) | ✅ |
+| Population benchmark endpoint (`POST /api/analytics/population-benchmark`) | ✅ |
+| Dashboard — Dataset Cohorts card (disease rates, record counts, feature stats) | ✅ |
+| Result page — "How Do You Compare?" percentile bars across all 4 cohorts | ✅ |
 | Model performance endpoint (`GET /api/predictions/model-info`) | ✅ |
 | REST API (FastAPI) | ✅ |
 | React + TypeScript Web UI | ✅ |
-| User Authentication (JWT — login / register) | ✅ Phase 1 |
-| Role-based access: Patient / Doctor | ✅ Phase 1 |
-| Server-side prediction history (SQLite → PostgreSQL) | ✅ Phase 1 |
-| Doctor profile management + NPI stub | ✅ Phase 1 |
-| Dashboard KPIs, charts, notifications | ✅ |
+| User Authentication (JWT — login / register) | ✅ |
+| Role-based access: Patient / Doctor | ✅ |
+| Server-side prediction history (SQLite → PostgreSQL) | ✅ |
+| Doctor profile management (NPI, specialty, fee, accepted insurance) | ✅ |
+| **Real doctor search via the public NPI registry (by ZIP/specialty)** | ✅ **New** |
+| **Declared-network insurance verification for registered doctors** | ✅ **New** |
+| **Doctor self-scheduling — publish appointment slots** | ✅ **New** |
+| **Patient self-booking of published appointment slots** | ✅ **New** |
+| **Request-to-book flow for external (non-registered) NPI providers** | ✅ **New** |
+| Dashboard KPIs, charts, notifications, toast feedback | ✅ |
 | MLflow experiment tracking | ✅ |
 | Docker support | ✅ |
-| Doctor in-network insurance verification | 🔜 Phase 2 |
-| In-app Chat & Video consultation | 🔜 Phase 3 |
-| Payment / billing (Stripe) | 🔜 Phase 4 |
+| Playwright end-to-end test coverage of the booking flow | ✅ **New** |
+| Payer-directory (Availity-style) real-time eligibility checks | 🔜 Planned |
+| In-app Chat & Video consultation | 🔜 Planned |
+| Payment / billing (Stripe) | 🔜 Planned |
 
 ---
 
@@ -54,7 +70,11 @@ heart-disease/
 │   ├── routers/
 │   │   ├── predictions.py          # POST/GET/DELETE /api/predictions + /model-info (includes population_percentiles)
 │   │   ├── analytics.py            # GET /api/analytics/datasets, POST /api/analytics/population-benchmark
-│   │   └── doctors.py              # GET/PUT /api/doctors/me, GET /api/doctors
+│   │   ├── doctors.py              # GET/PUT /api/doctors/me, GET /api/doctors, appointment slots & bookings
+│   │   └── local_doctors.py        # NPI-registry search + request-to-book for external providers
+│   ├── services/
+│   │   ├── insurance.py            # Declared-network insurance plan matching
+│   │   └── local_doctor_search.py  # CMS NPI Registry client
 │   ├── data/
 │   │   ├── prepare.py              # Cleveland data → processed.parquet (legacy single-dataset)
 │   │   └── prepare_multi.py        # (deprecated — logic moved into data_loader.py)
@@ -65,32 +85,29 @@ heart-disease/
 ├── alembic/
 │   ├── env.py                      # Alembic migration environment
 │   ├── script.py.mako              # Migration template
-│   └── versions/
-│       └── 0001_initial.py         # Initial schema migration
-├── ui/                             # React + TypeScript frontend
+│   └── versions/                   # 0001_initial, 0002_appointments, 0003_appointment_requests
+├── ui/                             # React + TypeScript frontend — see ui/README.md for full frontend docs
+│   ├── e2e/
+│   │   └── doctor-booking.spec.ts  # Playwright end-to-end test: full doctor↔patient booking flow
 │   └── src/
-│       ├── api/
-│       │   ├── authApi.ts          # register(), login(), refreshTokens(), getMe()
-│       │   ├── predictApi.ts       # predictHeartDisease(), fetchPredictionHistory()
-│       │   └── config.ts           # API_BASE_URL, authHeaders(), token helpers
-│       ├── store/slices/
-│       │   ├── authSlice.ts        # loginUser, registerUser, loadCurrentUser, logout
-│       │   ├── predictionSlice.ts  # submitPrediction thunk + localStorage history
-│       │   └── notificationSlice.ts
+│       ├── sideeffects/
+│       │   ├── api/                # api.ts (shared axios instance), RTK Query endpoints (auth/predict/doctor)
+│       │   └── slices/             # authSlice, predictionSlice (RTK Query-adjacent, API-response caches)
+│       ├── store/slices/           # sessionSlice, systemSlice, notificationSlice (local state, not API caches)
 │       ├── pages/
-│       │   ├── LoginPage.tsx       # JWT login form
-│       │   ├── RegisterPage.tsx    # Register with Patient/Doctor role toggle
-│       │   ├── DoctorProfilePage.tsx # Doctor NPI, specialty, fee, insurance editor
-│       │   ├── DashboardPage.tsx   # KPIs, pie chart, trend area chart
-│       │   ├── PredictPage.tsx     # Sectioned patient data form
-│       │   ├── ResultPage.tsx      # Animated risk gauge + verdict
-│       │   └── HistoryPage.tsx     # Server-side history (auth) / localStorage (anon)
+│       │   ├── Auth/               # LoginPage, RegisterPage (Patient/Doctor role toggle)
+│       │   ├── DoctorProfile/      # Doctor NPI, specialty, fee, insurance editor + appointment-slot publishing
+│       │   ├── Doctors/            # Find Doctors — unified registered + NPI-registry search, booking modal
+│       │   ├── Dashboard/          # KPIs, pie chart, trend area chart
+│       │   ├── Predict/            # Sectioned patient data form
+│       │   ├── Result/             # Animated risk gauge + verdict
+│       │   └── History/            # Server-side history (auth) / localStorage (anon)
 │       └── components/
 │           ├── ProtectedRoute.tsx  # Redirects to /login if not authenticated
 │           ├── Layout/             # Sidebar, Header (with user info + logout), Layout
 │           ├── Dashboard/          # KPICard, RiskGauge
 │           ├── Form/               # FormField, SelectField
-│           └── Notification/       # NotificationCenter
+│           └── Notification/       # NotificationCenter (persistent bell-icon feed)
 ├── .data/                          # All datasets and generated runtime artifacts
 │   ├── raw/                        # UCI source and processed .data files
 │   ├── processed/                  # Parquet training outputs
@@ -168,6 +185,8 @@ npm run dev        # http://localhost:3000
 ```
 
 Open **http://localhost:3000** — you will be redirected to `/register` to create your first account.
+
+> See **[ui/README.md](ui/README.md)** for the full frontend guide: tech stack, environment/proxy details, all npm scripts, the Playwright end-to-end suite, a manual end-to-end verification checklist, and UI troubleshooting.
 
 ---
 
@@ -475,6 +494,50 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
 
 > NPI format verification is currently local (exactly 10 digits). A future NPPES integration can add registry-level identity verification.
 
+### Appointment Slots & Booking (registered doctors)
+
+Doctors publish their own availability; patients book directly against a specific in-network doctor.
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/doctors/me/slots` | List the signed-in doctor's own published appointment slots | 🔒 Doctor role |
+| `POST` | `/api/doctors/me/slots` | Publish a new appointment slot (`starts_at`, `ends_at`) | 🔒 Doctor role |
+| `DELETE` | `/api/doctors/me/slots/{slot_id}` | Remove an unbooked slot | 🔒 Doctor role |
+| `GET` | `/api/doctors/{doctor_id}/slots` | List a doctor's open (unbooked, future) slots | Public |
+| `POST` | `/api/doctors/{doctor_id}/bookings` | Book an open slot (validates the patient's insurance is in-network first) | 🔒 Patient role |
+
+All timestamps are returned as explicit UTC-offset ISO 8601 strings (e.g. `2026-10-15T21:30:00+00:00`) so the browser never misinterprets a naive timestamp as local time — the UI converts to the viewer's local timezone for display.
+
+**Example — Publish a slot:**
+
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me/slots" -Method POST `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"starts_at":"2026-10-15T21:30:00.000Z","ends_at":"2026-10-15T22:00:00.000Z"}'
+```
+
+**Example — Book a slot:**
+
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/$doctorId/bookings" -Method POST `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"slot_id":"$slotId","insurance":"Blue Cross"}'
+```
+
+### Real Doctor Search & Request-to-Book (NPI Registry)
+
+Beyond doctors registered directly on CardioSense, patients can search the free, public [CMS NPI Registry](https://npiregistry.cms.hhs.gov/) (no API key required) by ZIP code and specialty, and request an appointment with any real provider found this way — useful when no registered doctor matches.
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/local-doctors/search` | Search real providers from the NPI registry by ZIP/postal code + optional specialty | Public |
+| `POST` | `/api/local-doctors/requests` | Submit a request-to-book for an external (non-registered) provider | 🔒 Patient role |
+| `GET` | `/api/local-doctors/requests/me` | List the signed-in patient's own appointment requests | 🔒 Patient role |
+
+If an NPI-search result happens to match a doctor already registered on CardioSense (matched by NPI number), the UI shows it as bookable in-app instead of a request-to-book — the Find Doctors page automatically de-duplicates and merges both sources into a single result list.
+
 ---
 
 ## Web UI Features
@@ -489,7 +552,8 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/doctors/me" -Method PUT `
 | **Predict** | `/predict` | Sectioned form (Personal / Symptoms / Vitals), validation |
 | **Result** | `/result` | Animated SVG risk gauge, color-coded verdict, patient summary, **"Why This Score?"** animated contribution bars per feature, **"How Do You Compare?"** population benchmark section with per-cohort percentile bars for each top-impact feature |
 | **History** | `/history` | Server-side history when logged in, localStorage fallback for anonymous |
-| **Doctor Profile** | `/doctor/profile` | Doctor-only: NPI, specialty, fee, insurance, accepting patients toggle |
+| **Find Doctors** | `/doctors` | Patient-only: search by insurance plan (required) + specialty/ZIP (optional); merges registered in-app doctors with real NPI-registry providers into one deduped, verified-in-network result grid; book a published slot directly, or submit a request-to-book for external providers |
+| **Doctor Profile** | `/doctor/profile` | Doctor-only: NPI, specialty, fee, insurance, accepting-patients toggle, and self-service appointment-slot publishing/removal |
 
 **Header (when logged in):**
 - Displays user name, role badge
@@ -595,10 +659,11 @@ mlflow ui --backend-store-uri sqlite:///./.data/db/mlflow.db --default-artifact-
 | Phase | Feature | Status |
 |---|---|---|
 | **1** | JWT Auth, Database, Doctor Profiles | ✅ Done |
-| **2** | In-network insurance verification (Availity API), appointment booking | 🔜 Next |
-| **3** | In-app WebSocket chat + Agora.io video calls (HIPAA-compliant) | 🔜 Planned |
-| **4** | Stripe payments, doctor payouts, co-pay calculation | 🔜 Planned |
-| **5** | HIPAA audit, encryption at rest, CI/CD, rate limiting | 🔜 Planned |
+| **2** | Real NPI-registry doctor search, declared-network insurance verification, doctor-published appointment slots, patient self-booking, request-to-book for external providers | ✅ Done |
+| **3** | Payer-directory (Availity-style) real-time eligibility checks | 🔜 Next |
+| **4** | In-app WebSocket chat + Agora.io video calls (HIPAA-compliant) | 🔜 Planned |
+| **5** | Stripe payments, doctor payouts, co-pay calculation | 🔜 Planned |
+| **6** | HIPAA audit, encryption at rest, CI/CD, rate limiting | 🔜 Planned |
 
 ---
 

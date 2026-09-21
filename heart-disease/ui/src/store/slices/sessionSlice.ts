@@ -12,7 +12,7 @@
  */
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { clearTokens } from '../../api/config';
+import { clearTokens } from '../../sideeffects/api/config';
 
 export const SESSION_MAX_MS  = 2 * 60 * 1000;
 export const SESSION_WARN_MS = 1 * 60  * 1000;
