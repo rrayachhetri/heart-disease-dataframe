@@ -23,6 +23,7 @@ export const TEXT = {
     myProfile: 'My Profile',
     modelInsights: 'Model Insights',
     findDoctors: 'Find Doctors',
+    consult: 'Consult',
   },
 
   header: {

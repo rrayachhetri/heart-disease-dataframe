@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import os
+import threading
 import joblib
 
 from src.db.database import init_db
@@ -10,6 +11,7 @@ from src.routers.predictions import router as predictions_router
 from src.routers.doctors import router as doctors_router
 from src.routers.local_doctors import router as local_doctors_router
 from src.routers.analytics import router as analytics_router
+from src.routers.chat import router as chat_router
 from src.config.paths import MODEL_DIR
 
 MODELS_DIR = MODEL_DIR
@@ -97,6 +99,13 @@ def startup_event():
     # In production, use `alembic upgrade head` instead.
     if os.getenv("AUTO_CREATE_TABLES", "false").lower() in ("1", "true", "yes"):
         init_db()
+    # Pre-load Ollama models and the RAG index in the background so the
+    # first chat question isn't slow.
+    from src.rag import ollama_client, knowledge_base
+    threading.Thread(
+        target=lambda: (ollama_client.warm_up(), knowledge_base.warm_up()),
+        daemon=True,
+    ).start()
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
@@ -105,6 +114,7 @@ app.include_router(predictions_router, prefix="/api")
 app.include_router(doctors_router, prefix="/api")
 app.include_router(local_doctors_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
 
 
 # ── Legacy / utility endpoints ────────────────────────────────────────────────
