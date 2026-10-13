@@ -11,6 +11,7 @@ import {
   BarChart3,
   X,
   Search,
+  MessageCircle,
 } from 'lucide-react';
 import { useAppSelector } from '../../store/hooks';
 import { getTextContent } from '../../content/text';
@@ -26,6 +27,7 @@ const patientNavItems = [
   { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
   { path: '/doctors', label: tNav.findDoctors, icon: Search },
+  { path: '/ask', label: tNav.askCardioSense, icon: MessageCircle },
 ];
 
 const doctorNavItems = [
@@ -34,6 +36,7 @@ const doctorNavItems = [
   { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
   { path: '/doctors', label: tNav.findDoctors, icon: Search },
+  { path: '/ask', label: tNav.askCardioSense, icon: MessageCircle },
   { path: '/doctor/profile', label: tNav.myProfile, icon: Stethoscope },
 ];
 

@@ -21,6 +21,7 @@ import json
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -161,6 +162,43 @@ def chat_health():
     )
 
 
+def _prepare(body: ChatRequest, db: Session, current_user):
+    if not body.question or not body.question.strip():
+        raise HTTPException(status_code=422, detail="question must not be empty")
+    ctx = _resolve_context(body, db, current_user)
+    try:
+        chunks = retrieve(body.question, top_k=3)
+    except OllamaUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return ctx, chunks, _build_prompt(body.question, ctx, chunks)
+
+
+@router.post("/stream")
+def ask_stream(
+    body: ChatRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_optional_user),
+):
+    """Same as /ask but streams NDJSON: a `meta` line, `token` lines, then `done`."""
+    ctx, chunks, prompt = _prepare(body, db, current_user)
+    meta = {
+        "type": "meta",
+        "sources": [{"source": c.source, "heading": c.heading} for c in chunks],
+        "grounded_in_prediction": ctx is not None,
+    }
+
+    def events():
+        yield json.dumps(meta) + "\n"
+        try:
+            for token in ollama_client.generate_stream(prompt, system=_SYSTEM_PROMPT):
+                yield json.dumps({"type": "token", "text": token}) + "\n"
+            yield json.dumps({"type": "done"}) + "\n"
+        except OllamaUnavailableError as exc:
+            yield json.dumps({"type": "error", "detail": str(exc)}) + "\n"
+
+    return StreamingResponse(events(), media_type="application/x-ndjson")
+
+
 @router.post("/ask", response_model=ChatResponse)
 def ask(
     body: ChatRequest,
@@ -170,14 +208,7 @@ def ask(
     if not body.question or not body.question.strip():
         raise HTTPException(status_code=422, detail="question must not be empty")
 
-    ctx = _resolve_context(body, db, current_user)
-
-    try:
-        chunks = retrieve(body.question, top_k=4)
-    except OllamaUnavailableError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-
-    prompt = _build_prompt(body.question, ctx, chunks)
+    ctx, chunks, prompt = _prepare(body, db, current_user)
 
     try:
         answer = ollama_client.generate(prompt, system=_SYSTEM_PROMPT)

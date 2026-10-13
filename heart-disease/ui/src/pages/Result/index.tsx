@@ -19,6 +19,7 @@ import type { TopFactor, PopulationPercentile } from '../../types';
 import RiskGauge from '../../components/Dashboard/RiskGauge';
 import { useCountUp } from '../../hooks/useCountUp';
 import Section from './Section';
+import AskCardioSense from '../../components/AskCardioSense';
 import styles from './ResultPage.module.less';
 
 const FIELD_LABELS: Record<string, string> = {
@@ -401,6 +402,8 @@ export default function ResultPage() {
           It should not be used as a substitute for professional medical diagnosis.
         </p>
       </motion.div>
+
+      <AskCardioSense result={result} patientData={patientData} />
 
       {/* ── Actions ──────────────────────────────────────────────────────── */}
       <motion.div

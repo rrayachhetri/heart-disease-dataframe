@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import os
+import threading
 import joblib
 
 from src.db.database import init_db
@@ -98,6 +99,13 @@ def startup_event():
     # In production, use `alembic upgrade head` instead.
     if os.getenv("AUTO_CREATE_TABLES", "false").lower() in ("1", "true", "yes"):
         init_db()
+    # Pre-load Ollama models and the RAG index in the background so the
+    # first chat question isn't slow.
+    from src.rag import ollama_client, knowledge_base
+    threading.Thread(
+        target=lambda: (ollama_client.warm_up(), knowledge_base.warm_up()),
+        daemon=True,
+    ).start()
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
