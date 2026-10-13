@@ -10,6 +10,7 @@ from src.routers.predictions import router as predictions_router
 from src.routers.doctors import router as doctors_router
 from src.routers.local_doctors import router as local_doctors_router
 from src.routers.analytics import router as analytics_router
+from src.routers.chat import router as chat_router
 from src.config.paths import MODEL_DIR
 
 MODELS_DIR = MODEL_DIR
@@ -105,6 +106,7 @@ app.include_router(predictions_router, prefix="/api")
 app.include_router(doctors_router, prefix="/api")
 app.include_router(local_doctors_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
 
 
 # ── Legacy / utility endpoints ────────────────────────────────────────────────
