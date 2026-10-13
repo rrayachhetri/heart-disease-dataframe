@@ -12,7 +12,7 @@ import ResultPage from './pages/Result';
 import HistoryPage from './pages/History';
 import DoctorProfilePage from './pages/DoctorProfile';
 import DoctorsPage from './pages/Doctors';
-import AskCardioSensePage from './pages/AskCardioSense';
+import AskCardioSensePage from './pages/Consult';
 import ModelInsightsPage from './pages/ModelInsights';
 import SessionTimeoutPage from './pages/SessionTimeout';
 import SystemUnavailablePage from './pages/SystemUnavailable';

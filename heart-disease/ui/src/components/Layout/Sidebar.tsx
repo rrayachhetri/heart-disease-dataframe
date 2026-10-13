@@ -27,7 +27,7 @@ const patientNavItems = [
   { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
   { path: '/doctors', label: tNav.findDoctors, icon: Search },
-  { path: '/ask', label: tNav.askCardioSense, icon: MessageCircle },
+  { path: '/ask', label: tNav.consult, icon: MessageCircle },
 ];
 
 const doctorNavItems = [
@@ -36,7 +36,7 @@ const doctorNavItems = [
   { path: '/model-insights', label: tNav.modelInsights, icon: BarChart3 },
   { path: '/history', label: tNav.history, icon: ClipboardList },
   { path: '/doctors', label: tNav.findDoctors, icon: Search },
-  { path: '/ask', label: tNav.askCardioSense, icon: MessageCircle },
+  { path: '/ask', label: tNav.consult, icon: MessageCircle },
   { path: '/doctor/profile', label: tNav.myProfile, icon: Stethoscope },
 ];
 
