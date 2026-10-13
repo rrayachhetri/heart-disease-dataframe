@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
@@ -47,11 +47,34 @@ class PredictionContext(BaseModel):
     population_percentiles: List[Dict[str, Any]] = []
     features: Optional[Dict[str, float]] = None
 
+    @field_validator("probability")
+    @classmethod
+    def validate_probability(cls, v: float) -> float:
+        if not (0 <= v <= 1):
+            raise ValueError("probability must be 0-1")
+        return v
+
+    @field_validator("features")
+    @classmethod
+    def validate_features_size(cls, v: Optional[Dict[str, float]]) -> Optional[Dict[str, float]]:
+        if v and len(str(v)) > 2000:
+            raise ValueError("features context too large (>2000 chars)")
+        return v
+
+
 
 class ChatRequest(BaseModel):
     question: str
     prediction_id: Optional[str] = None
     context: Optional[PredictionContext] = None
+
+    @field_validator("question")
+    @classmethod
+    def validate_question_length(cls, v: str) -> str:
+        if not v or len(v) > 1000:
+            raise ValueError("question must be 1-1000 characters")
+        return v.strip()
+
 
 
 class ChatSource(BaseModel):
@@ -110,11 +133,24 @@ def _resolve_context(
             raise HTTPException(status_code=404, detail="Prediction not found")
         if current_user is None or record.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="Not authorized to view this prediction")
+        # Recompute top factors and percentiles from the stored result
+        # so the assistant can explain the reasoning for this prediction.
+        try:
+            from src.models.explain import explain_prediction
+            features_dict = json.loads(record.features_json)
+            top_factors, pop_pctls = explain_prediction(
+                record.prediction, record.risk_score, features_dict
+            )
+        except Exception:
+            top_factors, pop_pctls = [], []
+        
         return PredictionContext(
             probability=record.risk_score,
             prediction=record.prediction,
             risk_level=record.risk_level,
             features=json.loads(record.features_json),
+            top_factors=top_factors,
+            population_percentiles=pop_pctls,
         )
     return body.context
 

@@ -9,8 +9,9 @@ service after install), with the chat and embedding models pulled:
     ollama pull llama3.2:1b
     ollama pull nomic-embed-text
 
-All settings are overridable via environment variables so a deployment can
-point at a different model or a remote Ollama instance.
+IMPORTANT: OLLAMA_BASE_URL must be localhost or 127.0.0.1 to ensure user
+prediction data (probability, health features) never leaves the machine.
+Remote Ollama instances are not supported to preserve privacy.
 """
 
 from __future__ import annotations
@@ -19,12 +20,28 @@ import json
 import os
 import threading
 from typing import Iterator, List
+from urllib.parse import urlparse
 
 import httpx
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3.2:1b")
 OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+
+
+def _validate_base_url(url: str) -> None:
+    """Ensure Ollama is only accessed locally to protect user data privacy."""
+    parsed = urlparse(url)
+    hostname = parsed.hostname or ""
+    if hostname.lower() not in ("localhost", "127.0.0.1", "::1"):
+        raise ValueError(
+            f"OLLAMA_BASE_URL must be localhost (not '{hostname}'). "
+            "Remote Ollama instances are not supported to prevent prediction data "
+            "and health features from leaving the machine."
+        )
+
+
+_validate_base_url(OLLAMA_BASE_URL)
 
 # Keep models resident between requests (Ollama's default is 5 minutes) and
 # cap output length / context so small local models answer quickly.

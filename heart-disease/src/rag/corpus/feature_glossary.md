@@ -68,13 +68,12 @@ test finding, not a screening-stage risk factor - a higher count directly
 reflects visualized coronary involvement.
 
 ## thal (Thalassemia / Thallium Stress Test Result)
-Result of a thallium stress test:
-- 3 = Normal
-- 6 = Fixed defect (an old, stable area of reduced perfusion, often from a
-  prior infarction)
-- 7 = Reversible defect (perfusion defect that improves at rest, suggesting
-  inducible ischemia from a significant stenosis)
 
+Result of a thallium stress test. **Note**: The app encodes these as `1 = Normal`, `2 = Fixed defect`, `3 = Reversible defect`:
+
+- 1 = Normal (no perfusion defect)
+- 2 = Fixed defect (an old, stable area of reduced perfusion, often from a prior infarction)
+- 3 = Reversible defect (perfusion defect that improves at rest, suggesting inducible ischemia from a significant stenosis)
 ## Important caveat about ca and thal
 `ca` and `thal` are results of invasive or specialized cardiac testing, not
 routine self-reported risk factors like smoking or blood pressure. When
