@@ -21,7 +21,7 @@ COLS = [
     "num",
 ]
 
-
+# read csv file into tabular fomat using panda
 def load_raw(path: Path) -> pd.DataFrame:
     # file is a comma-separated file without header
     df = pd.read_csv(path, header=None, names=COLS, na_values=["?", "\t?", "\n?", "\r?"], skip_blank_lines=True)

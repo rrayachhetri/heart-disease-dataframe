@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import { predictHeartDisease } from '../api/predictApi';
+import { JAVA_PREVIEW } from '../api/config';
 import type { PatientData, PredictionResult, PredictionRecord } from '../../types';
 
 interface PredictionState {
@@ -10,7 +11,8 @@ interface PredictionState {
   error: string | null;
 }
 
-const savedHistory = localStorage.getItem('predictionHistory');
+const historyKey = JAVA_PREVIEW ? 'javaPredictionHistory' : 'predictionHistory';
+const savedHistory = localStorage.getItem(historyKey);
 const initialHistory: PredictionRecord[] = savedHistory ? JSON.parse(savedHistory) : [];
 
 const initialState: PredictionState = {
@@ -39,11 +41,11 @@ const predictionSlice = createSlice({
     },
     clearHistory(state) {
       state.history = [];
-      localStorage.removeItem('predictionHistory');
+      localStorage.removeItem(historyKey);
     },
     removeFromHistory(state, action: PayloadAction<string>) {
       state.history = state.history.filter((r) => r.id !== action.payload);
-      localStorage.setItem('predictionHistory', JSON.stringify(state.history));
+      localStorage.setItem(historyKey, JSON.stringify(state.history));
     },
   },
   extraReducers: (builder) => {
@@ -65,7 +67,7 @@ const predictionSlice = createSlice({
         };
         state.history.unshift(record);
         if (state.history.length > 50) state.history = state.history.slice(0, 50);
-        localStorage.setItem('predictionHistory', JSON.stringify(state.history));
+        localStorage.setItem(historyKey, JSON.stringify(state.history));
       })
       .addCase(submitPrediction.rejected, (state, action) => {
         state.loading = false;

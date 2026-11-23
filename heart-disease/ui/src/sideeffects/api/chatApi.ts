@@ -1,4 +1,4 @@
-import { API_BASE_URL, getAccessToken } from './config';
+import { API_BASE_URL, JAVA_PREVIEW, getPythonAccessToken } from './config';
 import type { PredictionResult, PatientData } from '../../types';
 
 export interface ChatSource { source: string; heading: string }
@@ -20,9 +20,9 @@ export async function askCardioSenseStream(
   handlers: ChatStreamHandlers,
   signal?: AbortSignal,
 ): Promise<void> {
-  const token = getAccessToken();
+  const token = getPythonAccessToken();
   let body: Record<string, unknown> = { question };
-  if (result?.id) {
+  if (result?.id && !JAVA_PREVIEW) {
     body = { question, prediction_id: result.id };
   } else if (result) {
     body = {

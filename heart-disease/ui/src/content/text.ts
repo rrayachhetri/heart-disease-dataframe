@@ -12,6 +12,10 @@ export const TEXT = {
   app: {
     name: 'CardioSense',
     tagline: 'Heart Disease Risk Assessment',
+    javaPreviewNotice:
+      'Java preview: use a new MongoDB account. Predictions and chat use Python anonymously; ' +
+      'prediction history is stored in this browser and shared by its users. Password reset ' +
+      'and external appointment requests are unavailable.',
   },
 
   nav: {

@@ -18,6 +18,11 @@ import SessionTimeoutPage from './pages/SessionTimeout';
 import SystemUnavailablePage from './pages/SystemUnavailable';
 import SessionWarningBanner from './components/Session/SessionWarningBanner';
 import { useAppSelector } from './store/hooks';
+import { JAVA_PREVIEW } from './sideeffects/api/config';
+import { getTextContent } from './content/text';
+import styles from './App.module.less';
+
+const string = getTextContent('app');
 
 /** Watches system.unavailable and navigates to /system-unavailable when API is down. */
 function SystemRedirect() {
@@ -37,6 +42,11 @@ function SystemRedirect() {
 export default function App() {
   return (
     <>
+      {JAVA_PREVIEW && (
+        <div role="status" className={styles.javaPreviewNotice}>
+          {string.javaPreviewNotice}
+        </div>
+      )}
       <SystemRedirect />
       <SessionWarningBanner />
 

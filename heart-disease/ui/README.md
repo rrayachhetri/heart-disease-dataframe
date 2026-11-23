@@ -29,11 +29,28 @@ React + TypeScript single-page app for CardioSense: heart-disease risk predictio
 
 You need **both** the backend and the frontend running for the app to be fully functional (predictions, auth, doctor search, and booking all call the FastAPI backend — there is currently no mock/offline mode, see [Mock/offline mode](#mockoffline-mode) below).
 
+The default UI uses Python. For the optional Java/MongoDB UI preview, its startup
+commands, and account/feature limitations, see
+[Java backend preview](../README.md#use-java-apis-in-the-ui-local-preview).
+
 - Node.js 18+ and npm
 - Python 3.10+ with the project virtual environment set up (see root README §Quick Start)
 - The backend API running on `http://127.0.0.1:8080` (Vite proxies `/api` and `/health` to this address — see `vite.config.ts`)
 
 ### 1a. Start the backend (from the repository root, not `ui/`)
+
+#### macOS/Linux
+
+```bash
+cd /absolute/path/to/heart-disease
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+cp .env.example .env
+```
+
+#### Windows PowerShell
 
 ```powershell
 cd c:\heart-disease-dataframe\heart-disease
@@ -80,6 +97,12 @@ python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8080/api/health
 # Expect: { "status": "ok", "model_loaded": true }
+```
+
+On macOS/Linux, use the equivalent curl command:
+
+```bash
+curl http://127.0.0.1:8080/api/health
 ```
 
 If `model_loaded` is `false`, the training step above hasn't produced a usable artifact yet — predictions, the Dashboard, and Model Insights pages will fail until it's `true`. If this request fails entirely (connection refused), the UI will show a global **"System temporarily unavailable"** banner and auto-retry — that's expected behavior (see [Troubleshooting](#troubleshooting)), not a UI bug.

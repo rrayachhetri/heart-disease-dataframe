@@ -1,4 +1,5 @@
 import { api } from './api';
+import { JAVA_PREVIEW } from './config';
 import type { DoctorProfile } from '../../types';
 
 export interface InsuranceMatch {
@@ -91,17 +92,19 @@ export async function searchLocalDoctors(
   const { data } = await api.get<LocalProvider[]>('/local-doctors/search', {
     params: { postal_code: postalCode, specialty },
   });
-  return data;
+  return JAVA_PREVIEW ? data.map((provider) => ({ ...provider, registered_doctor_id: null })) : data;
 }
 
 export async function requestAppointment(
   payload: AppointmentRequestPayload
 ): Promise<AppointmentRequestRecord> {
+  if (JAVA_PREVIEW) throw new Error('External appointment requests are not available for Java preview accounts.');
   const { data } = await api.post<AppointmentRequestRecord>('/local-doctors/requests', payload);
   return data;
 }
 
 export async function fetchMyAppointmentRequests(): Promise<AppointmentRequestRecord[]> {
+  if (JAVA_PREVIEW) throw new Error('External appointment requests are not available for Java preview accounts.');
   const { data } = await api.get<AppointmentRequestRecord[]>('/local-doctors/requests/me');
   return data;
 }

@@ -1,4 +1,5 @@
 import { api } from './api';
+import { JAVA_PREVIEW } from './config';
 import type { PatientData, PredictionResult, ServerPredictionRecord, ModelInfo, PopulationPercentile } from '../../types';
 
 export async function predictHeartDisease(data: PatientData): Promise<PredictionResult> {
@@ -10,11 +11,13 @@ export async function fetchPredictionHistory(
   skip = 0,
   limit = 50
 ): Promise<{ predictions: ServerPredictionRecord[]; total: number }> {
+  if (JAVA_PREVIEW) throw new Error('Server prediction history is not available for Java preview accounts.');
   const { data } = await api.get('/predictions', { params: { skip, limit } });
   return data;
 }
 
 export async function deletePrediction(id: string): Promise<void> {
+  if (JAVA_PREVIEW) throw new Error('Server prediction history is not available for Java preview accounts.');
   await api.delete(`/predictions/${id}`);
 }
 
