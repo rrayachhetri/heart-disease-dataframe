@@ -296,12 +296,15 @@ The health response should include `"model_loaded": true`. If it reports
 `"model_loaded": false`, run `python -m src.models.train` and restart the API.
 The web UI will redirect to `/register` so you can create the first account.
 
-The database tables (users, patients, doctors, predictions) are created automatically
-on the first local startup. To apply migrations explicitly instead:
+Database tables are not created automatically by default (`AUTO_CREATE_TABLES=false`).
+Initialize the schema before the first API startup:
 
 ```bash
 python -m alembic upgrade head
 ```
+
+For local development instead, set `AUTO_CREATE_TABLES=true` in `.env` to create
+the tables automatically on startup.
 
 > See **[ui/README.md](ui/README.md)** for the full frontend guide: tech stack, environment/proxy details, all npm scripts, the Playwright end-to-end suite, a manual end-to-end verification checklist, and UI troubleshooting.
 

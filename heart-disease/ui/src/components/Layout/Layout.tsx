@@ -2,7 +2,11 @@ import { type ReactNode, useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import QuoteBanner from './QuoteBanner';
+import { JAVA_PREVIEW } from '../../sideeffects/api/config';
+import { getTextContent } from '../../content/text';
 import styles from './Layout.module.less';
+
+const string = getTextContent('app');
 
 interface Props {
   children: ReactNode;
@@ -95,7 +99,14 @@ export default function Layout({ children }: Props) {
           onUserMenuClose={handleUserMenuClose}
         />
         <QuoteBanner collapsed={collapsed} />
-        <main id="main-content" className={styles.content} tabIndex={-1}>{children}</main>
+        <main id="main-content" className={styles.content} tabIndex={-1}>
+          {JAVA_PREVIEW && (
+            <div role="status" className={styles.javaPreviewNotice}>
+              {string.javaPreviewNotice}
+            </div>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );

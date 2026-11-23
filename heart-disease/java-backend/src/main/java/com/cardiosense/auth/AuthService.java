@@ -59,7 +59,8 @@ public class AuthService {
     }
 
     public User currentUser(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ") || authorization.length() <= 7) {
+        if (authorization == null || !authorization.regionMatches(true, 0, "Bearer ", 0, 7)
+                || authorization.length() <= 7) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }
         return userForToken(authorization.substring(7), "access");

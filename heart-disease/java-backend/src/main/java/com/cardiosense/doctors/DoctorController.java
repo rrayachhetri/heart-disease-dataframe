@@ -86,7 +86,7 @@ public class DoctorController {
                     HttpStatus.UNPROCESSABLE_ENTITY, "insurance is required");
         }
         return doctors.list(specialty, insurance, true).stream()
-                .map(doctor -> new Recommendation(doctor, doctors.insurance(doctor.id(), insurance))).toList();
+                .map(doctor -> new Recommendation(doctor, doctors.insurance(doctor, insurance))).toList();
     }
 
     @GetMapping("/{doctorId}/insurance")

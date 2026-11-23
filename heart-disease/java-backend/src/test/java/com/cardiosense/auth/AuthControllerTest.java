@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import jakarta.servlet.DispatcherType;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,5 +57,14 @@ class AuthControllerTest {
     @Test
     void routesOutsideThisSliceAreNotExposed() throws Exception {
         mvc.perform(get("/api/predictions")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void errorDispatchesReachTheErrorHandler() throws Exception {
+        mvc.perform(get("/unsupported").with(request -> {
+                    request.setDispatcherType(DispatcherType.ERROR);
+                    return request;
+                }))
+                .andExpect(status().isNotFound());
     }
 }

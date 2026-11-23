@@ -177,6 +177,9 @@ verbose "Downloading to: $TMP_DOWNLOAD_DIR/$distributionUrlName"
 
 # select .zip or .tar.gz
 if ! command -v unzip >/dev/null; then
+  if [ -n "${distributionSha256Sum-}" ]; then
+    die "unzip is required when distributionSha256Sum is configured"
+  fi
   distributionUrl="${distributionUrl%.zip}.tar.gz"
   distributionUrlName="${distributionUrl##*/}"
 fi

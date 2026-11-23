@@ -83,6 +83,15 @@ class AuthServiceTest {
     }
 
     @Test
+    void acceptsBearerSchemeCaseInsensitively() {
+        User user = new User("123", "person@example.com", "unused", "patient",
+                true, true, "Pat", "Smith", Instant.now(), null);
+        when(users.findById(user.id())).thenReturn(Optional.of(user));
+
+        assertEquals(user.id(), auth.currentUser("bEaReR " + tokens.access(user)).id());
+    }
+
+    @Test
     void acceptsPythonBcryptPrehashAndHs256Token() {
         String pythonHash = "$2b$10$cDi.p2380N6b4sjEdr0rR.oTuIQUQGrR2ZxqxkiHxnBWq2tdU3elC";
         String pythonJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."

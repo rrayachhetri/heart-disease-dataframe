@@ -34,7 +34,7 @@ class DoctorControllerTest {
         var insurance = new DoctorService.InsuranceResponse("doc", "Blue Cross", true,
                 "Blue Cross", "doctor_declared_network", "Declared by doctor");
         when(doctors.list("Cardiology", "Blue Cross", true)).thenReturn(List.of(doctor));
-        when(doctors.insurance("doc", "Blue Cross")).thenReturn(insurance);
+        when(doctors.insurance(doctor, "Blue Cross")).thenReturn(insurance);
         mvc.perform(get("/api/doctors/recommendations").param("insurance", "Blue Cross")
                         .param("specialty", "Cardiology"))
                 .andExpect(status().isOk())

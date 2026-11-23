@@ -148,7 +148,7 @@ public class DoctorService {
     }
 
     public List<DoctorResponse> list(String specialty, String insurance, boolean acceptingOnly) {
-        return users.findAll().stream()
+        return users.findByRoleAndDoctorIsNotNull("doctor").stream()
                 .filter(u -> u.doctor() != null)
                 .filter(u -> !acceptingOnly || u.doctor().acceptingPatients())
                 .filter(u -> specialty == null || (u.doctor().specialty() != null
@@ -162,7 +162,18 @@ public class DoctorService {
             throw error(HttpStatus.UNPROCESSABLE_ENTITY, "insurance is required");
         }
         DoctorProfile doctor = findDoctor(doctorId).doctor();
-        String match = matchingPlan(insurance, doctor.acceptedInsurance());
+        return insuranceResponse(doctorId, insurance, doctor.acceptedInsurance());
+    }
+
+    InsuranceResponse insurance(DoctorResponse doctor, String insurance) {
+        return insuranceResponse(doctor.id(), insurance, doctor.acceptedInsurance());
+    }
+
+    private InsuranceResponse insuranceResponse(String doctorId, String insurance, List<String> acceptedPlans) {
+        if (insurance == null || insurance.isBlank()) {
+            throw error(HttpStatus.UNPROCESSABLE_ENTITY, "insurance is required");
+        }
+        String match = matchingPlan(insurance, acceptedPlans);
         return new InsuranceResponse(doctorId, insurance, match != null, match, "doctor_declared_network",
                 match != null ? "Matched against the insurance plans declared in the doctor profile."
                         : "No exact declared-plan match was found; confirm coverage with the payer before booking.");
@@ -254,6 +265,9 @@ public class DoctorService {
 
     static String matchingPlan(String requested, List<String> plans) {
         String normalized = normalize(requested);
+        if (normalized.isEmpty()) {
+            return null;
+        }
         return plans.stream().filter(plan -> normalize(plan).equals(normalized)).findFirst().orElse(null);
     }
 

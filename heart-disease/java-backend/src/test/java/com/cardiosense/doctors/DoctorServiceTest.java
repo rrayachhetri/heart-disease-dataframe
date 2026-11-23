@@ -52,6 +52,21 @@ class DoctorServiceTest {
     }
 
     @Test
+    void listQueriesOnlyDoctorProfiles() {
+        when(users.findByRoleAndDoctorIsNotNull("doctor")).thenReturn(List.of(doctor));
+
+        assertEquals(List.of("doc"), service.list(null, null, true).stream()
+                .map(DoctorService.DoctorResponse::id).toList());
+        verify(users).findByRoleAndDoctorIsNotNull("doctor");
+        verify(users, never()).findAll();
+    }
+
+    @Test
+    void emptyNormalizedInsuranceNameNeverMatches() {
+        assertNull(DoctorService.matchingPlan("-", List.of("-")));
+    }
+
+    @Test
     void bookedSlotUsesAtomicConditionalUpdate() {
         when(users.findByDoctorId("doc")).thenReturn(Optional.of(doctor));
         Instant start = Instant.now().plusSeconds(3600);
