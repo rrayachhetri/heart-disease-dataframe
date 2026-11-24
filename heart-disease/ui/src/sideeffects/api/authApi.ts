@@ -1,5 +1,5 @@
 import { api } from './api';
-import { saveTokens } from './config';
+import { JAVA_PREVIEW, getRefreshToken, saveTokens } from './config';
 import type { AuthUser, TokenPair, RegisterPayload, LoginPayload } from '../../types';
 
 export async function register(payload: RegisterPayload): Promise<AuthUser> {
@@ -14,7 +14,7 @@ export async function login(payload: LoginPayload): Promise<TokenPair> {
 }
 
 export async function refreshTokens(): Promise<TokenPair> {
-  const refresh_token = localStorage.getItem('refresh_token');
+  const refresh_token = getRefreshToken();
   if (!refresh_token) throw new Error('No refresh token');
   const { data } = await api.post<TokenPair>('/auth/refresh', { refresh_token });
   saveTokens(data.access_token, data.refresh_token);
@@ -31,11 +31,13 @@ export async function forgotPassword(
   first_name: string,
   last_name: string,
 ): Promise<{ message: string; dev_reset_token?: string }> {
+  if (JAVA_PREVIEW) throw new Error('Password reset is not available for Java preview accounts.');
   const { data } = await api.post('/auth/forgot-password', { email, first_name, last_name });
   return data;
 }
 
 export async function resetPassword(token: string, new_password: string): Promise<{ message: string }> {
+  if (JAVA_PREVIEW) throw new Error('Password reset is not available for Java preview accounts.');
   const { data } = await api.post('/auth/reset-password', { token, new_password });
   return data;
 }

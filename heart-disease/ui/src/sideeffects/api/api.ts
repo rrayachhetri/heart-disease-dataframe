@@ -6,7 +6,7 @@
  * fetch-based apiFetch wrapper) so every api/*.ts module gets this for free.
  */
 import axios, { type AxiosError } from 'axios';
-import { API_BASE_URL, getAccessToken } from './config';
+import { API_BASE_URL, JAVA_PREVIEW, getAccessToken, getPythonAccessToken } from './config';
 import { store } from '../../store';
 import { setUnavailable } from '../../store/slices/systemSlice';
 
@@ -16,7 +16,14 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = getAccessToken();
+  const path = config.url ?? '';
+  const javaEndpoint = JAVA_PREVIEW && (
+    /^\/auth\/(register|login|refresh|me)$/.test(path) ||
+    /^\/doctors(?:\/|$)/.test(path) ||
+    /^\/analytics\/(datasets|population-benchmark)$/.test(path)
+  );
+  if (javaEndpoint) config.baseURL = '/java-api';
+  const token = javaEndpoint ? getAccessToken() : getPythonAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

@@ -4,6 +4,7 @@ import { getTextContent } from '../../content/text';
 import { motion } from 'framer-motion';
 import { Heart, ServerCrash, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { clearUnavailable } from '../../store/slices/systemSlice';
+import { JAVA_PREVIEW } from '../../sideeffects/api/config';
 import styles from './SystemUnavailablePage.module.less';
 
 const RETRY_INTERVAL_MS = 15_000;
@@ -23,7 +24,10 @@ export default function SystemUnavailablePage() {
     setRetryCount((n) => n + 1);
     try {
       const res = await fetch('/api/health', { signal: AbortSignal.timeout(5000) });
-      if (res.ok) {
+      const javaRes = JAVA_PREVIEW
+        ? await fetch('/java-api/doctors', { signal: AbortSignal.timeout(5000) })
+        : null;
+      if (res.ok && (!JAVA_PREVIEW || javaRes?.ok)) {
         dispatch(clearUnavailable());
       }
     } catch {

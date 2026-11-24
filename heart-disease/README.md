@@ -125,66 +125,186 @@ heart-disease/
 
 ## Quick Start
 
-### 1. Python environment
+> The existing Python API remains the backend for the complete application. The
+> Java/MongoDB migration is in progress; see [Java backend preview](#java-backend-preview).
+
+### Prerequisites
+
+- Python 3.10 or newer (Python 3.12 is recommended)
+- Node.js 18 or newer and npm
+- Both terminal servers below must remain running while you use the app
+
+Run all backend commands from the **project root** (the directory containing `src/`,
+`requirements.txt`, and `ui/`).
+
+### macOS / Linux
+
+```bash
+python3 --version
+```
+
+Use Python 3.10 or newer. In this checkout, `.venv` is Python 3.9 and
+`.venv-mac` is Python 3.12. To use the existing compatible environment:
+
+```bash
+source .venv-mac/bin/activate
+python --version
+```
+
+If you are setting up a new environment and have Python 3.12 installed, create
+and activate `.venv` instead:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+```
+
+With the compatible environment activated, install the backend dependencies
+and create `.env` only if it does not exist:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+if [ ! -f .env ]; then cp .env.example .env; fi
+```
+
+`.env` is a local settings file read by the backend when it starts. If `.env`
+already exists in the project root, **keep using it**: do not copy
+`.env.example` over it, because that would replace your existing settings.
+Open the existing `.env` in a text editor and check that it contains a non-empty
+`SECRET_KEY` line. Keep any other settings already in the file. Add `SECRET_KEY`
+if it is missing; do not add a second copy if it is already present.
+
+To generate a new secret, run this from the activated virtual environment:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Copy the printed value into `.env`, for example:
+
+```env
+SECRET_KEY=paste-the-generated-value-here
+```
+
+Replace the example text with the value you generated. Do not share that value
+or commit `.env`. `DATABASE_URL` is optional for the default local SQLite setup;
+if your existing `.env` already defines it, leave it unchanged unless you
+specifically want to use another database.
+
+Train the model and prepare the data only if `.data/models/ensemble_model.joblib`
+does not already exist:
+
+```bash
+python -m src.models.train
+```
+
+Open two terminals.
+
+**Terminal 1 - API:**
+
+Activate the same environment you used above (`.venv-mac` for this checkout, or
+`.venv` if you created a new environment):
+
+```bash
+cd /absolute/path/to/heart-disease
+source .venv-mac/bin/activate
+python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload --reload-dir src
+```
+
+**Terminal 2 - web UI:**
+
+```bash
+cd /absolute/path/to/heart-disease/ui
+npm install
+npm run dev
+```
+
+### Optional: enable Ask CardioSense chat (Ollama)
+
+The rest of the application works without Ollama, but the chat assistant requires
+Ollama installed and running locally. Install it from
+[ollama.com/download](https://ollama.com/download), then open the Ollama app. Do
+not also run `ollama serve` if the app has already started the service.
+
+Check that the local Ollama server responds:
+
+```bash
+ollama --version
+curl http://127.0.0.1:11434/api/tags
+```
+
+Download the chat and embedding models used by default:
+
+```bash
+ollama pull llama3.2:1b
+ollama pull nomic-embed-text
+ollama list
+```
+
+With the CardioSense API running, open
+http://127.0.0.1:8080/api/chat/health. A working chat setup reports
+`"available": true` and includes `llama3.2:1b` and `nomic-embed-text` in
+`"models_installed"`. If `"available"` is false, Ollama is not reachable; if
+it is true but `"models_installed"` is empty or missing one of those names,
+install the missing model. The defaults can be changed with `OLLAMA_BASE_URL`,
+`OLLAMA_CHAT_MODEL`, and `OLLAMA_EMBED_MODEL` in `.env`; keep the Ollama URL
+local (`localhost` or `127.0.0.1`).
+
+In this checkout, `.venv-mac` is a working Python 3.12 environment. The existing
+`.venv` is Python 3.9 and cannot run this application because Python 3.9 does not
+support the union type syntax used throughout the source. For a fresh environment,
+create `.venv` with Python 3.12 (`python3.12 -m venv .venv`), not with a Python 3.9
+`python3`.
+
+### Windows (PowerShell)
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-### 2. Configure environment
+If `.env` already exists, keep it and edit that file rather than copying the
+template over it. Ensure `SECRET_KEY` has a generated value. Train the model if
+needed, and open two terminals:
+
+**Terminal 1 - API (from the project root):**
 
 ```powershell
-copy .env.example .env
+python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload --reload-dir src
 ```
 
-Edit `.env` and set at minimum:
-
-```env
-SECRET_KEY=your-long-random-secret-key-here
-DATABASE_URL=sqlite:///./.data/db/cardiosense.db   # SQLite (default, no setup needed)
-```
-
-For production with PostgreSQL:
-
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/cardiosense
-```
-
-### 3. Prepare data and train model
-
-```powershell
-python -m src.models.train    # loads .data/raw datasets, saves .data/models + .data/processed artifacts
-```
-
-> `prepare.py` is no longer required. The training script loads and merges all datasets automatically with missing-value imputation.
-
-The training script prints a full report including CV AUC ± std, per-feature importance bars, and per-cohort disease rates.
-
-### 4. Start the API
-
-```powershell
-python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload
-```
-
-The database tables (users, patients, doctors, predictions) are **created automatically on first startup** — no manual migration needed for local dev.
-
-To run migrations explicitly with Alembic:
-
-```powershell
-alembic upgrade head
-```
-
-### 5. Start the Web UI
+**Terminal 2 - UI:**
 
 ```powershell
 cd ui
 npm install
-npm run dev        # http://localhost:3000
+npm run dev
 ```
 
-Open **http://localhost:3000** — you will be redirected to `/register` to create your first account.
+### Verify and open
+
+- API: http://127.0.0.1:8080/docs
+- Health: http://127.0.0.1:8080/api/health
+- Web UI: http://localhost:3000
+
+The health response should include `"model_loaded": true`. If it reports
+`"model_loaded": false`, run `python -m src.models.train` and restart the API.
+The web UI will redirect to `/register` so you can create the first account.
+
+Database tables are not created automatically by default (`AUTO_CREATE_TABLES=false`).
+Initialize the schema before the first API startup:
+
+```bash
+python -m alembic upgrade head
+```
+
+For local development instead, set `AUTO_CREATE_TABLES=true` in `.env` to create
+the tables automatically on startup.
 
 > See **[ui/README.md](ui/README.md)** for the full frontend guide: tech stack, environment/proxy details, all npm scripts, the Playwright end-to-end suite, a manual end-to-end verification checklist, and UI troubleshooting.
 
@@ -621,8 +741,143 @@ Remove-Item .\.data\db\cardiosense.db
 
 ---
 
+## Java backend preview
+
+The Java 17 Spring Boot project in [`java-backend/`](java-backend/) is a migration
+preview, **not yet a replacement for the Python API**. It implements REST
+registration, login, refresh, `/api/auth/me`, registered-doctor profiles, declared
+insurance matching, appointment slots, and booking using MongoDB. Doctor profiles
+are embedded in newly registered doctor users; bookings are embedded in slots and
+claimed with an atomic conditional update. A unique index prevents duplicate
+doctor/start-time slots. This is not a real-time insurer verification or a booking
+with an external provider.
+
+MongoDB users are separate from SQLite users; no data is copied automatically.
+Doctor users created in the earlier Java preview without an embedded profile need
+a migration before they can use the doctor endpoints. Password reset, external
+provider search and requests, predictions, chat, Kafka, and OpenShift deployment
+are not implemented in Java yet. A read-only GraphQL API is available for
+registered doctors and their available slots. Java analytics endpoints delegate
+to the existing Python API, which must also be running. The UI defaults to Python;
+an optional Java preview mode is described below.
+
+The Java preview requires a running MongoDB server, Java 17, and a JWT secret of
+at least 32 UTF-8 bytes. The Maven wrapper downloads Maven when first run. It does
+not load the Python `.env` file automatically.
+
+On macOS without Homebrew, download the **macOS ARM 64** (Apple Silicon) or
+**macOS x64** archive from the [MongoDB Community download page](https://www.mongodb.com/try/download/community).
+For example, with the Apple Silicon 8.0.38 archive in `~/Downloads`, extract it
+and start MongoDB in its own terminal:
+
+```bash
+if [ ! -x "$HOME/Downloads/mongodb-macos-aarch64--8.0.38/bin/mongod" ]; then tar -xzf "$HOME/Downloads/mongodb-macos-arm64-8.0.38.tgz" -C "$HOME/Downloads"; fi
+mkdir -p "$HOME/data/cardiosense-mongodb"
+"$HOME/Downloads/mongodb-macos-aarch64--8.0.38/bin/mongod" --dbpath "$HOME/data/cardiosense-mongodb" --bind_ip 127.0.0.1 --port 27017
+```
+
+Keep that terminal open; press **Ctrl+C** to stop MongoDB. These paths differ
+for other versions and architectures. The tarball does not include `mongosh`.
+This example has no database authentication and is for local development only;
+do not expose it to the network.
+
+In another terminal, for a temporary local secret, run the following from the
+project root (tokens created with this secret become invalid when you generate
+another one):
+
+```bash
+export SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
+cd java-backend
+./mvnw test
+./mvnw spring-boot:run
+```
+
+By default the Java preview connects to `mongodb://localhost:27017/cardiosense`
+and listens on port 8081. Set `MONGODB_URI` or `PORT` in the environment to
+override these settings. Do not share or commit secrets or database credentials.
+Keep MongoDB and Java running in their separate terminals. To stop either, press
+**Ctrl+C** in its terminal.
+
+In a third terminal, check the Java API and its MongoDB connection:
+
+```bash
+curl -i http://127.0.0.1:8081/api/auth/me
+curl http://127.0.0.1:8081/api/doctors
+```
+
+The first request should return `401` because no token was supplied. The doctor
+list should return JSON (an empty `[]` is normal for a fresh database). To query
+the Java GraphQL endpoint:
+
+```bash
+curl -X POST http://127.0.0.1:8081/graphql -H 'Content-Type: application/json' -d '{"query":"{ doctors { id firstName lastName specialty } }"}'
+```
+
+GraphQL currently supports only the public `doctors`, `doctor`, and
+`availableSlots` queries; it does not yet support authentication, mutations, or
+UI integration. Restart the Java process yourself after changing Java code or
+dependencies. After a restart, a newly generated temporary `SECRET_KEY` makes old
+Java login tokens invalid.
+
+To check the Java analytics endpoint, start the Python API on port 8080 first,
+then run:
+
+```bash
+curl http://127.0.0.1:8081/api/analytics/datasets
+```
+
+The Java service defaults to `http://127.0.0.1:8080` for model data; set
+`MODEL_SERVICE_URL` to a different local HTTP origin if needed. Only loopback
+addresses are allowed because the benchmark request contains health features.
+If the Python service is unavailable, the Java analytics endpoint returns 503.
+
+### Use Java APIs in the UI (local preview)
+
+Keep MongoDB, Java on port 8081, and Python on port 8080 running. Stop the
+existing UI with **Ctrl+C** in its terminal, then run:
+
+```bash
+cd "$HOME/Desktop/heart-disease-prediction-model/heart-disease-dataframe/heart-disease/ui"
+VITE_API_BACKEND=java npm run dev
+```
+
+Open http://localhost:3000 and register a new Java account; existing Python
+SQLite accounts are not copied to MongoDB. Registration, login, registered
+doctors, slots, bookings, and analytics use Java. Analytics still delegates to
+Python. Predictions, chat, model info, and external provider searches use Python
+without a Java login; predictions are anonymous on the server. Prediction history
+in this mode is stored locally in the browser, is shared by users of that browser,
+and is not synchronized to either database. Python doctor IDs are not linked to
+Java bookings. Password reset and external-provider appointment requests are
+unavailable for Java accounts. GraphQL is not yet used by the UI.
+
+The Vite development server proxies `/java-api` to Java and `/api` to Python.
+Other deployments need equivalent same-origin routing; the preview flag is baked
+into production builds. To return to the existing Python UI, stop Vite and start
+it again with `npm run dev` (without `VITE_API_BACKEND=java`).
+
+To run the Java tests, including integration tests, with local MongoDB and the
+Python API running:
+
+```bash
+cd "$HOME/Desktop/heart-disease-prediction-model/heart-disease-dataframe/heart-disease/java-backend"
+RUN_MONGO_INTEGRATION=true RUN_MODEL_INTEGRATION=true ./mvnw test
+```
+
+The integration test creates and removes its own randomly named test database;
+it does not use the `cardiosense` application database. The model integration
+test sends synthetic data to the Python API. The Java preview and end-to-end UI
+cutover are still in development.
+
+---
+
 ## Known Local-Setup Quirks
 
+- **Python 3.9 gives `TypeError: unsupported operand type(s) for |`** — use Python 3.10 or newer. Check `python --version` after activating the virtual environment; creating a virtual environment with Python 3.9 does not make it a newer Python environment.
+- **`No such revision or branch 'f4a9b2c7d1e6'` while training** — the active environment's MLflow is older than the schema recorded in `.data/db/mlflow.db`. This checkout's `.venv` uses MLflow 3.1.4, while `.venv-mac` uses Python 3.12 and MLflow 3.18, which includes that migration. Activate `.venv-mac` before retraining; do not delete or edit the database to work around the mismatch. If `.data/models/ensemble_model.joblib` already exists, skip training.
+- **`NotOpenSSLWarning` from urllib3** — this warning indicates the active Python is linked against LibreSSL. It is not the cause of the MLflow migration failure; use the Python 3.12 environment above.
+- **No `uvicorn` module on macOS** — install dependencies inside the project virtual environment with `python -m pip install -r requirements.txt`, then run `python -m uvicorn ...`. Do not run the system `/usr/bin/python3`.
+- **`[Errno 48] Address already in use` on port 8080** — the API is probably already running. Check `http://127.0.0.1:8080/api/health`; if it returns `"status": "ok"`, keep using that server and do not start a second one. Otherwise, stop the API in the terminal where it was started with **Ctrl+C**, then start it again. Port `3000` is used by the UI.
 - **`ModuleNotFoundError: No module named 'src'` running `python .\src\models\train.py` directly** — run it as a module instead (`python -m src.models.train`), or make sure the project root is on `sys.path` (already patched in `train.py`).
 - **`SECRET_KEY environment variable is not set`** — you must copy `.env.example` to `.env` and set a real `SECRET_KEY`; there is no default in code for security reasons. Generate one quickly with:
   ```powershell
@@ -723,10 +978,22 @@ mlflow ui --backend-store-uri sqlite:///./.data/db/mlflow.db --default-artifact-
 
 ### Step 1 — Start the FastAPI Backend
 
-Open **Terminal 1** in the project root:
+Open **Terminal 1** in the project root and activate the same Python 3.10+ environment
+you used in Quick Start. For this checkout, use `.venv-mac`; if you created a fresh
+`.venv`, substitute that directory instead.
+
+macOS/Linux:
+
+```bash
+source .venv-mac/bin/activate
+python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload --reload-dir src
+```
+
+Windows PowerShell:
 
 ```powershell
-python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn src.api.app:app --host 127.0.0.1 --port 8080 --reload --reload-dir src
 ```
 
 **What happens on startup:**
@@ -743,13 +1010,25 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8080
 ```
 
-> `--reload` causes the server to auto-restart whenever you save a Python file.
+> `--reload-dir src` limits auto-restarts to backend source changes. This avoids
+> restarting the server when files change in `.venv`, `.data`, or other project
+> directories.
 
 ---
 
 ### Step 2 — Start the React Frontend
 
-Open **Terminal 2** inside the `ui/` folder:
+Open **Terminal 2** in the project root:
+
+macOS/Linux:
+
+```bash
+cd ui
+npm install
+npm run dev
+```
+
+Windows PowerShell:
 
 ```powershell
 cd ui
@@ -996,6 +1275,7 @@ The backend ships with an interactive API explorer. With the backend running:
 | `Failed to fetch` / network error | Vite can't reach the backend proxy target | Confirm uvicorn is running on `127.0.0.1:8080` |
 | Redirected to `/login` after page refresh | Token expired or missing from localStorage | Log in again |
 | `503 Model not loaded` on predict | Model file missing at startup | Run `python -m src.models.train`; ensure `.data/models/ensemble_model.joblib` exists |
+| `503` on `POST /api/chat/stream` | Ollama is unreachable or the embedding model is missing | Check `/api/chat/health`, start Ollama, then run `ollama pull nomic-embed-text` and `ollama pull llama3.2:1b` |
 | CORS error in browser console | Frontend running on a port not in CORS allow-list | Add your port to `allow_origins` in `src/api/app.py` |
 | `Email already registered` | Duplicate email on register | Use a different email address |
 | `422 Unprocessable Entity` | Request body missing required fields | Check the request body matches the schema above |

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import { login as apiLogin, register as apiRegister, getMe } from '../api/authApi';
-import { clearTokens } from '../api/config';
+import { clearTokens, getAccessToken } from '../api/config';
 import type { AuthUser, LoginPayload, RegisterPayload } from '../../types';
 
 interface AuthState {
@@ -49,7 +49,7 @@ export const registerUser = createAsyncThunk(
 export const loadCurrentUser = createAsyncThunk(
   'auth/loadCurrentUser',
   async (_, { rejectWithValue }) => {
-    const token = localStorage.getItem('access_token');
+    const token = getAccessToken();
     if (!token) return rejectWithValue('no token');
     try {
       return await getMe();

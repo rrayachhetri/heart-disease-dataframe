@@ -1,0 +1,28 @@
+type Query {
+    doctors(specialty: String, insurance: String, acceptingOnly: Boolean = true): [Doctor!]!
+    doctor(id: ID!): Doctor
+    availableSlots(doctorId: ID!): [AppointmentSlot!]!
+}
+
+type Doctor {
+    id: ID!
+    userId: ID!
+    firstName: String!
+    lastName: String!
+    npiNumber: String
+    specialty: String
+    bio: String
+    phone: String
+    consultationFee: Float!
+    acceptedInsurance: [String!]!
+    isNpiVerified: Boolean!
+    isAcceptingPatients: Boolean!
+    rating: Float!
+}
+
+type AppointmentSlot {
+    id: ID!
+    doctorId: ID!
+    startsAt: String!
+    endsAt: String!
+}
